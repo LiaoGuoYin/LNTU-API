@@ -1,7 +1,7 @@
+from urllib.parse import urlencode
+
 import requests
 from lxml import etree
-
-from Spider.Utils.urlencode import urlencode
 
 URL_ROOT = 'http://s2.natfrp.com:7792/academic/'
 

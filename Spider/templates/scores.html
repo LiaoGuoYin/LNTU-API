@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    getScores Page
+{% endblock %}
+
+{% block content %}
+    <h1>本学期成绩</h1>
+    <table class="table table-dark ">
+        {% for course in scores.values %}
+            <tr>
+                {% for key, value in course.items %}
+                    <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

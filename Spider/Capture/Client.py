@@ -2,7 +2,7 @@ import requests
 from lxml import etree
 
 from Spider.Capture.EvaluateTeacher import run as evaluate_run
-from Spider.models import Score
+from Spider.models import Score, CET, ExamPlan
 
 
 class Client(object):
@@ -80,33 +80,38 @@ class Client(object):
         response = self.session.get(url)
         html_doc = etree.HTML(response.text)
         CETs = html_doc.xpath('/html/body/table[2]/tr[@class="infolist_common"]')
-        result_lists = []
         for each in CETs:
-            CET_level = each.xpath('td[1]/text()')[0].strip()
-            CET_datetime = each.xpath('td[2]/text()')[0].strip()
-            CET_score = each.xpath('td[3]/text()')[0].strip()
-            result_lists.append([CET_level, CET_datetime, CET_score])
-            print(CET_level, CET_datetime, CET_score)
-        return result_lists
+            cet = CET()
+            cet.userId = self.userId
+            cet.level = each.xpath('td[1]/text()')[0].strip()
+            cet.exam_date = each.xpath('td[2]/text()')[0].strip()
+            cet.score = each.xpath('td[3]/text()')[0].strip()
+            cet.save()
 
     def evaluateTeacher(self):
         evaluate_run(self.session.headers["Cookie"])
 
-    def getExamTime(self):
+    def getExamPlan(self):
         url = self.url + 'student/exam/index.jsdo'
         response = self.session.get(url)
         html_doc = etree.HTML(response.text)
-        nodes = html_doc.xpath('/html/body/table[2]/tr[@class="infolist_common"]')
-        exams = []
-        for node in nodes:
-            exam = node.xpath('td/text()')
-            exams.append({exam[0]: [detail.strip() for detail in exam[1:]]})
-        print(exams)
+        elements = html_doc.xpath('/html/body/table[2]/tr[@class="infolist_common"]')
+        for element in elements:
+            exam = ExamPlan()
+            exam.userId = self.userId
+            exam.name = element.xpath('td[1]/text()')[0]
+            exam.date, exam.time = element.xpath('td[2]/text()')[0].split()
+            exam.location = element.xpath('td[3]/text()')[0]
+            exam.save()
 
     def getClassTable(self):
         pass
 
-    def selectBestURLLine(self):
+    def getPersonalInfo(self):
+
+        pass
+
+    def selectBestURL(self):
         pass
 
 # print(etree.tostring(html_doc, encoding='unicode'))

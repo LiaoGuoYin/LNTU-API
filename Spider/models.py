@@ -2,7 +2,7 @@ from django.db import models
 
 
 class User(models.Model):
-    __tablename__ = "user"
+    __tablename__ = 'user'
 
     userId = models.CharField("学号", max_length=16, primary_key=True, unique=True)
     password = models.CharField("密码", max_length=32)
@@ -31,3 +31,24 @@ class Score(models.Model):
     midterm_score = models.IntegerField("期中成绩")
     exam_score = models.IntegerField("考试成绩")
     final_score = models.IntegerField("最终成绩")
+
+
+class CET(models.Model):
+    __tablename__ = 'CET'
+
+    userId = models.ForeignKey(User, on_delete=models.CASCADE)
+    id = models.AutoField(primary_key=True)
+    level = models.CharField(max_length=64)
+    exam_date = models.DateField()
+    score = models.IntegerField()
+
+
+class ExamPlan(models.Model):
+    __table__ = 'exam'
+
+    userId = models.ForeignKey(User, on_delete=models.CASCADE)
+    id = models.AutoField(primary_key=True)
+    course = models.CharField(max_length=64)
+    date = models.DateField()
+    time = models.DateTimeField()
+    location = models.CharField(max_length=32)

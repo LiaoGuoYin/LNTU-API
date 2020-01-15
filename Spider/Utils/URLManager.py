@@ -13,6 +13,16 @@ campus_calendar_url = 'http://jwzx.lntu.edu.cn/index/xl.htm'
 classroom_status_url = 'http://jwzx.lntu.edu.cn/info/1086/1116.htm'
 
 
+# http://202.199.224.24:11080/newacademic/common/security/login.jsp
+# http://202.199.224.24:11081/academic/common/security/login.jsp
+# http://202.199.224.24:11180/newacademic/common/security/login.jsp
+# http://202.199.224.24:11181/newacademic/common/security/login.jsp
+# http://202.199.224.24:11182/academic/common/security/login.jsp
+#
+# http://202.199.224.121:11180/newacademic/common/security/login.jsp
+# http://202.199.224.121:11080/newacademic/common/security/login.jsp
+
+
 # 外网登陆
 # http://202.199.224.24:11189/academic/common/security/login.jsp
 # http://202.199.224.24:11089/newacademic/common/security/login.jsp
@@ -60,7 +70,7 @@ class URLManager(object):
         self.selectCourse_urls = html_doc.xpath(selectCourse_xpath)
         self.teacher_urls = html_doc.xpath(teacher_xpath_outer)
 
-        print(self.__dict__)
+        print(self.outer_urls)
 
 
 client = URLManager()

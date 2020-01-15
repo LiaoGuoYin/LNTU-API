@@ -4,7 +4,7 @@ from django.db import models
 class User(models.Model):
     __tablename__ = 'user'
 
-    userId = models.CharField("学号", max_length=16, primary_key=True, unique=True)
+    userId = models.BigIntegerField("学号", primary_key=True)
     password = models.CharField("密码", max_length=32)
     last_login = models.DateTimeField("最后一次登陆时间", auto_now_add=True)
 
@@ -26,29 +26,36 @@ class Score(models.Model):
     semester_season = models.CharField("11学期", max_length=32)
     is_delay_exam = models.BooleanField("12是否缓考", default=False)
     details_print_id = models.CharField("13打卷申请", max_length=128)
-    score_composition = models.CharField("成绩组成", max_length=128)
-    daily_score = models.IntegerField("平时成绩")
-    midterm_score = models.IntegerField("期中成绩")
-    exam_score = models.IntegerField("考试成绩")
-    final_score = models.IntegerField("最终成绩")
+    score_composition = models.CharField("成绩组成", max_length=128, null=True)
+    daily_score = models.IntegerField("平时成绩", null=True)
+    midterm_score = models.IntegerField("期中成绩", null=True)
+    exam_score = models.IntegerField("考试成绩", null=True)
+    final_score = models.IntegerField("最终成绩", default=-1)
+
+    def __str__(self):
+        return str(self.__dict__)
 
 
 class CET(models.Model):
-    __tablename__ = 'CET'
+    __tablename__ = 'cet'
 
     userId = models.ForeignKey(User, on_delete=models.CASCADE)
-    id = models.AutoField(primary_key=True)
     level = models.CharField(max_length=64)
     exam_date = models.DateField()
-    score = models.IntegerField()
+    score = models.FloatField(null=True)
+
+    def __str__(self):
+        return str(self.__dict__)
 
 
 class ExamPlan(models.Model):
     __table__ = 'exam'
 
     userId = models.ForeignKey(User, on_delete=models.CASCADE)
-    id = models.AutoField(primary_key=True)
     course = models.CharField(max_length=64)
     date = models.DateField()
     time = models.DateTimeField()
     location = models.CharField(max_length=32)
+
+    def __str__(self):
+        return str(self.__dict__)

@@ -2,27 +2,31 @@ import requests
 from lxml import etree
 
 from Spider.Capture.EvaluateTeacher import run as evaluate_run
-from Spider.models import Score, CET, ExamPlan
+from Spider.models import Score, CET, ExamPlan, User
 
 
 class Client(object):
 
     def __init__(self, username: int, password: str):
+        urls = ['http://202.199.224.121:11189/newacademic/common/security/login.jsp',
+                'http://202.199.224.121:11089/newacademic/common/security/login.jsp']
         # self.url = 'http://s2.natfrp.com:7792/academic/'
-        self.url = 'http://202.199.224.24:11189/academic/'
-        # self.url = 'http://202.199.224.24:11089/newacademic/'
+        # self.url = 'http://202.199.224.121:11189/newacademic/'
+        # self.url = 'http://202.199.224.121:11089/newacademic/'
+        self.url = urls[0].split("common/security/login.jsp")[0]
         self.session = requests.Session()
+        self.user = User(username, password)
         self.login_with_account(username, password)
-        self.userId = username
-        self.password = password
 
     def login_with_account(self, username: int, password: str):
         url = self.url + 'j_acegi_security_check'
+        print(url)
         form_data = {'j_username': username, 'j_password': password}
         response = self.session.post(url, data=form_data)
-        if response.text.find('本科生教务管理系统') != -1:  # TODO 优化判断
-            cookie = response.request.headers.get('Cookie')
-            self.session.headers.update({'Cookie': cookie})
+        # if response.text.find('本科生教务管理系统') != -1:  # TODO 优化判断
+        #     cookie = response.request.headers.get('Cookie')
+        #     self.session.headers.update({'Cookie': cookie})
+        if response.status_code == 302:
             return True
         else:
             # TODO 错误：密码不匹配!
@@ -34,11 +38,12 @@ class Client(object):
         url = self.url + 'student/queryscore/queryscore.jsdo'
         response = self.session.get(url)
         html_doc = etree.HTML(response.text)
+        # print(response.text)
         course_lists = html_doc.xpath('/html/body/table[2]/tr')
         score_results = {}
         for course in course_lists[1:]:
             score = Score()
-            score.userId = self.userId
+            score.userId = self.user
             score.strId = course.xpath('td[1]/text()')[0]
             score.name = course.xpath('td[2]/text()')[0]
             score.numberId = course.xpath('td[3]/text()')[0]
@@ -69,6 +74,7 @@ class Client(object):
         response = self.session.get(url)
         html_doc = etree.HTML(response.text)
         detail_element = html_doc.xpath('/html/body/center/table')[0]
+        score.userId = self.user
         score.score_composition = detail_element.xpath('tr[5]/td/p/b/text()')[0].strip()
         score.daily_score = detail_element.xpath('tr[7]/td[1]/b/text()')[0].strip()
         score.midterm_score = detail_element.xpath('tr[7]/td[2]/b/text()')[0].strip()
@@ -82,10 +88,11 @@ class Client(object):
         CETs = html_doc.xpath('/html/body/table[2]/tr[@class="infolist_common"]')
         for each in CETs:
             cet = CET()
-            cet.userId = self.userId
+            cet.userId = self.user
             cet.level = each.xpath('td[1]/text()')[0].strip()
             cet.exam_date = each.xpath('td[2]/text()')[0].strip()
             cet.score = each.xpath('td[3]/text()')[0].strip()
+            print(cet)
             cet.save()
 
     def evaluateTeacher(self):
@@ -129,7 +136,7 @@ class Client(object):
 # client.getScores()
 
 
-# client = Client(1710030215, '*')
+# client = Client(1710030105, 'heying')
 # client.getCET()
 # client.getScores()
 # client.getExamTime()

@@ -6,7 +6,7 @@ from lxml import etree
 URL_ROOT = 'http://s2.natfrp.com:7792/academic/'
 
 
-def is_all_evaluate(html_doc):
+def is_evaluated_all(html_doc):
     evaluate_statuses = html_doc.xpath('/html/body/center/table[2]/tr/td[3]/span')
     status = [each.text for each in evaluate_statuses if each.text != '已评估']
     if len(status) == 0:
@@ -15,7 +15,7 @@ def is_all_evaluate(html_doc):
         return False
 
 
-def evaluate_form(cookie, url):
+def form_evaluate_body(cookie, url):
     response = requests.get(url, headers={'Cookie': cookie})
     html_doc = etree.HTML(response.text)
     data_lists = []
@@ -38,28 +38,25 @@ def evaluate_form(cookie, url):
 
 def evaluate(cookie, form_data):
     url = URL_ROOT + 'eva/index/putresult.jsdo'
-    headers = {'Cookie': cookie, 'Content-Type': 'application/x-www-form-urlencoded'}
+    headers = {'Cookie': cookie}
     response = requests.post(url, data=form_data, headers=headers)
     if response.status_code == 200:
         print("评课完成")
-    # print(response.request.headers)
-    # print(response.headers)
-    # print(response.text)
+    else:
+        print("Unknown error")
 
 
 def run(cookie):
     url = URL_ROOT + 'eva/index/resultlist.jsdo'
     response = requests.get(url, headers={"Cookie": cookie})
     html_doc = etree.HTML(response.text)
-    if is_all_evaluate(html_doc):
+    if is_evaluated_all(html_doc):
         print("已经完成评课！")
     else:
         print("尚未完成，不能查成绩，马上开始评课...")
         evaluate_elements = html_doc.xpath('/html/body/center/table[2]/tr/td[4]/a/@href')
-        evaluate_urls = [URL_ROOT + 'eva/index/' + each for each in evaluate_elements]
+        evaluate_urls = [(URL_ROOT + 'eva/index/' + element) for element in evaluate_elements]
         print(evaluate_urls)
         for url in evaluate_urls:
-            form_data = evaluate_form(cookie, url)
+            form_data = form_evaluate_body(cookie, url)
             evaluate(cookie, form_data)
-
-# run("JSESSIONID=913241AB7DA3B204760EED3A2D205CC4.T55; Path=/academic")

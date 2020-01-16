@@ -55,7 +55,7 @@ class URLManager(object):
     def __init__(self):
         pass
 
-    def freshURLS(self):
+    def getURLS(self):
         JWZX_URL = 'http://jwzx.lntu.edu.cn/'
         response = requests.get(JWZX_URL)
         html_doc = etree.HTML(response.text)
@@ -71,7 +71,4 @@ class URLManager(object):
         self.teacher_urls = html_doc.xpath(teacher_xpath_outer)
 
         print(self.outer_urls)
-
-
-client = URLManager()
-client.freshURLS()
+        return self.outer_urls

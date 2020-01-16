@@ -5,17 +5,26 @@ from Spider.Capture.Client import Client
 
 
 def getCET(request):
-    client = Client(1710030105, '****')
-    result_lists = client.getCET()
-
-    return render(request, 'login.html', {"CETS": result_lists})
+    if request.method == 'GET':
+        userId = request.GET.get('username')
+        password = request.GET.get('password')
+        client = Client(userId, password)
+        result_lists = client.getCET()
+        return render(request, 'login.html', {"CETS": result_lists})
+    else:
+        return HttpResponse("The POST method is not support")
 
 
 def getScores(request):
-    client = Client(1710030105, '****')
-    result_dicts = client.getScores()
-    print(result_dicts)
-    return render(request, 'scores.html', {"scores": result_dicts})
+    if request.method == 'GET':
+        userId = request.GET.get('username')
+        password = request.GET.get('password')
+        client = Client(userId, password)
+        result_dicts = client.getScores()
+        print(result_dicts)
+        return render(request, 'scores.html', {"scores": result_dicts})
+    else:
+        return HttpResponse("The POST method is not support")
 
 
 def login(request):

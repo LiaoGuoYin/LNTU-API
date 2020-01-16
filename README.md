@@ -1,7 +1,7 @@
 # LNTUME
-    A Python Spider for Crawling LiaoNing Technology University Educational Online.
+    A Python Spider for Crawling LiaoNing Technology University Teaching Management Online.
 
-## TODO
+## Schedule
 - With Python crawling student's info:
     - [ ] Personal Information
     - [x] Evaluate Teachers
@@ -16,5 +16,9 @@
     - [ ] Token
     - [ ] Crash monitor
 
+- Others:
+    - [ ] Calculate GPA(Great Point Average)
+    - [ ] Student Quality expansion Spider
+    
 ## License
     MIT

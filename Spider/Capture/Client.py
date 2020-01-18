@@ -14,7 +14,7 @@ class Client(object):
         # self.url = 'http://s2.natfrp.com:7792/academic/'
         # self.url = 'http://202.199.224.121:11189/newacademic/'
         # self.url = 'http://202.199.224.121:11089/newacademic/'
-        self.url = urls[0].split("common/security/login.jsp")[0]
+        self.url = urls[1].split("common/security/login.jsp")[0]
         self.session = requests.Session()
         if self.login_with_account(username, password):
             self.user = User.objects.filter(userId=username, password=password).first()
@@ -30,8 +30,8 @@ class Client(object):
     def login_with_account(self, username: int, password: str):
         url = self.url + 'j_acegi_security_check'
         print(url)
-        form_data = {'j_username': username, 'j_password': password}
-        response = self.session.post(url, data=form_data)
+        body = {'j_username': username, 'j_password': password}
+        response = self.session.post(url, data=body)
         if response.text.find('本科生教务管理系统') != -1:  # TODO 优化判断
             # cookie = response.request.headers.get('Cookie')
             # self.session.headers.update({'Cookie': cookie})
@@ -47,7 +47,6 @@ class Client(object):
         url = self.url + 'student/queryscore/queryscore.jsdo'
         response = self.session.get(url)
         html_doc = etree.HTML(response.text)
-        # print(response.text)
         course_lists = html_doc.xpath('/html/body/table[2]/tr')
         score_results = {}
         for course in course_lists[1:]:
@@ -63,6 +62,7 @@ class Client(object):
                 score.scores = course.xpath('td[4]/font')[0].text.strip()
             else:
                 score.scores = score.scores.strip()
+
             score.credit = course.xpath('td[5]/text()')[0]
             score.check_method = course.xpath('td[6]/text()')[0]
             score.select_properties = course.xpath('td[7]/text()')[0].split()[0]

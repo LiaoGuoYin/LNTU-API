@@ -1,9 +1,9 @@
 import requests
 from lxml import etree
 
-from Spider.Capture.EvaluateTeacher import run as evaluate_run
-from Spider.Utils.URLManager import URLManager
+from Spider.core.EvaluateTeacher import run as evaluate_run
 from Spider.models import Score, CET, ExamPlan, User
+from Spider.utils.URLManager import URLManager
 
 
 class Client(object):
@@ -17,11 +17,11 @@ class Client(object):
         self.url = urls[1].split("common/security/login.jsp")[0]
         self.session = requests.Session()
         if self.login_with_account(username, password):
-            self.user = User.objects.filter(userId=username, password=password).first()
+            self.user = User.objects.filter(username=username, password=password).first()
             if self.user:
                 pass
             else:
-                self.user = User(userId=username, password=password)
+                self.user = User(username=username, password=password)
                 self.user.save()
         else:
             # 重新输入密码
@@ -51,7 +51,7 @@ class Client(object):
         score_results = {}
         for course in course_lists[1:]:
             score = Score()
-            score.userId = self.user
+            score.username = self.user
             score.strId = course.xpath('td[1]/text()')[0]
             score.name = course.xpath('td[2]/text()')[0]
             score.numberId = course.xpath('td[3]/text()')[0]
@@ -71,19 +71,26 @@ class Client(object):
             score.semester_year = course.xpath('td[10]/text()')[0][:4]
             score.semester_season = course.xpath('td[10]/text()')[0][4:]
             score.is_delay_exam = course.xpath('td[11]/text()')[0]
-            score.details_print_id = course.xpath('td[12]/a/@href')
-            score.details_print_id = "None" if len(score.details_print_id) == 0 else score.details_print_id[0]
+
+            # 有的课程没有打印 id
+            score.details_print_id = course.xpath('td[12]')[0].find('a')
+            print(score.details_print_id)
+            if score.details_print_id:
+                score.details_print_id = course.xpath('td[12]/a/@href')[0]
+            else:
+                pass
+
             score_results.update({score.name: score.__dict__})
             score.save()
         for k, v in score_results.items():
-            if v['details_print_id'] != "None":
+            if v['details_print_id']:
                 print('{} {}'.format(k, v['scores']), end=' ')
                 self.getDetail(v['strId'])
                 # TODO Test ok?
         return score_results
 
     def getDetail(self, course_strId):
-        score = Score.objects.filter(strId=course_strId, userId=self.user).first()
+        score = Score.objects.filter(strId=course_strId, username=self.user).first()
         url = self.url + 'student/queryscore/' + score.details_print_id  # 保留 id，以后应该也能看
         response = self.session.get(url)
         html_doc = etree.HTML(response.text)
@@ -102,11 +109,11 @@ class Client(object):
         CETs = html_doc.xpath('/html/body/table[2]/tr[@class="infolist_common"]')
         for each in CETs:
             cet = CET()
-            cet.userId = self.user
+            cet.username = self.user
             cet.level = each.xpath('td[1]/text()')[0].strip()
             cet.exam_date = each.xpath('td[2]/text()')[0].strip()
             cet.score = each.xpath('td[3]/text()')[0].strip()
-            if CET.objects.filter(userId=cet.userId, exam_date=cet.exam_date).exists():
+            if CET.objects.filter(username=cet.username, exam_date=cet.exam_date).exists():
                 print(cet)
             else:
                 cet.save()
@@ -122,7 +129,7 @@ class Client(object):
         elements = html_doc.xpath('/html/body/table[2]/tr[@class="infolist_common"]')
         for element in elements:
             exam = ExamPlan()
-            exam.userId = self.user
+            exam.username = self.user
             exam.name = element.xpath('td[1]/text()')[0]
             exam.date, exam.time = element.xpath('td[2]/text()')[0].split()
             exam.location = element.xpath('td[3]/text()')[0]
@@ -137,24 +144,3 @@ class Client(object):
 
     def selectBestURL(self):
         pass
-
-# print(etree.tostring(html_doc, encoding='unicode'))
-# with open('output.html', 'w+') as fp:
-#     fp.write(etree.tostring(html_doc.xpath('/html')[0], encoding="unicode"))
-
-
-# with open('account.txt', 'r') as fp:
-#     users = fp.readlines()
-# for user in users:
-#     username, password = user.split("----")
-#     print(username, password)
-#     client = Client(username.strip(), password.strip())
-#     client.evaluateTeacher()
-# client.getScores()
-
-
-# client = Client(1710030105, 'heying')
-# client.getCET()
-# client.getScores()
-# client.getExamTime()
-# client.evaluateTeacher()

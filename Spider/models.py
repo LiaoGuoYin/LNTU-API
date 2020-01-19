@@ -3,13 +3,13 @@ from django.db.models import UniqueConstraint
 
 
 class User(models.Model):
-    userId = models.BigIntegerField("学号", primary_key=True)
-    password = models.CharField("密码", max_length=32)
-    last_login = models.DateTimeField("最后一次登陆时间", auto_now=True)
+    username = models.BigIntegerField(primary_key=True)
+    password = models.CharField(max_length=32)
+    latest_login = models.DateTimeField(auto_now=True)
 
 
 class Score(models.Model):
-    userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name="score")
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="score")
     id = models.AutoField(primary_key=True)
     strId = models.CharField("1课程号", max_length=64)
     name = models.CharField("2课程名", max_length=64)
@@ -31,28 +31,28 @@ class Score(models.Model):
     final_score = models.CharField("最终成绩", max_length=8, null=True)
 
     class Meta:
-        UniqueConstraint(fields=['strId', 'semester_year', 'semester_season', 'userId'], name="unique_stu_score")
+        UniqueConstraint(fields=['strId', 'semester_year', 'semester_season', 'username'], name="unique_stu_score")
 
         def __str__(self):
             return str(self.__dict__)
 
 
 class CET(models.Model):
-    userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cet")
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cet")
     id = models.AutoField(primary_key=True)
     exam_date = models.DateField(null=False)
     level = models.CharField(max_length=64)
     score = models.CharField(max_length=16, null=True)
 
     class Meta:
-        UniqueConstraint(fields=['exam_date', 'userId'], name="unique_stu_cet")
+        UniqueConstraint(fields=['exam_date', 'username'], name="unique_stu_cet")
 
     def __str__(self):
         return str(self.level)
 
 
 class ExamPlan(models.Model):
-    userId = models.ForeignKey(User, on_delete=models.CASCADE, related_name="examPlan")
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="examPlan")
     id = models.AutoField(primary_key=True)
     course = models.CharField(max_length=64)
     date = models.DateField()
@@ -60,7 +60,7 @@ class ExamPlan(models.Model):
     location = models.CharField(max_length=32)
 
     class Meta:
-        UniqueConstraint(fields=['id', 'course', 'userId'], name="unique_stu_examPlan")
+        UniqueConstraint(fields=['id', 'course', 'username'], name="unique_stu_examPlan")
 
     def __str__(self):
         return str(self.__dict__)

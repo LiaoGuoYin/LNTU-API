@@ -129,7 +129,7 @@ class Client(object):
         student.name = table.xpath('tr[2]/td[1]')[0].text.strip()
         student.native_from = table.xpath('tr[2]/td[2]')[0].text.strip()
         student.foreign_name = table.xpath('tr[3]/td[1]')[0].text.strip()
-        # student.birthday = table.xpath('tr[3]/td[2]')[0].text.strip()
+        student.birthday = table.xpath('tr[3]/td[2]')[0].text.strip()
         student.card_kind = table.xpath('tr[4]/td[1]')[0].text.strip()
         student.politics = table.xpath('tr[4]/td[1]')[0].text.strip()
         student.ID_number = table.xpath('tr[5]/td[1]')[0].text.strip()
@@ -146,9 +146,9 @@ class Client(object):
         student.graduate_from = table.xpath('tr[10]/td[2]')[0].text.strip()
         student.foreign_language = table.xpath('tr[11]/td[1]')[0].text.strip()
         student.enroll_number = table.xpath('tr[11]/td[2]')[0].text.strip()
-        student.enroll_method = table.xpath('tr[12]/td[1]')[0].text.strip()
-        # student.enroll_at = table.xpath('tr[12]/td[2]')[0].text.strip()
-        # student.graduate_at = table.xpath('tr[13]/td[1]')[0].text.strip()
+        student.enroll_at = table.xpath('tr[12]/td[1]')[0].text.strip()
+        student.enroll_method = table.xpath('tr[12]/td[2]')[0].text.strip()
+        student.graduate_at = table.xpath('tr[13]/td[1]')[0].text.strip()
         student.train_method = table.xpath('tr[13]/td[2]')[0].text.strip()
         student.address = table.xpath('tr[14]/td[1]')[0].text.strip()
         student.zip = table.xpath('tr[14]/td[2]')[0].text.strip()
@@ -158,6 +158,8 @@ class Client(object):
         student.source_from = table.xpath('tr[16]/td[2]')[0].text.strip()
         student.graduate_to = table.xpath('tr[17]/td[1]')[0].text.strip()
         student.comment = table.xpath('tr[18]/td[1]')[0].text
+        student.img_url = "http://202.199.224.121:11180/newacademic/manager/studentinfo/photo/photo/{}.jpg".format(
+            student.number)
 
         student.save()
 

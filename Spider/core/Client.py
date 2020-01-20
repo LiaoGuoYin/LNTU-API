@@ -2,7 +2,7 @@ import requests
 from lxml import etree
 
 from Spider.core.EvaluateTeacher import run as evaluate_run
-from Spider.models import Score, CET, ExamPlan, User
+from Spider.models import Score, CET, ExamPlan, User, StudentInfo
 from Spider.utils.URLManager import URLManager
 
 
@@ -33,9 +33,6 @@ class Client(object):
         body = {'j_username': username, 'j_password': password}
         response = self.session.post(url, data=body)
         if response.text.find('本科生教务管理系统') != -1:  # TODO 优化判断
-            # cookie = response.request.headers.get('Cookie')
-            # self.session.headers.update({'Cookie': cookie})
-            # if response.status_code == 302:
             return True
         else:
             # TODO 错误：密码不匹配!
@@ -46,23 +43,17 @@ class Client(object):
     def getScores(self):
         url = self.url + 'student/queryscore/queryscore.jsdo'
         response = self.session.get(url)
-        html_doc = etree.HTML(response.text)
+        html = response.text.replace('<font color="#CC0000">', '').replace('</font>', '').replace(
+            '<a target="_blank" href="', '').replace('">打印</a>', '')  # 破坏指定元素的结构，方便有效率地统一提取
+        html_doc = etree.HTML(html)
         course_lists = html_doc.xpath('/html/body/table[2]/tr')
-        score_results = {}
         for course in course_lists[1:]:
             score = Score()
             score.username = self.user
             score.strId = course.xpath('td[1]/text()')[0]
             score.name = course.xpath('td[2]/text()')[0]
             score.numberId = course.xpath('td[3]/text()')[0]
-
-            # 挂科成绩和正常成绩标签不同
-            score.scores = course.xpath('td[4]')[0].text
-            if not score.scores:
-                score.scores = course.xpath('td[4]/font')[0].text.strip()
-            else:
-                score.scores = score.scores.strip()
-
+            score.scores = course.xpath('td[4]')[0].text.strip()  # 破坏1：挂科成绩和正常成绩标签不同
             score.credit = course.xpath('td[5]/text()')[0]
             score.check_method = course.xpath('td[6]/text()')[0]
             score.select_properties = course.xpath('td[7]/text()')[0].split()[0]
@@ -71,36 +62,24 @@ class Client(object):
             score.semester_year = course.xpath('td[10]/text()')[0][:4]
             score.semester_season = course.xpath('td[10]/text()')[0][4:]
             score.is_delay_exam = course.xpath('td[11]/text()')[0]
-
-            # 有的课程没有打印 id
-            score.details_print_id = course.xpath('td[12]')[0].find('a')
-            print(score.details_print_id)
-            if score.details_print_id:
-                score.details_print_id = course.xpath('td[12]/a/@href')[0]
-            else:
-                pass
-
-            score_results.update({score.name: score.__dict__})
+            score.details_print_id = course.xpath('td[12]')[0].text  # 破坏2：有的课程没有打印 id
             score.save()
-        for k, v in score_results.items():
-            if v['details_print_id']:
-                print('{} {}'.format(k, v['scores']), end=' ')
-                self.getDetail(v['strId'])
-                # TODO Test ok?
-        return score_results
 
-    def getDetail(self, course_strId):
-        score = Score.objects.filter(strId=course_strId, username=self.user).first()
-        url = self.url + 'student/queryscore/' + score.details_print_id  # 保留 id，以后应该也能看
-        response = self.session.get(url)
-        html_doc = etree.HTML(response.text)
-        detail_element = html_doc.xpath('/html/body/center/table')[0]
-        score.score_composition = detail_element.xpath('tr[5]/td/p/b/text()')[0].strip()
-        score.daily_score = detail_element.xpath('tr[7]/td[1]/b/text()')[0].strip()
-        score.midterm_score = detail_element.xpath('tr[7]/td[2]/b/text()')[0].strip()
-        score.exam_score = detail_element.xpath('tr[7]/td[3]/b/text()')[0].strip()
-        score.final_score = detail_element.xpath('tr[7]/td[4]/b/text()')[0].strip()
-        score.save()
+    def getDetail(self, score):
+        if score:
+            score = score[0]
+            url = self.url + 'student/queryscore/' + score.details_print_id  # 保留 id，以后应该也能看
+            response = self.session.get(url)
+            html_doc = etree.HTML(response.text)
+            detail_element = html_doc.xpath('/html/body/center/table')[0]
+            score.score_composition = detail_element.xpath('tr[5]/td/p/b/text()')[0].strip()
+            score.daily_score = detail_element.xpath('tr[7]/td[1]/b/text()')[0].strip()
+            score.midterm_score = detail_element.xpath('tr[7]/td[2]/b/text()')[0].strip()
+            score.exam_score = detail_element.xpath('tr[7]/td[3]/b/text()')[0].strip()
+            score.final_score = detail_element.xpath('tr[7]/td[4]/b/text()')[0].strip()
+            score.save()
+        else:
+            pass
 
     def getCET(self):
         url = self.url + 'student/queryscore/skilltestscore.jsdo'
@@ -138,9 +117,50 @@ class Client(object):
     def getClassTable(self):
         pass
 
-    def getPersonalInfo(self):
+    def getStudentInfo(self):
+        url = self.url + '/student/studentinfo/studentinfo.jsdo'
+        response = self.session.get(url)
+        html_doc = etree.HTML(response.text)
+        student = StudentInfo()
+        table = html_doc.xpath('/html/body/center/table[1]')[0]
 
-        pass
+        student.number = table.xpath('tr[1]/td[1]')[0].text.strip()
+        student.citizenship = table.xpath('tr[1]/td[2]')[0].text.strip()
+        student.name = table.xpath('tr[2]/td[1]')[0].text.strip()
+        student.native_from = table.xpath('tr[2]/td[2]')[0].text.strip()
+        student.foreign_name = table.xpath('tr[3]/td[1]')[0].text.strip()
+        # student.birthday = table.xpath('tr[3]/td[2]')[0].text.strip()
+        student.card_kind = table.xpath('tr[4]/td[1]')[0].text.strip()
+        student.politics = table.xpath('tr[4]/td[1]')[0].text.strip()
+        student.ID_number = table.xpath('tr[5]/td[1]')[0].text.strip()
+        student.section = table.xpath('tr[5]/td[2]')[0].text.strip()
+        student.gender = table.xpath('tr[6]/td[1]')[0].text.strip()
+        student.nation = table.xpath('tr[6]/td[2]')[0].text.strip()
+        student.academy = table.xpath('tr[7]/td[1]')[0].text.strip()
+        student.major = table.xpath('tr[7]/td[2]')[0].text.strip()
+        student.class_number = table.xpath('tr[8]/td[1]')[0].text.strip()
+        student.category = table.xpath('tr[8]/td[2]')[0].text.strip()
+        student.province = table.xpath('tr[9]/td[1]')[0].text.strip()
+        student.score = table.xpath('tr[9]/td[2]')[0].text.strip()
+        student.exam_number = table.xpath('tr[10]/td[1]')[0].text.strip()
+        student.graduate_from = table.xpath('tr[10]/td[2]')[0].text.strip()
+        student.foreign_language = table.xpath('tr[11]/td[1]')[0].text.strip()
+        student.enroll_number = table.xpath('tr[11]/td[2]')[0].text.strip()
+        student.enroll_method = table.xpath('tr[12]/td[1]')[0].text.strip()
+        # student.enroll_at = table.xpath('tr[12]/td[2]')[0].text.strip()
+        # student.graduate_at = table.xpath('tr[13]/td[1]')[0].text.strip()
+        student.train_method = table.xpath('tr[13]/td[2]')[0].text.strip()
+        student.address = table.xpath('tr[14]/td[1]')[0].text.strip()
+        student.zip = table.xpath('tr[14]/td[2]')[0].text.strip()
+        student.phone = table.xpath('tr[15]/td[1]')[0].text.strip()
+        student.email = table.xpath('tr[15]/td[2]')[0].text.strip()
+        student.roll_number = table.xpath('tr[16]/td[1]')[0].text.strip()
+        student.source_from = table.xpath('tr[16]/td[2]')[0].text.strip()
+        student.graduate_to = table.xpath('tr[17]/td[1]')[0].text.strip()
+        student.comment = table.xpath('tr[18]/td[1]')[0].text
 
-    def selectBestURL(self):
-        pass
+        student.save()
+
+
+def selectBestURL(self):
+    pass

@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from Spider.core.Client import Client
+from Spider.models import User
 
 
 def getCET(request):
@@ -18,11 +19,8 @@ def getCET(request):
 def getScores(request):
     if request.method == 'GET':
         username = request.GET.get('username')
-        password = request.GET.get('password')
-        client = Client(username, password)
-        result_dicts = client.getScores()
-        print(result_dicts)
-        return render(request, 'scores.html', {"scores": result_dicts})
+        user = User.objects.get(pk=username)
+        return render(request, 'scores.html', {"scores": user.score.all()})
     else:
         return HttpResponse("The POST method is not support")
 

@@ -3,7 +3,7 @@
 
 ## Schedule
 - With Python crawling student's info:
-    - [ ] Personal Information
+    - [x] Personal Information
     - [x] Evaluate Teachers
     - [x] Exam Plannings
     - [x] Exam Grades

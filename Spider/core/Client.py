@@ -48,38 +48,37 @@ class Client(object):
         html_doc = etree.HTML(html)
         course_lists = html_doc.xpath('/html/body/table[2]/tr')
         for course in course_lists[1:]:
-            score = Score()
-            score.username = self.user
-            score.strId = course.xpath('td[1]/text()')[0]
+            course_id = course.xpath('td[1]/text()')[0]
+            semester = course.xpath('td[10]/text()')[0]
+            score = Score.objects.get_or_create(username=self.user, semester=semester, course_id=course_id)[0]
             score.name = course.xpath('td[2]/text()')[0]
-            score.numberId = course.xpath('td[3]/text()')[0]
+            score.course_number = course.xpath('td[3]/text()')[0]
             score.scores = course.xpath('td[4]')[0].text.strip()  # 破坏1：挂科成绩和正常成绩标签不同
             score.credit = course.xpath('td[5]/text()')[0]
-            score.check_method = course.xpath('td[6]/text()')[0]
-            score.select_properties = course.xpath('td[7]/text()')[0].split()[0]
+            score.inspect_method = course.xpath('td[6]/text()')[0]
+            score.course_properties = course.xpath('td[7]/text()')[0].split()[0]
             score.status = course.xpath('td[8]/text()')[0]
-            score.exam_status = course.xpath('td[9]/text()')[0]
-            score.semester_year = course.xpath('td[10]/text()')[0][:4]
-            score.semester_season = course.xpath('td[10]/text()')[0][4:]
+            score.exam_categories = course.xpath('td[9]/text()')[0]
             score.is_delay_exam = course.xpath('td[11]/text()')[0]
             score.details_print_id = course.xpath('td[12]')[0].text  # 破坏2：有的课程没有打印 id
+            if score.details_print_id:
+                score.details_print_id = score.details_print_id.strip()
+                print(score.details_print_id)
+                self.getDetail(score)
             score.save()
 
-    def getDetail(self, score):
-        if score:
-            score = score[0]
-            url = self.url + 'student/queryscore/' + score.details_print_id  # 保留 id，以后应该也能看
-            response = self.session.get(url)
-            html_doc = etree.HTML(response.text)
-            detail_element = html_doc.xpath('/html/body/center/table')[0]
-            score.score_composition = detail_element.xpath('tr[5]/td/p/b/text()')[0].strip()
-            score.daily_score = detail_element.xpath('tr[7]/td[1]/b/text()')[0].strip()
-            score.midterm_score = detail_element.xpath('tr[7]/td[2]/b/text()')[0].strip()
-            score.exam_score = detail_element.xpath('tr[7]/td[3]/b/text()')[0].strip()
-            score.final_score = detail_element.xpath('tr[7]/td[4]/b/text()')[0].strip()
-            score.save()
-        else:
-            pass
+    def getDetail(self, score: Score):
+        score.details_print_id = score.details_print_id
+        url = self.url + 'student/queryscore/' + score.details_print_id  # 保留 id，以后应该也能看
+        response = self.session.get(url)
+        html_doc = etree.HTML(response.text)
+        detail_element = html_doc.xpath('/html/body/center/table')[0]
+        score.made_up_of = detail_element.xpath('tr[5]/td/p/b/text()')[0].strip()
+        score.daily_score = detail_element.xpath('tr[7]/td[1]/b/text()')[0].strip()
+        score.midterm_score = detail_element.xpath('tr[7]/td[2]/b/text()')[0].strip()
+        score.exam_score = detail_element.xpath('tr[7]/td[3]/b/text()')[0].strip()
+        score.final_score = detail_element.xpath('tr[7]/td[4]/b/text()')[0].strip()
+        score.save()
 
     def getCET(self):
         url = self.url + 'student/queryscore/skilltestscore.jsdo'
@@ -87,16 +86,11 @@ class Client(object):
         html_doc = etree.HTML(response.text)
         CETs = html_doc.xpath('/html/body/table[2]/tr[@class="infolist_common"]')
         for each in CETs:
-            cet = CET()
-            cet.username = self.user
+            date = each.xpath('td[2]/text()')[0].strip()
+            cet = CET.objects.get_or_create(username=self.user, date=date)[0]
             cet.level = each.xpath('td[1]/text()')[0].strip()
-            cet.exam_date = each.xpath('td[2]/text()')[0].strip()
             cet.score = each.xpath('td[3]/text()')[0].strip()
-            if CET.objects.filter(username=cet.username, exam_date=cet.exam_date).exists():
-                print(cet)
-            else:
-                cet.save()
-        # return str(cet.__dict__)
+            cet.save()
 
     def evaluateTeacher(self):
         evaluate_run(self.session.headers["Cookie"])
@@ -160,9 +154,7 @@ class Client(object):
         student.comment = table.xpath('tr[18]/td[1]')[0].text
         student.img_url = "http://202.199.224.121:11180/newacademic/manager/studentinfo/photo/photo/{}.jpg".format(
             student.number)
-
         student.save()
 
-
-def selectBestURL(self):
-    pass
+    def selectBestURL(self):
+        pass

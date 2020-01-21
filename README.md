@@ -1,15 +1,16 @@
 # LNTUME
     A Python Spider for Crawling LiaoNing Technology University Teaching Management Online.
 
-## Schedule
+## Scheduling
 - With Python crawling student's info:
-    - [x] Personal Information
-    - [x] Evaluate Teachers
-    - [x] Exam Plannings
-    - [x] Exam Grades
-    - [x] CET Scores
-    - [ ] Teaching Plans
-    - [ ] Water-card Balance
+    - [x] student information
+    - [ ] teaching plannings
+    - [ ] class table
+    - [ ] class room
+    - [x] evaluate teachers
+    - [x] exam plannings
+    - [x] exam scores
+    - [x] CET scores
     
 - With Django REST Framework implementing backend server:
     - [ ] JSON
@@ -19,6 +20,7 @@
 - Others:
     - [ ] Calculate GPA(Great Point Average)
     - [ ] Student Quality expansion Spider
+    - [ ] water-card Balance
     
 ## License
     MIT

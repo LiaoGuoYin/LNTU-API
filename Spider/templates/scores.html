@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    getScores Page
+    getScores | LNTUME
 {% endblock %}
 
 {% block content %}
@@ -9,47 +9,34 @@
     <table class="table table-dark">
         <thead>
         <tr>
-            <th>课程序号</th>
-            <th>课程名</th>
-            <th>选课序号</th>
-            <th>成绩</th>
-            <th>学分</th>
-            <th>考核方式</th>
-            <th>选课属性</th>
-            <th>备注：正常，挂科</th>
-            <th>考试类别</th>
-            <th>学年</th>
-            <th>学期</th>
-            <th>是否缓考</th>
-            <th>打卷申请id</th>
-            <th>成绩组成</th>
-            <th>平时成绩</th>
-            <th>期中成绩</th>
-            <th>考试成绩</th>
-            <th>最终成绩</th>
+            {% for name,verbose_name in context.name_and_verbose.items %}
+                <th>{{ verbose_name }}</th>
+            {% endfor %}
         </tr>
         </thead>
         <tbody>
-        {% for course in scores %}
+        {% for score in context.scores %}
             <tr>
-                <td>{{ course.strId }}</td>
-                <td>{{ course.name }}</td>
-                <td>{{ course.numberId }}</td>
-                <td>{{ course.scores }}</td>
-                <td>{{ course.credit }}</td>
-                <td>{{ course.check_method }}</td>
-                <td>{{ course.select_properties }}</td>
-                <td>{{ course.status }}</td>
-                <td>{{ course.exam_status }}</td>
-                <td>{{ course.semester_year }}</td>
-                <td>{{ course.semester_season }}</td>
-                <td>{{ course.details_print_id }}</td>
-                <td>{{ course.score_composition }}</td>
-                <td>{{ course.daily_score }}</td>
-                <td>{{ course.midterm_score }}</td>
-                <td>{{ course.midterm_score }}</td>
-                <td>{{ course.exam_score }}</td>
-                <td>{{ course.final_score }}</td>
+                <td>{{ score.course_id }}</td>
+                <td>{{ score.name }}</td>
+                <td>{{ score.course_number }}</td>
+                <td>{{ score.scores }}</td>
+                <td>{{ score.credit }}</td>
+                <td>{{ score.inspect_method }}</td>
+                <td>{{ score.course_properties }}</td>
+                <td>{{ score.status }}</td>
+                <td>{{ score.status }}</td>
+                <td>{{ score.exam_categories }}</td>
+                <td>{{ score.semester }}</td>
+                <td>{{ score.is_delay_exam }}</td>
+                <td>{{ score.details_print_id }}</td>
+                <td>{{ score.made_up_of }}</td>
+                <td>{{ score.daily_score }}</td>
+                <td>{{ score.midterm_score }}</td>
+                <td>{{ score.exam_score }}</td>
+                <td>{{ score.final_score }}</td>
+                <td>{{ score.last_updated }}</td>
+                <td>{{ score.username }}</td>
             </tr>
         {% endfor %}
         </tbody>

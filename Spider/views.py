@@ -1,32 +1,44 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from Spider.core.Client import Client
-from Spider.models import User
+from Spider.models import CET, Score
+from core.Client import Client
 
 
-def getCET(request):
-    if request.method == 'GET':
-        username = request.GET.get('username')
-        password = request.GET.get('password')
-        client = Client(username, password)
-        result_lists = client.getCET()
-        return render(request, 'login.html', {"CETS": result_lists})
+def login(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        try:
+            client = Client(username, password)
+            client.getStudentInfo()
+            client.getScores()
+            context = "success"
+        except Exception as e:
+            context = "username or password error or Office online down"
+        return render(request, 'login.html', {'context': context})
     else:
-        return HttpResponse("The POST method is not support")
+        return HttpResponse("GET method is not support..")
 
 
 def getScores(request):
     if request.method == 'GET':
         username = request.GET.get('username')
-        user = User.objects.get(pk=username)
-        return render(request, 'scores.html', {"scores": user.score.all()})
+        scores = Score.objects.filter(username=username)
+        name_and_verbose = {each.name: each.verbose_name for each in Score._meta.get_fields()}
+        context = {'scores': scores, 'name_and_verbose': name_and_verbose}
+        return render(request, 'scores.html', {'context': context})
     else:
-        return HttpResponse("The POST method is not support")
+        return HttpResponse("POST method is not support..")
 
 
-def login(request):
-    if request.method == "POST":
-        return HttpResponse("Processing..")
+def getCET(request):
+    if request.method == "GET":
+        username = request.GET['username']
+        scores = CET.objects.filter(username=username)
+        name_and_verbose = {each.name: each.verbose_name for each in CET._meta.get_fields()}
+        name_and_verbose.pop('id')
+        context = {'scores': scores, 'name_and_verbose': name_and_verbose}
+        return render(request, 'cet.html', {'context': context})
     else:
-        return HttpResponse("GET method is coding..")
+        return HttpResponse("POST method is not support..")

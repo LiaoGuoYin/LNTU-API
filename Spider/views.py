@@ -1,8 +1,12 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from Spider.core.Client import Client
 from Spider.models import CET, Score
-from core.Client import Client
+
+
+def home(request):
+    pass
 
 
 def login(request):

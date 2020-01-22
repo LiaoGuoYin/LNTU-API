@@ -46,8 +46,8 @@ class Score(models.Model):
 
 
 class CET(models.Model):
-    date = models.DateField("考试日期", null=False)
-    level = models.CharField("等级", max_length=64)
+    date = models.CharField("考试日期", max_length=16, null=False)
+    level = models.CharField("等级", max_length=16)
     score = models.CharField("分数", max_length=16, null=True)
     username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cet")
 
@@ -61,18 +61,18 @@ class CET(models.Model):
 
 
 class ExamPlan(models.Model):
-    course = models.CharField("课程名", max_length=64)
+    name = models.CharField("课程名", max_length=64)
     room = models.CharField("考场", max_length=32)
     date = models.DateField("考试日期")
-    time = models.DateTimeField("考试时间")
+    time = models.CharField("考试时间", max_length=32)
     username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_plan")
 
     def __str__(self):
-        return str(self.course)
+        return str(self.name)
 
     class Meta:
         db_table = "exam_plan"
-        UniqueConstraint(fields=['username', 'course', 'date'], name="unique_stu_exam_plan")
+        UniqueConstraint(fields=['username', 'name', 'date'], name="unique_stu_exam_plan")
         ordering = ['username', '-date']
 
 

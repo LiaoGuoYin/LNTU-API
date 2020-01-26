@@ -1,11 +1,11 @@
 import requests
 
-from spider.core.EvaluateTeacher import run as evaluate_run
 from spider.core.cet import cet_get_html, cet_parser
 from spider.core.examPlan import examPlan_get_html, examPlan_parser
 from spider.core.scoreDetail import detail_get_html, detail_parser
 from spider.core.socre import score_get_html, score_parser
 from spider.core.studentInfo import studentInfo_get_html, studentInfo_parser
+from spider.core.teacherEvaluate import run as evaluate_run
 from spider.utils.UrlEnums import UrlEnums
 from web.models import Score, User
 
@@ -38,15 +38,13 @@ class Client(object):
         print("获取成绩: ", score_parser(html_doc, self.user))
 
     def getDetail(self):
-        scores = Score.objects.filter(username=self.user, details_print_id__isnull=False)
-        isAllOk = False
+        scores = Score.objects.filter(username=self.user, details_print_id__istartswith="chajuandy.jsp")
+        isAllOk = {True}
         for score in scores:
-            details_print_id = score.details_print_id
-            if not details_print_id:
-                continue
-            html_doc = detail_get_html(self.session, details_print_id)
-            isAllOk = detail_parser(html_doc, score)
-        print("获取成绩详情: ", isAllOk)
+            html_doc = detail_get_html(self.session, score.details_print_id)
+            isOk = detail_parser(html_doc, score)
+            isAllOk.add(isOk)
+        print("获取成绩详情: ", True if len(isAllOk) == 1 else False)
 
     def getCET(self):
         html_doc = cet_get_html(self.session)
@@ -57,7 +55,7 @@ class Client(object):
 
     def getExamPlan(self):
         html_doc = examPlan_get_html(self.session)
-        print("获取 考试计划: ", examPlan_parser(html_doc, self.user))
+        print("获取考试计划: ", examPlan_parser(html_doc, self.user))
 
     def getClassTable(self):
         # TODO

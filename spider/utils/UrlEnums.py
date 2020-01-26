@@ -21,8 +21,6 @@ class UrlEnums(Enum):
     def __str__(self):
         return self.value
 
-
 # for name, member in UrlEnums.__members__.items():
 #     print(name.lower(), member.value)
 # # print(list(UrlEnums))
-print(UrlEnums.LOGIN)

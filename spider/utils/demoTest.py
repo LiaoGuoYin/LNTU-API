@@ -5,7 +5,7 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'LNTUME.settings'
 django.setup()
 
-from Spider.core.Client import Client
+from client import Client
 
 
 def login(username, password):

@@ -6,6 +6,7 @@ from spider.core.scoreDetail import detail_get_html, detail_parser
 from spider.core.socre import score_get_html, score_parser
 from spider.core.studentInfo import studentInfo_get_html, studentInfo_parser
 from spider.core.teacherEvaluate import run as evaluate_run
+from spider.core.teachingPlan import teachingPlan_parser, teachingPlan_get_uri, teachingPlan_get_html
 from spider.utils.UrlEnums import UrlEnums
 from web.models import Score, User
 
@@ -33,6 +34,27 @@ class Client(object):
         else:
             return True
 
+    def getStudentInfo(self):
+        html_doc = studentInfo_get_html(self.session)
+        print("获取个人信息: ", studentInfo_parser(html_doc, self.user))
+
+    def getTeachingPlan(self):
+        uri = teachingPlan_get_uri(self.session)
+        if uri:
+            html_doc = teachingPlan_get_html(self.session, uri)
+            print("获取教学计划: ", teachingPlan_parser(html_doc, self.user))
+
+    def getClassTable(self):
+        # TODO
+        pass
+
+    def getExamPlan(self):
+        html_doc = examPlan_get_html(self.session)
+        print("获取考试计划: ", examPlan_parser(html_doc, self.user))
+
+    def evaluateTeacher(self):
+        evaluate_run(self.session.headers["Cookie"])
+
     def getScores(self):
         html_doc = score_get_html(self.session)
         print("获取成绩: ", score_parser(html_doc, self.user))
@@ -46,24 +68,12 @@ class Client(object):
             isAllOk.add(isOk)
         print("获取成绩详情: ", True if len(isAllOk) == 1 else False)
 
+    def calculateGPA(self):
+        pass
+
     def getCET(self):
         html_doc = cet_get_html(self.session)
         print("获取 CET: ", cet_parser(html_doc, self.user))
-
-    def evaluateTeacher(self):
-        evaluate_run(self.session.headers["Cookie"])
-
-    def getExamPlan(self):
-        html_doc = examPlan_get_html(self.session)
-        print("获取考试计划: ", examPlan_parser(html_doc, self.user))
-
-    def getClassTable(self):
-        # TODO
-        pass
-
-    def getStudentInfo(self):
-        html_doc = studentInfo_get_html(self.session)
-        print("获取个人信息: ", studentInfo_parser(html_doc, self.user))
 
     def selectBestURL(self):
         # TODO

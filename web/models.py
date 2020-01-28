@@ -16,7 +16,7 @@ class User(models.Model):
 
 
 class Score(models.Model):
-    course_id = models.CharField("课程号", max_length=64)
+    course_id = models.CharField("课程号", max_length=32)
     name = models.CharField("课程名", max_length=64, null=True)
     course_number = models.IntegerField("选课序号", null=True)
     scores = models.CharField("成绩", max_length=16, null=True)  # 有等级制、分数制，应该为 Char
@@ -71,7 +71,7 @@ class ExamPlan(models.Model):
         return str(self.name)
 
     class Meta:
-        db_table = "exam_plan"
+        db_table = "plan_exam"
         UniqueConstraint(fields=['username', 'name', 'date'], name="unique_stu_exam_plan")
         ordering = ['username', '-date']
 
@@ -121,3 +121,25 @@ class StudentInfo(models.Model):
     class Meta:
         db_table = "info"
         ordering = ['-last_updated', '-number']
+
+
+class TeachingPlanCourse(models.Model):
+    semester = models.CharField("学年学期", max_length=32)
+    course_id = models.CharField("课程号", max_length=32)
+    course_name = models.CharField("课程名称", max_length=64)
+    inspect_method = models.CharField("考核方式", max_length=64, null=True)
+    credit = models.FloatField("学分", null=True)
+    period = models.IntegerField("总学时", null=True)
+    course_type = models.CharField("课程类别", max_length=16, null=True)
+    course_group = models.CharField("所属分组", max_length=16, null=True)
+    course_properties = models.CharField("选课属性", max_length=64, null=True)
+    username = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        self.__dict__.pop("_state")
+        return str(self.__dict__)
+
+    class Meta:
+        db_table = "plan_teaching"
+        UniqueConstraint(fields=['course_id', 'username', 'semester'], name="unique_teaching_plan")
+        ordering = ['username']

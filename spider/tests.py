@@ -12,11 +12,12 @@ class ClientTest(object):
     def test_client_method(self):
         client = Client(1710030215, "****")
         client.getStudentInfo()
-        client.getScores()
-        client.getCET()
-        client.getExamPlan()
-        client.getClassTable()
-        client.getDetail()
+        client.getTeachingPlan()
+        # client.getScores()
+        # client.getCET()
+        # client.getExamPlan()
+        # client.getClassTable()
+        # client.getDetail()
 
 
 ClientTest().test_client_method()

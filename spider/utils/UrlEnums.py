@@ -8,6 +8,7 @@ class UrlEnums(Enum):
 
     LOGIN = URL_ROOT + "j_acegi_security_check"
     STUDENT_INFO = URL_ROOT + "student/studentinfo/studentinfo.jsdo"
+    TEACHING_PLAN = URL_ROOT + "student/studyschedule/"
     CLASS_TABLE = URL_ROOT + "student/currcourse/currcourse.jsdo"  # TODO 其他接口
     TEACHER_EVALUATE_QUERY = URL_ROOT + "eva/index/resultlist.jsdo"
     TEACHER_EVALUATE = URL_ROOT + "eva/index/putresult.jsdo"

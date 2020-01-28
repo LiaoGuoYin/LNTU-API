@@ -4,7 +4,7 @@
 ## Scheduling
 - With Python crawling student's info:
     - [x] student information
-    - [ ] teaching plannings
+    - [x] teaching plannings
     - [ ] class table
     - [ ] class room
     - [x] evaluate teachers

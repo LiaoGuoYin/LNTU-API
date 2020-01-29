@@ -1,3 +1,6 @@
+from configparser import ConfigParser
+from unittest import TestCase
+
 from client import Client
 
 
@@ -6,18 +9,22 @@ from client import Client
 # django.setup()
 
 
-# class ClientTest(TestCase):
-class ClientTest(object):
+class ClientTest(TestCase):
+
+    def setUp(self):
+        """load my test account"""
+        conf = ConfigParser()
+        conf.read('static/config.ini')
+        for username, password in conf.items("account")[0:1]:
+            self.client = Client(username, password)
+            print(self.client)
 
     def test_client_method(self):
-        client = Client(1710030215, "****")
-        client.getStudentInfo()
-        client.getTeachingPlan()
-        # client.getScores()
-        # client.getCET()
-        # client.getExamPlan()
-        # client.getClassTable()
-        # client.getDetail()
-
-
-ClientTest().test_client_method()
+        # self.client.getStudentInfo()
+        self.client.getTeachingPlan()
+        self.client.getClassTable()
+        # self.client.getScores()
+        # self.client.getCET()
+        # self.client.getExamPlan()
+        # self.client.getClassTable()
+        # self.client.getDetail()

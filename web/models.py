@@ -23,7 +23,7 @@ class Score(models.Model):
     credit = models.FloatField("学分", null=True)
     inspect_method = models.CharField("考核方式", max_length=64, null=True)
     course_properties = models.CharField("选课属性", max_length=64, null=True)
-    status = models.CharField("备注：正常，挂科", max_length=64, null=True)
+    status = models.CharField("备注：正常/挂科", max_length=64, null=True)
     exam_categories = models.CharField("考试类别", max_length=64, null=True)
     semester = models.CharField("学年学期", max_length=32)
     is_delay_exam = models.CharField("是否缓考", max_length=8, null=True)
@@ -140,6 +140,30 @@ class TeachingPlanCourse(models.Model):
         return str(self.__dict__)
 
     class Meta:
-        db_table = "plan_teaching"
+        db_table = 'plan_teaching'
         UniqueConstraint(fields=['course_id', 'username', 'semester'], name="unique_teaching_plan")
         ordering = ['username']
+
+
+class ClassCourse(models.Model):
+    semester = models.CharField("学年学期", max_length=32)
+    course_id = models.CharField("课程号", max_length=32)
+    course_number = models.IntegerField("选课序号", null=True)
+    course_name = models.CharField("课程名称", max_length=64)
+    teacher = models.CharField("任课教师", max_length=32)
+    credit = models.FloatField("学分", null=True)
+    course_properties = models.CharField("选课属性", max_length=64, null=True)
+    inspect_method = models.CharField("考核方式", max_length=64, null=True)
+    status = models.CharField("正常/挂科", max_length=64, null=True)
+    is_delay_exam = models.CharField("是否缓考", max_length=8, null=True)
+    details = models.CharField("上课时间、地点	", max_length=64, null=True)
+    comment = models.TextField("备注", null=True)
+    username = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.__dict__)
+
+    class Meta:
+        db_table = "class_course"
+        UniqueConstraint(fields=['username', 'semester', 'course_id'], name="unique_class_course")
+        ordering = ['username', '-semester']

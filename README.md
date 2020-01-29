@@ -5,7 +5,7 @@
 - With Python crawling student's info:
     - [x] student information
     - [x] teaching plannings
-    - [ ] class table
+    - [x] class table
     - [ ] class room
     - [x] evaluate teachers
     - [x] exam plannings

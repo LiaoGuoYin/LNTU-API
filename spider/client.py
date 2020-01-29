@@ -1,6 +1,7 @@
 import requests
 
 from spider.core.cet import cet_get_html, cet_parser
+from spider.core.classTable import classTable_get_html, classTable_parser
 from spider.core.examPlan import examPlan_get_html, examPlan_parser
 from spider.core.scoreDetail import detail_get_html, detail_parser
 from spider.core.socre import score_get_html, score_parser
@@ -44,9 +45,11 @@ class Client(object):
             html_doc = teachingPlan_get_html(self.session, uri)
             print("获取教学计划: ", teachingPlan_parser(html_doc, self.user))
 
-    def getClassTable(self):
-        # TODO
-        pass
+    def getClassTable(self, year=38, term=2):
+        semester_str = "{} {}".format(year, term)
+        semester_data = {'year': year, 'term': term}
+        html_doc = classTable_get_html(self.session, semester_data)
+        print("获取默认学期学年课表：", classTable_parser(html_doc, self.user, semester_str))
 
     def getExamPlan(self):
         html_doc = examPlan_get_html(self.session)
@@ -78,3 +81,6 @@ class Client(object):
     def selectBestURL(self):
         # TODO
         pass
+
+    def __str__(self):
+        return str(self.user) + " 登陆成功"

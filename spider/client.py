@@ -21,9 +21,9 @@ class Client(object):
         # self.url = 'http://202.199.224.24:11089/newacademic/'
         self.session = requests.Session()
         if self.login_with_account(username, password):
-            self.user, isExist = User.objects.get_or_create(username=username, password=password)
-            if not isExist:
-                self.user.save()
+            self.user = User.objects.get_or_create(username=username)[0]
+            self.user.password = password
+            self.user.save()
 
     def login_with_account(self, username: int, password: str):
         url = UrlEnums.LOGIN

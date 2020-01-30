@@ -6,7 +6,7 @@
     - [x] student information
     - [x] teaching plannings
     - [x] class table
-    - [ ] class room
+    - [x] class room
     - [x] evaluate teachers
     - [x] exam plannings
     - [x] exam scores
@@ -18,9 +18,9 @@
     - [ ] Crash monitor
 
 - Others:
-    - [ ] Calculate GPA(Great Point Average)
+    - [ ] Calculate GPA(Grade Point Average)
     - [ ] Student Quality expansion Spider
-    - [ ] water-card Balance
+    - [ ] Water-card Balance
     
 ## License
     MIT

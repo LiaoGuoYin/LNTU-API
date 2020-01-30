@@ -11,7 +11,7 @@ class User(models.Model):
         return str(self.username)
 
     class Meta:
-        db_table = "user"
+        db_table = "lntu_user"
         ordering = ['-last_login', 'username']
 
 
@@ -40,7 +40,7 @@ class Score(models.Model):
         return str(self.__dict__)
 
     class Meta:
-        db_table = "exam_score"
+        db_table = "lntu_exam_score"
         UniqueConstraint(fields=['course_id', 'semester', 'username'], name="unique_stu_score")
         ordering = ['-semester', '-last_updated']
 
@@ -55,7 +55,7 @@ class CET(models.Model):
         return str(self.level)
 
     class Meta:
-        db_table = "cet"
+        db_table = "lntu_cet"
         UniqueConstraint(fields=['username', 'date'], name="unique_stu_cet")
         ordering = ['username', '-date']
 
@@ -71,7 +71,7 @@ class ExamPlan(models.Model):
         return str(self.name)
 
     class Meta:
-        db_table = "plan_exam"
+        db_table = "lntu_exam_plan"
         UniqueConstraint(fields=['username', 'name', 'date'], name="unique_stu_exam_plan")
         ordering = ['username', '-date']
 
@@ -119,7 +119,7 @@ class StudentInfo(models.Model):
         return str(self.__dict__)
 
     class Meta:
-        db_table = "info"
+        db_table = "lntu_user_info"
         ordering = ['-last_updated', '-number']
 
 
@@ -140,7 +140,7 @@ class TeachingPlanCourse(models.Model):
         return str(self.__dict__)
 
     class Meta:
-        db_table = 'plan_teaching'
+        db_table = 'lntu_teaching_plan'
         UniqueConstraint(fields=['course_id', 'username', 'semester'], name="unique_teaching_plan")
         ordering = ['username']
 
@@ -164,6 +164,26 @@ class ClassCourse(models.Model):
         return str(self.__dict__)
 
     class Meta:
-        db_table = "class_course"
+        db_table = "lntu_class_course"
         UniqueConstraint(fields=['username', 'semester', 'course_id'], name="unique_class_course")
         ordering = ['username', '-semester']
+
+
+class ClassRoom(models.Model):
+    buildingId = models.IntegerField("教学楼编号", default=-1)
+    name = models.CharField("教室", max_length=32, primary_key=True)
+    capacity = models.IntegerField("容量", default=-1)
+    category = models.CharField("类别", max_length=32)
+    week = models.IntegerField("周", default=-1)
+    monday = models.CharField("周一", max_length=32)
+    tuesday = models.CharField("周二", max_length=32)
+    wednesday = models.CharField("周三", max_length=32)
+    thursday = models.CharField("周四", max_length=32)
+    friday = models.CharField("周五", max_length=32)
+    saturday = models.CharField("周六", max_length=32)
+    sunday = models.CharField("周日", max_length=32)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "lntu_classroom"
+        ordering = ['buildingId', 'name']

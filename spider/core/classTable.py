@@ -1,40 +1,32 @@
-from lxml import etree
-
-from spider.utils.UrlEnums import UrlEnums
+from utils.utils import string_strip
 from web.models import ClassCourse
-
-
-def classTable_get_html(session, semester_data):
-    url = UrlEnums.CLASS_TABLE
-    response = session.get(url, params=semester_data)
-    # with open("output0.html", 'w+') as fp:
-    #     fp.write(response.text)
-    #     print("ok HTML")
-    return etree.HTML(response.text)
 
 
 def classTable_parser(html_doc, user, semester_str):
     try:
-        course_elements = html_doc.xpath('/html/body/table[4]/tr')
-        for each in course_elements[1:]:  # 舍弃表头
-            td_elements = each.xpath('td')  # 获取所有td
-            course_id = td_elements[0].text
+        course_tr_elements = html_doc.xpath('/html/body/table[4]/tr')
+        for course_row in course_tr_elements[1:]:
+            course_td_elements = course_row.xpath('./td')
+            # data0 = [td.xpath('string(.)').replace("\r\n", "").replace("  ", "").strip() for td in
+            #            td_elements]
+            data = [string_strip(td.xpath('string(.)')) for td in course_td_elements]
+            course_id = data[0]
             course = ClassCourse.objects.get_or_create(username=user, semester=semester_str, course_id=course_id)[0]
-            results = [td.xpath('string(.)').replace("\r\n", "").replace("  ", "").strip() for td in
-                       td_elements]
-            course.course_number = results[1]
-            course.course_name = results[2]
-            course.teacher = results[3]
-            course.credit = results[4]
-            course.course_properties = results[5]
-            course.inspect_method = results[6]
-            course.status = results[7]
-            course.is_delay_exam = results[8]
-            course.details = results[9]
-            # course.comment = results[10]  # 空
-            course.comment = results[11]
+            course.course_number = data[1]
+            course.course_name = data[2]
+            course.teacher = data[3]
+            course.credit = data[4]
+            course.course_properties = data[5]
+            course.inspect_method = data[6]
+            course.status = data[7]
+            course.is_delay_exam = data[8]
+            course.details = course_td_elements[9].xpath('string(.)').replace("\r\n", "").replace("  ", "").replace(
+                "\n", "").strip()  # TODO
+            # course.details = data[9]
+            # course.comment = data[10]  # 空
+            course.comment = data[11]
             course.save()
         return True
     except Exception as e:
-        print(e.args)
+        print(e)
         return False

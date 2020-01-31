@@ -2,10 +2,11 @@ from configparser import ConfigParser
 from unittest import TestCase
 
 from client import Client
+
+
 # sys.path.append(os.path.dirname(os.path.abspath(__file__)))  # 项目路径
 # os.environ.update({'DJANGO_SETTINGS_MODUEL': "LNTUME.settings"})
 # django.setup()
-from core.classroom import buildings, classroom_fresh
 
 
 class ClientTest(TestCase):
@@ -28,12 +29,12 @@ class ClientTest(TestCase):
         self.client.getCET()
         self.client.getExamPlan()
         self.client.getClassTable()
-        self.client.getDetail()
+        self.client.getScoreDetail()
 
-    def test_class_room(self):
-        """test spider classroom"""
-        for building in buildings:
-            for room_data in building:
-                room_data['weeks'] = 10  # TODO 周次
-                print(room_data)
-                classroom_fresh(room_data=room_data)
+    # def test_class_room(self):
+    #     """test spider classroom"""
+    #     for building in buildings:
+    #         for room_data in building:
+    #             room_data['weeks'] = 10  # TODO 周次
+    #             print(room_data)
+    #             classroom_fresh(room_data=room_data)

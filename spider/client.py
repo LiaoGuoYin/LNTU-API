@@ -1,13 +1,14 @@
 import requests
 
-from spider.core.cet import cet_get_html, cet_parser
-from spider.core.classTable import classTable_get_html, classTable_parser
-from spider.core.examPlan import examPlan_get_html, examPlan_parser
-from spider.core.scoreDetail import detail_get_html, detail_parser
-from spider.core.socre import score_get_html, score_parser
-from spider.core.studentInfo import studentInfo_get_html, studentInfo_parser
+from core.getHTML import get_html_doc, score_get_html_doc
+from spider.core.cet import cet_parser
+from spider.core.classTable import classTable_parser
+from spider.core.examPlan import examPlan_parser
+from spider.core.scoreDetail import detail_parser
+from spider.core.socre import score_parser
+from spider.core.studentInfo import studentInfo_parser
 from spider.core.teacherEvaluate import run as evaluate_run
-from spider.core.teachingPlan import teachingPlan_parser, teachingPlan_get_uri, teachingPlan_get_html
+from spider.core.teachingPlan import teachingPlan_parser, teachingPlan_get_html
 from spider.utils.UrlEnums import UrlEnums
 from web.models import Score, User
 
@@ -35,48 +36,67 @@ class Client(object):
         else:
             return True
 
+    def getIds(self):  # TODO
+        """Get studentId and classId"""
+        try:
+            url = str(UrlEnums.TEACHING_PLAN) + "studyschedule.jsdo"
+            html_doc = get_html_doc(self.session, url)
+            element = html_doc.xpath('/html/body/center/table[5]/form/tr/td/input')
+            uri = element[0].get('onclick').split(r"'")[1]
+            return uri
+        except Exception as e:
+            print(e)
+            return ""
+
     def getStudentInfo(self):
-        html_doc = studentInfo_get_html(self.session)
-        print("获取个人信息: ", studentInfo_parser(html_doc, self.user))
+        url = UrlEnums.STUDENT_INFO
+        html_doc = get_html_doc(self.session, url)
+        print("获取个人信息: ", studentInfo_parser(html_doc, self.user), end=', ')
 
     def getTeachingPlan(self):
-        uri = teachingPlan_get_uri(self.session)
+        uri = self.getIds()
         if uri:
             html_doc = teachingPlan_get_html(self.session, uri)
-            print("获取教学计划: ", teachingPlan_parser(html_doc, self.user))
+            print("获取教学计划: ", teachingPlan_parser(html_doc, self.user), end=', ')
 
-    def getClassTable(self, year=38, term=2):
-        semester_str = "{} {}".format(year, term)
-        semester_data = {'year': year, 'term': term}
-        html_doc = classTable_get_html(self.session, semester_data)
-        print("获取默认学期学年课表：", classTable_parser(html_doc, self.user, semester_str))
+    def getClassTable(self, year=39, term=2):
+        # TODO
+        url = UrlEnums.CLASS_TABLE
+        semester_str = F"{year} {term}"
+        semester_data = {'params': {'year': year, 'term': term}}
+        html_doc = get_html_doc(self.session, url, **semester_data)
+        print("获取默认学期学年课表：", classTable_parser(html_doc, self.user, semester_str), end=', ')
 
     def getExamPlan(self):
-        html_doc = examPlan_get_html(self.session)
-        print("获取考试计划: ", examPlan_parser(html_doc, self.user))
+        url = UrlEnums.EXAM_PLAN
+        html_doc = get_html_doc(self.session, url)
+        print("获取考试计划: ", examPlan_parser(html_doc, self.user), end=', ')
 
     def evaluateTeacher(self):
         evaluate_run(self.session.headers["Cookie"])
 
     def getScores(self):
-        html_doc = score_get_html(self.session)
-        print("获取成绩: ", score_parser(html_doc, self.user))
+        url = UrlEnums.SCORE
+        html_doc = score_get_html_doc(self.session, url)
+        print("获取成绩: ", score_parser(html_doc, self.user), end=', ')
 
-    def getDetail(self):
+    def getScoreDetail(self):
         scores = Score.objects.filter(username=self.user, details_print_id__istartswith="chajuandy.jsp")
         isAllOk = {True}
         for score in scores:
-            html_doc = detail_get_html(self.session, score.details_print_id)
+            url = str(UrlEnums.SCORES_DETAIL) + score.details_print_id  # 保留 id，以后应该也能看
+            html_doc = get_html_doc(self.session, url)
             isOk = detail_parser(html_doc, score)
             isAllOk.add(isOk)
-        print("获取成绩详情: ", True if len(isAllOk) == 1 else False)
+        print("获取成绩详情: ", True if len(isAllOk) == 1 else False, end=', ')
 
     def calculateGPA(self):
         pass
 
     def getCET(self):
-        html_doc = cet_get_html(self.session)
-        print("获取 CET: ", cet_parser(html_doc, self.user))
+        url = UrlEnums.CET
+        html_doc = get_html_doc(self.session, url)
+        print("获取 CET: ", cet_parser(html_doc, self.user), end=', ')
 
     def selectBestURL(self):
         # TODO

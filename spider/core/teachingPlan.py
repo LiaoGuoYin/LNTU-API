@@ -14,7 +14,7 @@ def teachingPlan_get_uri(session):
         uri_element = html_doc.xpath('/html/body/center/table[5]/form/tr/td/input')
         uri = uri_element[0].get('onclick').split(r"'")[1]
     except Exception as e:
-        print(e.with_traceback)
+        print(e)
     return uri
 
 
@@ -28,21 +28,23 @@ def teachingPlan_get_html(session, uri):
 def teachingPlan_parser(html_doc, user):
     try:
         semester_elements = html_doc.xpath('/html/body/table[2]/tr/td/table[@class="infolist_hr"]')
-        for semester_index, element in enumerate(semester_elements[1:], start=1):  # 舍弃第一个table
-            planning_courses = element.xpath('tr')
-            for each in planning_courses[1:]:  # 舍弃表头
-                course_id = each.xpath('td[1]')[0].text.strip()
+        for semester_index, semester in enumerate(semester_elements[1:], start=1):  # 舍弃第一个table
+            course_tr_elements = semester.xpath('./tr')
+            for course_row in course_tr_elements[1:]:  # 舍弃表头
+                course_td_elements = course_row.xpath('./td')
+                data = [td.text for td in course_td_elements]
+                course_id = data[0]
                 course = TeachingPlanCourse.objects.get_or_create(username=user, semester=semester_index,
                                                                   course_id=course_id)[0]
-                course.course_name = each.xpath('td[2]')[0].text.strip()
-                course.inspect_method = each.xpath('td[3]')[0].text.strip()
-                course.credit = each.xpath('td[4]')[0].text.strip()
-                course.period = each.xpath('td[5]')[0].text.strip()
-                course.course_type = each.xpath('td[6]')[0].text.strip()
-                course.course_group = each.xpath('td[7]')[0].text.strip()
-                course.course_properties = each.xpath('td[8]')[0].text.strip()
+                course.course_name = data[1]
+                course.inspect_method = data[2]
+                course.credit = data[3]
+                course.period = data[4]
+                course.course_type = data[5]
+                course.course_group = data[6]
+                course.course_properties = data[7]
                 course.save()
+        return True
     except Exception as e:
-        print(e.with_traceback())
+        print(e)
         return False
-    return True

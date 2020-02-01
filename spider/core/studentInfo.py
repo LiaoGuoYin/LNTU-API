@@ -12,9 +12,9 @@ def studentInfo_get_html(session):
 
 def studentInfo_parser(html_doc, user):
     try:
-        student = StudentInfo.objects.get_or_create(number=user)[0]
+        student = StudentInfo.objects.get_or_create(username=user)[0]
         table_element = html_doc.xpath('/html/body/center/table[1]')[0]
-        student.number = table_element.xpath('./tr[1]/td[1]')[0].text.strip()
+        student.username = table_element.xpath('./tr[1]/td[1]')[0].text.strip()
         student.name = table_element.xpath('./tr[2]/td[1]')[0].text.strip()
         student.native_from = table_element.xpath('./tr[1]/td[2]')[0].text.strip() + \
                               table_element.xpath('./tr[2]/td[2]')[0].text.strip()
@@ -49,7 +49,7 @@ def studentInfo_parser(html_doc, user):
         # student.graduate_to = table_element.xpath('./tr[17]/td[1]')[0].text.strip()
         # student.comment = table_element.xpath('./tr[18]/td[1]')[0].text
         student.img_url = "http://202.199.224.121:11180/newacademic/manager/studentinfo/photo/photo/{}.jpg".format(
-            student.number)
+            student.username)
         student.save()
         return True
     except Exception as e:

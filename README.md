@@ -18,7 +18,7 @@
     - [ ] Crash monitor
 
 - Others:
-    - [ ] Calculate GPA(Grade Point Average)
+    - [x] Calculate GPA(Grade Point Average)
     - [ ] Student Quality expansion Spider
     - [ ] Water-card Balance
     

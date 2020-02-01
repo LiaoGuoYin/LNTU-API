@@ -7,15 +7,15 @@ class User(models.Model):
     password = models.CharField(max_length=32)
     student_id = models.CharField("用于获取成绩的学生ID", max_length=32, null=True)
     class_id = models.CharField("最近学期的课程表ID", max_length=32, null=True)
-    GPA = models.IntegerField("Grade Point Average", null=True)
-    last_login = models.DateTimeField(auto_now=True)
+    latest_GPA = models.FloatField("Grade Point Average", null=True)
+    latest_login = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.username)
 
     class Meta:
         db_table = "lntu_user"
-        ordering = ['-last_login', 'username']
+        ordering = ['-latest_login', 'username']
 
 
 class Score(models.Model):
@@ -80,7 +80,7 @@ class ExamPlan(models.Model):
 
 
 class StudentInfo(models.Model):
-    number = models.CharField("学号", max_length=32, primary_key=True)
+    username = models.CharField("学号", max_length=32, primary_key=True)
     name = models.CharField("姓名", max_length=64)
     native_from = models.CharField("国籍籍贯", max_length=64, null=True)
     foreign_name = models.CharField("外语", max_length=64, null=True)
@@ -123,7 +123,7 @@ class StudentInfo(models.Model):
 
     class Meta:
         db_table = "lntu_user_info"
-        ordering = ['-last_updated', '-number']
+        ordering = ['-last_updated', '-username']
 
 
 class TeachingPlanCourse(models.Model):

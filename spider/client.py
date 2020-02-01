@@ -4,6 +4,7 @@ from spider.core.cet import cet_parser
 from spider.core.classTable import classTable_parser
 from spider.core.examPlan import examPlan_parser
 from spider.core.getHTML import get_html_doc, score_get_html_doc
+from spider.core.gpa import calculateGPA
 from spider.core.scoreDetail import detail_parser
 from spider.core.socre import score_parser
 from spider.core.studentInfo import studentInfo_parser
@@ -95,7 +96,8 @@ class Client(object):
         print("获取成绩详情: ", True if len(isAllOk) == 1 else False, end=', ')
 
     def calculateGPA(self):
-        pass
+        """Calculate default semeter's GPA"""
+        calculateGPA(user=self.user, semester="2018秋")
 
     def getCET(self):
         url = UrlEnums.CET

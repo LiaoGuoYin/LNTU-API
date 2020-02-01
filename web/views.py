@@ -3,10 +3,13 @@ from django.shortcuts import render
 
 from spider.client import Client
 from web.models import CET, Score
+from web.serializer import ScoreSerializer
 
 
 def home(request):
-    pass
+    scores = Score.objects.filter(name="管理统计学")
+    scores_serializer = ScoreSerializer(scores, many=True)
+    return HttpResponse(scores_serializer.data)
 
 
 def login(request):

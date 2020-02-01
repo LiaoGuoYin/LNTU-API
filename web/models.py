@@ -5,6 +5,9 @@ from django.db.models import UniqueConstraint
 class User(models.Model):
     username = models.CharField(max_length=32, primary_key=True)
     password = models.CharField(max_length=32)
+    student_id = models.CharField("用于获取成绩的学生ID", max_length=32, null=True)
+    class_id = models.CharField("最近学期的课程表ID", max_length=32, null=True)
+    GPA = models.IntegerField("Grade Point Average", null=True)
     last_login = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -77,14 +80,11 @@ class ExamPlan(models.Model):
 
 
 class StudentInfo(models.Model):
-    # number = models.ForeignKey(User, max_length=32, on_delete=models.CASCADE, primary_key=True)
     number = models.CharField("学号", max_length=32, primary_key=True)
     name = models.CharField("姓名", max_length=64)
-    citizenship = models.CharField("国籍", max_length=64, null=True)
-    native_from = models.CharField("籍贯", max_length=64, null=True)
+    native_from = models.CharField("国籍籍贯", max_length=64, null=True)
     foreign_name = models.CharField("外语", max_length=64, null=True)
     birthday = models.DateField("出生年月", null=True)
-    card_kind = models.CharField("证件类型", max_length=32)
     ID_number = models.CharField("证件号", max_length=32)
     politics = models.CharField("政治面貌", max_length=64, null=True)
     section = models.CharField("乘车区间", max_length=64, null=True)
@@ -96,24 +96,27 @@ class StudentInfo(models.Model):
     category = models.CharField("班级", max_length=32)
     province = models.CharField("高考考区", max_length=32, null=True)
     score = models.FloatField("高考分数", null=True)  #
-    exam_number = models.CharField("高考证号", max_length=32, null=True)
     graduate_from = models.CharField("毕业高中", max_length=64, null=True)
-    enroll_number = models.CharField("入学录取证号", max_length=32, null=True)
-    enroll_method = models.CharField("入学方式", max_length=32, null=True)
     enroll_at = models.DateField("入学日期", null=True)
     graduate_at = models.DateField("毕业日期", null=True)
-    foreign_language = models.CharField("外语语种", max_length=32, null=True)
     train_method = models.CharField("培养方案", max_length=32, null=True)
+    foreign_language = models.CharField("外语语种", max_length=32, null=True)
     address = models.CharField("家庭住址", max_length=255, null=True)
-    zip = models.CharField("邮编", max_length=32, null=True)
     phone = models.CharField("手机号", max_length=16, null=True)
     email = models.CharField("邮箱", max_length=64, null=True)
-    roll_number = models.CharField("学籍表号", max_length=64, null=True)
     source_from = models.CharField("学生来源", max_length=255, null=True)
-    graduate_to = models.CharField("毕业去向", max_length=255, null=True)
-    comment = models.CharField("备注", max_length=255, null=True)
     img_url = models.URLField("头像地址")
     last_updated = models.DateTimeField("最后更新时间", auto_now=True)
+
+    # number = models.ForeignKey(User, max_length=32, on_delete=models.CASCADE, primary_key=True)
+    # exam_number = models.CharField("高考证号", max_length=32, null=True)
+    # card_kind = models.CharField("证件类型", max_length=32)
+    # enroll_number = models.CharField("入学录取证号", max_length=32, null=True)
+    # enroll_method = models.CharField("入学方式", max_length=32, null=True)
+    # roll_number = models.CharField("学籍表号", max_length=64, null=True)
+    # zip = models.CharField("邮编", max_length=32, null=True)
+    # graduate_to = models.CharField("毕业去向", max_length=255, null=True)
+    # comment = models.CharField("备注", max_length=255, null=True)
 
     def __str__(self):
         return str(self.__dict__)
@@ -156,7 +159,7 @@ class ClassCourse(models.Model):
     inspect_method = models.CharField("考核方式", max_length=64, null=True)
     status = models.CharField("正常/挂科", max_length=64, null=True)
     is_delay_exam = models.CharField("是否缓考", max_length=8, null=True)
-    details = models.CharField("上课时间、地点	", max_length=64, null=True)
+    details = models.CharField("上课时间、地点	", max_length=255, null=True)
     comment = models.TextField("备注", null=True)
     username = models.ForeignKey(User, on_delete=models.CASCADE)
 

@@ -1,9 +1,9 @@
 import requests
 
-from core.getHTML import get_html_doc, score_get_html_doc
 from spider.core.cet import cet_parser
 from spider.core.classTable import classTable_parser
 from spider.core.examPlan import examPlan_parser
+from spider.core.getHTML import get_html_doc, score_get_html_doc
 from spider.core.scoreDetail import detail_parser
 from spider.core.socre import score_parser
 from spider.core.studentInfo import studentInfo_parser
@@ -28,7 +28,7 @@ class Client(object):
 
     def login_with_account(self, username: int, password: str):
         url = UrlEnums.LOGIN
-        print(url)
+        # print(url)
         body = {'j_username': username, 'j_password': password}
         response = self.session.post(url, data=body)
         if response.text.find("本科生教务管理系统", 1, 50) == -1:
@@ -36,17 +36,19 @@ class Client(object):
         else:
             return True
 
-    def getIds(self):  # TODO
-        """Get studentId and classId"""
+    def getIds(self):
+        """Get studentId and classId: uri:./studyschedule_view_byterm.jsdo?studentId=2884862&classId=13925"""
         try:
-            url = str(UrlEnums.TEACHING_PLAN) + "studyschedule.jsdo"
+            url = UrlEnums.TEACHING_PLAN_IDS
             html_doc = get_html_doc(self.session, url)
             element = html_doc.xpath('/html/body/center/table[5]/form/tr/td/input')
-            uri = element[0].get('onclick').split(r"'")[1]
-            return uri
+            data = element[0].get('onclick').split(r"'")[1]
+            self.user.student_id, self.user.class_id = tuple(i.split("=")[1] for i in data.split("&"))
+            self.user.save()
+            return True
         except Exception as e:
             print(e)
-            return ""
+            return False
 
     def getStudentInfo(self):
         url = UrlEnums.STUDENT_INFO
@@ -54,7 +56,9 @@ class Client(object):
         print("获取个人信息: ", studentInfo_parser(html_doc, self.user), end=', ')
 
     def getTeachingPlan(self):
-        uri = self.getIds()
+        if not self.user.student_id:
+            self.getIds()
+        uri = F"./studyschedule_view_byterm.jsdo?studentId={self.user.student_id}&classId={self.user.class_id}"
         if uri:
             html_doc = teachingPlan_get_html(self.session, uri)
             print("获取教学计划: ", teachingPlan_parser(html_doc, self.user), end=', ')

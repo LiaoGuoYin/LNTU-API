@@ -15,26 +15,21 @@ class ClientTest(TestCase):
         """load my test account"""
         conf = ConfigParser()
         conf.read('static/config.ini')
-        for username, password in conf.items("account")[0:1]:
-            self.client = Client(username, password)
-            print(self.client)
-            self.test_client_method()
+        for username, password in conf.items("account"):
+            self.test_client_method(username, password)
 
-    def test_client_method(self):
+    def test_client_method(self, username, password):
         """test one client's all methods"""
-        self.client.getStudentInfo()
-        self.client.getTeachingPlan()
-        self.client.getClassTable()
-        self.client.getScores()
-        self.client.getCET()
-        self.client.getExamPlan()
-        self.client.getClassTable()
-        self.client.getScoreDetail()
-
-    # def test_class_room(self):
-    #     """test spider classroom"""
-    #     for building in buildings:
-    #         for room_data in building:
-    #             room_data['weeks'] = 10  # TODO 周次
-    #             print(room_data)
-    #             classroom_fresh(room_data=room_data)
+        try:
+            self.client = Client(username, password)
+            self.client.getStudentInfo()
+            self.client.getTeachingPlan()
+            self.client.getClassTable()
+            self.client.getScores()
+            self.client.getCET()
+            self.client.getExamPlan()
+            self.client.getScoreDetail()
+            print(self.client)
+        except Exception as e:
+            print(e)
+            print(F"密码错误：{username}")

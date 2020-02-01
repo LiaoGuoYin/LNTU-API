@@ -1,4 +1,4 @@
-from utils.utils import string_strip
+from spider.utils.utils import string_strip
 
 
 def detail_parser(html_doc, score):
@@ -11,6 +11,8 @@ def detail_parser(html_doc, score):
         score.final_score = string_strip(detail_element.xpath('./tr[7]/td[4]/b')[0].text)
         score.save()
         return True
+    except IndexError:
+        print(F"{score.name} 成绩有缺失")
     except Exception as e:
         print(e)
         return False

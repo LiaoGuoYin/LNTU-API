@@ -1,4 +1,4 @@
-from utils.utils import string_strip
+from spider.utils.utils import string_strip
 from web.models import ClassCourse
 
 

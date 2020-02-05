@@ -42,9 +42,9 @@ def test_gpa(username):
     #              for season in seasons]
     # print(semesters)
     # for semester in semesters[-1:]:
-    #     scores = Score.objects.filter(username_id=1710030120, semester=semester)
+    #     scores = Score.objects.filter(username_id=1710030215, semester=semester)
     #     calculateGPA(scores)
-    users = User.objects.filter(username=1710030101)
+    users = User.objects.filter(username=1710030215)
     for user in users:
         user.latest_GPA = calculateGPA(user)
         print(user)

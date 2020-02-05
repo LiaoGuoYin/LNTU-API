@@ -21,6 +21,8 @@
     - [x] Calculate GPA(Grade Point Average)
     - [ ] Student Quality expansion Spider
     - [ ] Water-card Balance
+    - [x] SunnyRunning(Aipao app)
+    - [ ] Web
     
 ## License
     MIT

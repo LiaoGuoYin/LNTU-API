@@ -2,13 +2,13 @@ from django.db import models
 
 
 class Student(models.Model):
-    sunny_id = models.IntegerField(primary_key=True)
+    id = models.IntegerField("阳光体育ID", primary_key=True)
     number = models.CharField("学号", max_length=32, null=True)
-    name = models.CharField("姓名", max_length=32, null=True)
+    name = models.CharField("姓名", max_length=255, null=True)
     gender = models.CharField("性别", max_length=8, null=True)
     school = models.CharField("学校", max_length=64, null=True)
     college = models.CharField("院系", max_length=32, null=True)
-    i_class = models.CharField("班级", max_length=32, null=True)
+    i_class = models.CharField("班级", max_length=255, null=True)
     total_records = models.IntegerField(null=True)
     morning_records = models.IntegerField(null=True)
     success_records = models.IntegerField(null=True)
@@ -20,9 +20,7 @@ class Student(models.Model):
 
 class Success(models.Model):
     IIDD = models.CharField(max_length=32, primary_key=True)
-    user_id = models.CharField("学号", max_length=32, null=True)
     name = models.CharField("姓名", max_length=32)
-    type = models.CharField("长跑类型", max_length=32)
     client_type = models.CharField("客户端类型", max_length=32)
     speed = models.FloatField("配速", null=True)
     step = models.IntegerField("步数", null=True)
@@ -43,9 +41,7 @@ class Success(models.Model):
 
 class Failure(models.Model):
     IIDD = models.CharField(max_length=32, primary_key=True)
-    user_id = models.CharField("学号", max_length=32, null=True)
     name = models.CharField("姓名", max_length=32)
-    type = models.CharField("长跑类型", max_length=32)
     client_type = models.CharField("客户端类型", max_length=32)
     speed = models.FloatField("配速", null=True)
     step = models.IntegerField("步数", null=True)

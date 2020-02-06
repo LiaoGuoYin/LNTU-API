@@ -10,17 +10,15 @@ from spider.core.socre import score_parser
 from spider.core.studentInfo import studentInfo_parser
 from spider.core.teacherEvaluate import run as evaluate_run
 from spider.core.teachingPlan import teachingPlan_parser, teachingPlan_get_html
-from spider.utils.UrlEnums import UrlEnums
+from spider.utils.URLManager import UrlEnums
 from web.models import Score, User
 
 
 class Client(object):
 
     def __init__(self, username: int, password: str):
-        # url_manager = URLManager()
-        # urls = url_manager.getURLS()
+        # urls = URLManager.run()
         # self.url = urls[1].split("common/security/login.jsp")[0]
-        # self.url = 'http://202.199.224.24:11089/newacademic/'
         self.session = requests.Session()
         if self.login_with_account(username, password):
             self.user = User.objects.get_or_create(username=username)[0]
@@ -29,7 +27,6 @@ class Client(object):
 
     def login_with_account(self, username: int, password: str):
         url = UrlEnums.LOGIN
-        # print(url)
         body = {'j_username': username, 'j_password': password}
         response = self.session.post(url, data=body)
         if response.text.find("本科生教务管理系统", 1, 50) == -1:

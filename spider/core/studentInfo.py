@@ -1,6 +1,6 @@
 from lxml import etree
 
-from spider.utils.UrlEnums import UrlEnums
+from spider.utils.URLManager import UrlEnums
 from web.models import StudentInfo
 
 

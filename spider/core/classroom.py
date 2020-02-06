@@ -1,7 +1,7 @@
 import requests
 from lxml import etree
 
-from utils.utils import string_strip
+from utils import string_strip
 from web.models import ClassRoom
 
 

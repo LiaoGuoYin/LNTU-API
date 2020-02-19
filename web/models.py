@@ -8,7 +8,7 @@ class User(models.Model):
     student_id = models.CharField("用于获取成绩的学生ID", max_length=32, null=True)
     class_id = models.CharField("最近学期的课程表ID", max_length=32, null=True)
     latest_GPA = models.FloatField("Grade Point Average", null=True)
-    latest_login = models.DateTimeField(auto_now=True)
+    latest_login = models.DateTimeField(auto_now=True)  # TODO: correct UTC time
 
     def __str__(self):
         return str(self.username)
@@ -19,6 +19,7 @@ class User(models.Model):
 
 
 class Score(models.Model):
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="scores")  # TODO: try CASCADE
     course_id = models.CharField("课程号", max_length=32)
     name = models.CharField("课程名", max_length=64, null=True)
     course_number = models.IntegerField("选课序号", null=True)
@@ -37,7 +38,6 @@ class Score(models.Model):
     exam_score = models.CharField("考试成绩", max_length=8, null=True)
     final_score = models.CharField("最终成绩", max_length=8, null=True)
     last_updated = models.DateTimeField("最后更新时间", auto_now=True)
-    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="scores")
 
     def __str__(self):
         return str(self.__dict__)
@@ -49,10 +49,10 @@ class Score(models.Model):
 
 
 class CET(models.Model):
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cets")
     date = models.CharField("考试日期", max_length=16, null=False)
     level = models.CharField("等级", max_length=16)
     score = models.CharField("分数", max_length=16, null=True)
-    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cet")
 
     def __str__(self):
         return str(self.level)
@@ -64,11 +64,11 @@ class CET(models.Model):
 
 
 class ExamPlan(models.Model):
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_plans")
     name = models.CharField("课程名", max_length=64)
     room = models.CharField("考场", max_length=32)
     date = models.DateField("考试日期")
     time = models.CharField("考试时间", max_length=32)
-    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_plan")
 
     def __str__(self):
         return str(self.name)
@@ -80,7 +80,7 @@ class ExamPlan(models.Model):
 
 
 class StudentInfo(models.Model):
-    username = models.CharField("学号", max_length=32, primary_key=True)
+    username = models.ForeignKey(User, max_length=32, on_delete=models.CASCADE, related_name="infos")
     name = models.CharField("姓名", max_length=64)
     native_from = models.CharField("国籍籍贯", max_length=64, null=True)
     foreign_name = models.CharField("外语", max_length=64, null=True)
@@ -122,11 +122,13 @@ class StudentInfo(models.Model):
         return str(self.__dict__)
 
     class Meta:
+        UniqueConstraint(fields=['username'], name="unique_user_info")
         db_table = "lntu_user_info"
         ordering = ['-last_updated', '-username']
 
 
 class TeachingPlanCourse(models.Model):
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="course_plans")
     semester = models.CharField("学年学期", max_length=32)
     course_id = models.CharField("课程号", max_length=32)
     course_name = models.CharField("课程名称", max_length=64)
@@ -136,7 +138,6 @@ class TeachingPlanCourse(models.Model):
     course_type = models.CharField("课程类别", max_length=16, null=True)
     course_group = models.CharField("所属分组", max_length=16, null=True)
     course_properties = models.CharField("选课属性", max_length=64, null=True)
-    username = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         self.__dict__.pop("_state")
@@ -149,6 +150,7 @@ class TeachingPlanCourse(models.Model):
 
 
 class ClassCourse(models.Model):
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="courses")
     semester = models.CharField("学年学期", max_length=32)
     course_id = models.CharField("课程号", max_length=32)
     course_number = models.IntegerField("选课序号", null=True)
@@ -161,7 +163,6 @@ class ClassCourse(models.Model):
     is_delay_exam = models.CharField("是否缓考", max_length=8, null=True)
     details = models.CharField("上课时间、地点	", max_length=255, null=True)
     comment = models.TextField("备注", null=True)
-    username = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.__dict__)

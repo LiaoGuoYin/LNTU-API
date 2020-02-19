@@ -24,7 +24,7 @@ SECRET_KEY = 'g*yr7qij53rzhvov7h8*d&c8$x(se8w!uy47e1f5@me@w=ddux'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['liaoguoyin.com', 'localhost']
+ALLOWED_HOSTS = ['liaoguoyin.com', 'localhost', '127.0.0.1']
 
 # Application definition
 
@@ -36,9 +36,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'spider.apps.SpiderConfig',
-    'web.apps.WebConfig',
     'aipao.apps.AipaoConfig',
+    'web.apps.WebConfig',
+    'rest_framework',
+    'api',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

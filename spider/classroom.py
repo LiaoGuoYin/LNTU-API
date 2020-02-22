@@ -1,7 +1,13 @@
+import os
+
+import django
 import requests
 from lxml import etree
 
-from utils import string_strip
+os.environ['DJANGO_SETTINGS_MODULE'] = 'LNTUME.settings'
+django.setup()
+
+from spider.utils.utils import string_strip
 from web.models import ClassRoom
 
 
@@ -53,3 +59,11 @@ buildings = [
      {'buildingid1': '11', 'buildingname': '葫芦岛物理实验室'},
      {'buildingid1': '14', 'buildingname': '静远楼'}]
 ]
+
+
+def run():
+    for building in buildings:
+        for room_data in building:
+            room_data['weeks'] = 10  # TODO 周次
+            print(room_data)
+            classroom_fresh(room_data=room_data)

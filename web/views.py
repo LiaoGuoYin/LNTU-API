@@ -1,51 +1,64 @@
-from django.http import HttpResponse
-from django.shortcuts import render
+# from rest_framework import viewsets
+#
+# from web.models import User
+# from web.serializers import UserSerializer
+#
+#
+# class UserViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
+from django.http import Http404
+from django.shortcuts import render, redirect
+from rest_framework.views import APIView
 
-from spider.client import Client
-from web.models import CET, Score
-from web.serializer import ScoreSerializer
+from web.forms import LoginForm
 
 
-def home(request):
-    scores = Score.objects.filter(name="管理统计学")
-    scores_serializer = ScoreSerializer(scores, many=True)
-    return HttpResponse(scores_serializer.data)
+class UserView(APIView):
+    def get(self, request, format=None):
+        # user = User.objects.all()
+        # serializer = UserSerializer(user, many=True)
+        # return Response(serializer.data)
+        return render(request, template_name='user.html', context=context)
+
+    def post(self, request, format=None):
+        pass
 
 
 def login(request):
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-        try:
-            client = Client(username, password)
-            client.getStudentInfo()
-            client.getScores()
-            context = "success"
-        except Exception as e:
-            context = "username or password error or Office online down"
-        return render(request, 'login.html', {'context': context})
+        print("POST method")
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            print(form.__dict__)
+            return redirect(login)
+    elif request.method == "GET":
+        print("GET method")
+        form = LoginForm()
     else:
-        return HttpResponse("GET method is not support..")
+        print("unknown method")
+        return Http404
+    print(locals())
+    return render(request, 'login.html', locals())
 
-
-def getScores(request):
-    if request.method == 'GET':
-        username = request.GET.get('username')
-        scores = Score.objects.filter(username=username)
-        name_and_verbose = {each.name: each.verbose_name for each in Score._meta.get_fields()}
-        context = {'scores': scores, 'name_and_verbose': name_and_verbose}
-        return render(request, 'scores.html', {'context': context})
-    else:
-        return HttpResponse("POST method is not support..")
-
-
-def getCET(request):
-    if request.method == "GET":
-        username = request.GET['username']
-        scores = CET.objects.filter(username=username)
-        name_and_verbose = {each.name: each.verbose_name for each in CET._meta.get_fields()}
-        name_and_verbose.pop('id')
-        context = {'scores': scores, 'name_and_verbose': name_and_verbose}
-        return render(request, 'cet.html', {'context': context})
-    else:
-        return HttpResponse("POST method is not support..")
+#
+# def contact(request):
+#     if request.method == "POST":
+#         form = ContactForm(request.POST)
+#         if form.is_valid():
+#             cd = form.clean_message()
+#             print(cd)
+#             return redirect('login')
+#         else:
+#             form = ContactForm()
+#             form.message = "error"
+#     return render(request, 'contract.html', locals())
+#
+#
+# def search(request):
+#     q = request.GET.get('q')
+#     error_message = ''
+#     if not q:
+#         error_message = 'Input a keyword please'
+#         return render(request, 'login.html', locals())

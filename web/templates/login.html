@@ -3,9 +3,39 @@
 {% block title %}
     Login | LNTUME
 {% endblock %}
-
-<div class="container">
-    {% block content %}
-        <h1>{{ context }}</h1>
-    {% endblock %}
-</div>
+{% block content %}
+    <div class="container">
+        <h1 class="text-center my-4">
+            <a href="{% url 'login' %}">LNTU-Spider</a>
+        </h1>
+        <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-6 col-sm-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Log in</h3>
+                        <form method="post" action="{% url 'login' %}">
+                            <div class="form-group">
+                                <label for="{{ form.username.id_for_label }}">Username</label>
+                                <input type="text" class="form-control" id="id_username" name="username">
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.password.id_for_label }}">Password</label>
+                                <input type="password" class="form-control" id="id_password" name="password">
+                            </div>
+                            {#                                                                                    {% include 'include/form.html' %}#}
+                            <button type="submit" class="btn btn-primary btn-block">Log in</button>
+                        </form>
+                    </div>
+                    <div class="card-footer text-muted text-center">
+                        <a href="#">忘记密码？</a>
+                    </div>
+                </div>
+                <div class="text-center py-1">
+                    <sall>
+                        <a href="#" class="text-muted">忘记密码，请联系教务处</a>
+                    </sall>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

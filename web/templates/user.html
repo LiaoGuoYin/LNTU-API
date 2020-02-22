@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    LNTUME | UserProfile
+    {{ username }}
+{% endblock %}
+
+<div class="container">
+    {% block content %}
+        {{ profile }}
+    {% endblock %}
+</div>

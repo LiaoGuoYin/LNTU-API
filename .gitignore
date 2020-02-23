@@ -136,3 +136,6 @@ dmypy.json
 
 # Test config account
 config.ini
+
+# ORM's database
+*/migrations

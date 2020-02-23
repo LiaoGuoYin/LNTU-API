@@ -6,7 +6,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'LNTUME.settings'
 django.setup()
 
 from client import Client, User
-from spider.core.classroom import buildings, classroom_fresh
+from spider.classroom import buildings, classroom_fresh
 from spider.core.gpa import calculateGPA
 
 

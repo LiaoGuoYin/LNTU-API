@@ -1,6 +1,6 @@
 from django import forms
 
-from web.models import User
+from api.models import User
 
 
 class LoginForm(forms.ModelForm):

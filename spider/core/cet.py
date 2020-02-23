@@ -1,11 +1,11 @@
 from lxml import etree
 
+from api.models import CET
 # 调试时用
 # os.environ["DJANGO_SETTINGS_MODULE"] = "LNTUME.settings"
 # django.setup()
 from spider.utils.URLManager import UrlEnums
 from spider.utils.utils import string_strip
-from web.models import CET
 
 
 def cet_get_html(session):

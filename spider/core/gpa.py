@@ -1,4 +1,4 @@
-from web.models import Score
+from api.models import Score
 
 
 def calculateGPA(user, semester="2018秋"):

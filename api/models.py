@@ -10,9 +10,6 @@ class User(models.Model):
     latest_GPA = models.FloatField("Grade Point Average", null=True)
     latest_login = models.DateTimeField(auto_now=True)  # TODO: correct UTC time
 
-    def __str__(self):
-        return str(self.username)
-
     class Meta:
         db_table = "lntu_user"
         ordering = ['-latest_login', 'username']
@@ -80,12 +77,12 @@ class ExamPlan(models.Model):
 
 
 class StudentInfo(models.Model):
-    username = models.ForeignKey(User, max_length=32, on_delete=models.CASCADE, related_name="infos")
+    username = models.ForeignKey(User, max_length=32, on_delete=models.CASCADE, related_name="info")
     name = models.CharField("姓名", max_length=64)
     native_from = models.CharField("国籍籍贯", max_length=64, null=True)
     foreign_name = models.CharField("外语", max_length=64, null=True)
     birthday = models.DateField("出生年月", null=True)
-    ID_number = models.CharField("证件号", max_length=32)
+    card_number = models.CharField("证件号", max_length=32)
     politics = models.CharField("政治面貌", max_length=64, null=True)
     section = models.CharField("乘车区间", max_length=64, null=True)
     gender = models.CharField("性别", max_length=32)  #
@@ -150,7 +147,7 @@ class TeachingPlanCourse(models.Model):
 
 
 class ClassCourse(models.Model):
-    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="courses")
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="course_now")
     semester = models.CharField("学年学期", max_length=32)
     course_id = models.CharField("课程号", max_length=32)
     course_number = models.IntegerField("选课序号", null=True)
@@ -174,7 +171,7 @@ class ClassCourse(models.Model):
 
 
 class ClassRoom(models.Model):
-    buildingId = models.IntegerField("教学楼编号", default=-1)
+    building_id = models.IntegerField("教学楼编号", default=-1)
     name = models.CharField("教室", max_length=32, primary_key=True)
     capacity = models.IntegerField("容量", default=-1)
     category = models.CharField("类别", max_length=32)
@@ -190,4 +187,14 @@ class ClassRoom(models.Model):
 
     class Meta:
         db_table = "lntu_classroom"
-        ordering = ['buildingId', 'name']
+        ordering = ['building_id', 'name']
+
+
+class UserToken(models.Model):
+    user = models.OneToOneField(to=User, on_delete=models.DO_NOTHING)
+    token = models.CharField(max_length=65)
+    created = models.DateTimeField(auto_now_add=True)
+    expired = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "lntu_auth"

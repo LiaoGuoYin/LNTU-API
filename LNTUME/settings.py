@@ -24,7 +24,7 @@ SECRET_KEY = 'g*yr7qij53rzhvov7h8*d&c8$x(se8w!uy47e1f5@me@w=ddux'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['liaoguoyin.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['liaoguoyin.com', 'localhost', '127.0.0.1', 'lntu.me']
 
 # Application definition
 
@@ -35,16 +35,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'spider.apps.SpiderConfig',
-    'aipao.apps.AipaoConfig',
-    'web.apps.WebConfig',
     'rest_framework',
+    'rest_framework.authtoken',
     'api',
+    'spider',
+    'aipao',
+    'web',
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
 }
 
 MIDDLEWARE = [
@@ -84,7 +92,7 @@ WSGI_APPLICATION = 'LNTUME.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'lntu',  # 数据库
+        'NAME': 'lntume',  # 数据库
         'USER': 'lntume',  # 数据库登录名
         'PASSWORD': 'lntume',  # 数据库登录密码
         'TEST': {

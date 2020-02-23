@@ -1,5 +1,5 @@
+from api.models import ClassCourse
 from spider.utils.utils import string_strip
-from web.models import ClassCourse
 
 
 def classTable_parser(html_doc, user, semester_str):

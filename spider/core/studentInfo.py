@@ -1,7 +1,7 @@
 from lxml import etree
 
+from api.models import StudentInfo
 from spider.utils.URLManager import UrlEnums
-from web.models import StudentInfo
 
 
 def studentInfo_get_html(session):

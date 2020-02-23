@@ -1,5 +1,5 @@
+from api.models import Score
 from spider.utils.utils import string_strip
-from web.models import Score
 
 
 def score_parser(html_doc, user):

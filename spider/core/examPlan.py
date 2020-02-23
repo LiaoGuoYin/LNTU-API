@@ -1,5 +1,5 @@
+from api.models import ExamPlan
 from spider.utils.utils import string_strip
-from web.models import ExamPlan
 
 
 def examPlan_parser(html_doc, user):

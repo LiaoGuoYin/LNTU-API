@@ -1,7 +1,7 @@
 from lxml import etree
 
+from api.models import TeachingPlanCourse
 from spider.utils.URLManager import UrlEnums
-from web.models import TeachingPlanCourse
 
 
 def teachingPlan_get_uri(session):

@@ -8,7 +8,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'LNTUME.settings'
 django.setup()
 
 from spider.utils.utils import string_strip
-from web.models import ClassRoom
+from api.models import ClassRoom
 
 
 def classroom_fresh(room_data):

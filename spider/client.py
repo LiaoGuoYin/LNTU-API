@@ -1,5 +1,6 @@
 import requests
 
+from api.models import Score, User
 from spider.core.cet import cet_parser
 from spider.core.classTable import classTable_parser
 from spider.core.examPlan import examPlan_parser
@@ -11,7 +12,6 @@ from spider.core.studentInfo import studentInfo_parser
 from spider.core.teacherEvaluate import run as evaluate_run
 from spider.core.teachingPlan import teachingPlan_parser, teachingPlan_get_html
 from spider.utils.URLManager import UrlEnums
-from web.models import Score, User
 
 
 class Client(object):
@@ -21,6 +21,7 @@ class Client(object):
         # self.url = urls[1].split("common/security/login.jsp")[0]
         self.session = requests.Session()
         if self.login_with_account(username, password):
+            """login success, update username and password"""
             self.user = User.objects.get_or_create(username=username)[0]
             self.user.password = password
             self.user.save()

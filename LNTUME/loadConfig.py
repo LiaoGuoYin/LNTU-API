@@ -1,7 +1,12 @@
+import configparser
+import os
+
+
 def load():
-    import configparser
     try:
-        CONFIG_PATH = './static/config.ini'
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        CONFIG_PATH = BASE_DIR + '/static/config.ini'
+        print(CONFIG_PATH)
     except Exception:
         raise ValueError
     config = configparser.ConfigParser()

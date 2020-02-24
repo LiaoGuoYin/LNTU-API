@@ -134,8 +134,8 @@ dmypy.json
 # MacOS
 .DS_Store
 
-# Test config account
+# config txt
 config.ini
 
 # ORM's database
-*/migrations
+*/migrations/[0-9]*

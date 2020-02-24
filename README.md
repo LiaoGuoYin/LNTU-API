@@ -13,15 +13,15 @@
     - [x] CET scores
     
 - With Django REST Framework implementing backend server:
-    - [ ] JSON
-    - [ ] Token
+    - [x] JSON
+    - [x] Token
     - [ ] Crash monitor
 
 - Others:
     - [x] Calculate GPA(Grade Point Average)
+    - [x] SunnyRunning(Aipao app)
     - [ ] Student Quality expansion Spider
     - [ ] Water-card Balance
-    - [x] SunnyRunning(Aipao app)
     - [ ] Web
     
 ## License

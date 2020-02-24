@@ -1,4 +1,5 @@
 import requests
+from rest_framework import exceptions
 
 from api.models import Score, User
 from spider.core.cet import cet_parser
@@ -31,7 +32,8 @@ class Client(object):
         body = {'j_username': username, 'j_password': password}
         response = self.session.post(url, data=body)
         if response.text.find("本科生教务管理系统", 1, 50) == -1:
-            raise KeyError("错误：Password or UserName is invalid or Teaching Management Online is down.")
+            raise exceptions.AuthenticationFailed(
+                "用户名或密码错误，或教务在线爆炸")
         else:
             return True
 

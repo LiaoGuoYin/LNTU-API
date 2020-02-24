@@ -12,7 +12,7 @@ def studentInfo_get_html(session):
 
 def studentInfo_parser(html_doc, user):
     try:
-        student = StudentInfo.objects.get_or_create(username=user)[0]
+        student = StudentInfo.objects.get_or_create(user=user)[0]
         table_element = html_doc.xpath('/html/body/center/table[1]')[0]
         student.username = table_element.xpath('./tr[1]/td[1]')[0].text.strip()
         student.name = table_element.xpath('./tr[2]/td[1]')[0].text.strip()

@@ -61,7 +61,7 @@ class CET(models.Model):
 
 
 class ExamPlan(models.Model):
-    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_plans")
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exams")
     name = models.CharField("课程名", max_length=64)
     room = models.CharField("考场", max_length=32)
     date = models.DateField("考试日期")
@@ -77,7 +77,7 @@ class ExamPlan(models.Model):
 
 
 class StudentInfo(models.Model):
-    username = models.ForeignKey(User, max_length=32, on_delete=models.CASCADE, related_name="info")
+    user = models.ForeignKey(User, max_length=32, on_delete=models.CASCADE, related_name="selfInfo")
     name = models.CharField("姓名", max_length=64)
     native_from = models.CharField("国籍籍贯", max_length=64, null=True)
     foreign_name = models.CharField("外语", max_length=64, null=True)
@@ -121,11 +121,11 @@ class StudentInfo(models.Model):
     class Meta:
         UniqueConstraint(fields=['username'], name="unique_user_info")
         db_table = "lntu_user_info"
-        ordering = ['-last_updated', '-username']
+        ordering = ['-last_updated']
 
 
 class TeachingPlanCourse(models.Model):
-    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="course_plans")
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="coursesPlan")
     semester = models.CharField("学年学期", max_length=32)
     course_id = models.CharField("课程号", max_length=32)
     course_name = models.CharField("课程名称", max_length=64)
@@ -147,7 +147,7 @@ class TeachingPlanCourse(models.Model):
 
 
 class ClassCourse(models.Model):
-    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="course_now")
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name="coursesNow")
     semester = models.CharField("学年学期", max_length=32)
     course_id = models.CharField("课程号", max_length=32)
     course_number = models.IntegerField("选课序号", null=True)

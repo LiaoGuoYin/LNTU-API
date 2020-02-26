@@ -135,8 +135,11 @@ dmypy.json
 .DS_Store
 
 # config
-config.ini
-ssl/
+static/config.ini
+static/ssl/
 
 # ORM's database
 */migrations/[0-9]*
+
+# tmp demo.py
+demo.py

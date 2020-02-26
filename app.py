@@ -1,16 +1,25 @@
+from configparser import NoSectionError
+
 from UUIA import Uuia
+from UUIA.exception.config_error_exception import Config_error_exception
+
+
+def load_config(config_path='static/config.ini'):
+    """load static/config.ini"""
+    from configparser import ConfigParser
+    conf = ConfigParser()
+    try:
+        conf.read(config_path)
+        config_dict = {}
+        for k, v in conf.items('UUIA-config'):
+            config_dict.update({k: v})
+        return config_dict
+    except NoSectionError:
+        raise Config_error_exception("Please confirm static/config.ini:UUIA-config")
+
 
 uuia = Uuia(
-    app_id="",
-    app_token="",
-    app_name="LNTU-Online",
-    running_port=3000,  # 运行端口
-    running_ip="127.0.0.1",  # 运行ip
-    thread_name=__name__,  # 监听线程
-    running_domain="/api",  # 运行url
-    ssl_flag=False,  # 是否开启ssl
-    ssl_crt="ssl/crt",  # 证书crt位置，ssl_flag 为true时必要
-    ssl_key="ssl/key",  # 证书key位置，ssl_flag 为true时必要
+    **load_config()
 )
 
 

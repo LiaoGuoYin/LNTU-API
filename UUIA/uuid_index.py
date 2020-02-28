@@ -4,7 +4,7 @@
 from .constant.constant import Constant
 from .controler.uuia_controller import setting_flask_application  # 从controller导入flask app
 from .exception.config_error_exception import Config_error_exception
-from .util.uuia_logger import Uuia_logger
+from .util.logger import Uuia_logger
 
 
 class Uuia:

@@ -9,7 +9,7 @@ from ..exception.action_callback_exception import Callback_exception
 from ..exception.lack_necessary_info_exception import Lack_necessary_info_exception
 from ..exception.not_implemented_exception import Not_implemented_exception
 from ..service import parser
-from ..util.uuia_logger import Uuia_logger
+from ..util.logger import Uuia_logger
 from ..util.validator import Validator
 
 

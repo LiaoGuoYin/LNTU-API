@@ -3,7 +3,7 @@
 # @purpose:
 import hashlib
 
-from UUIA.util.uuia_logger import Uuia_logger
+from UUIA.util.logger import Uuia_logger
 
 
 class Validator:

@@ -141,6 +141,6 @@ static/ssl/
 # ORM's database
 */migrations/[0-9]*
 
-# tmp test.py
+# tmp demo.py
 test.py
 demo.py

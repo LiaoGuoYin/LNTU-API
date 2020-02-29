@@ -35,9 +35,11 @@ def log_in(username, password):
     elif '请不要过快点击' in response.text:
         Logger().e('login', '点击过快（错误太多）')
         return False
-    else:
+    elif '您当前位置' in response.text:
         print(F"登陆成功: {response.request.headers['Cookie']}")
         return session
+    else:
+        print("未知错误")
 
 
 def get_std_ids(session):
@@ -78,11 +80,6 @@ def get_std_info(username, password, session=None):
     else:
         return 503
     # TODO
-
-
-def main():
-    get_class_table('username', 'password')
-    get_std_info('password', 'password')
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@
     - [ ] exam scores
     - [ ] CET scores
     
-- follow proper API standard
+- Prettify API format in proper style
 
 - Others:
     - [ ] Calculate GPA(Grade Point Average)

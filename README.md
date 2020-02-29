@@ -1,10 +1,11 @@
 # LNTUME
     A Python Spider for Crawling LiaoNing Technology University Teaching Management Online.
-    And confirming UUIA API standard to implement UUIA's WeChat Mini Programs
+    And confirming UUIA API standard to implement UUIA's WeChat Mini Programs.
 
 ## Scheduling
 - With Python crawling student's info:
-    - [ ] student information
+    - [x] login
+    - [x] student information
     - [ ] teaching plannings
     - [ ] class table
     - [ ] class room
@@ -13,7 +14,7 @@
     - [ ] exam scores
     - [ ] CET scores
     
-- Implementing UUIA API standard 
+- follow proper API standard
 
 - Others:
     - [ ] Calculate GPA(Grade Point Average)

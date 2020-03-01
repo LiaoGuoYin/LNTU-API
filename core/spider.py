@@ -33,15 +33,15 @@ def log_in(username, password):
     response = session.post(url, data=data)
     if '密码错误' in response.text:
         Logger().e('login', '密码错误')
-        return False
+        raise Exception("密码错误")
     elif '请不要过快点击' in response.text:
         Logger().e('login', '点击过快（错误太多）')
-        return False
+        return Exception("点击过快（错误太多）")
     elif '您当前位置' in response.text:
         print(F"登陆成功: {response.request.headers['Cookie']}")
         return session
     else:
-        print("未知错误")
+        return Exception("未知错误")
 
 
 def get_std_ids(session):

@@ -1,10 +1,11 @@
 import hashlib
 import time
 
-from requests_html import HTMLSession
+from lxml import etree
+from requests import Session
 
 from core.parser import LNTUParser
-from util import Logger
+from util import Logger, search_all
 
 URL_ROOT = 'http://202.199.224.119:8080/eams'
 LOGIN = URL_ROOT + '/loginExt.action'
@@ -21,10 +22,11 @@ CLASS_TABLE_OF_STD_IDS = URL_ROOT + '/courseTableForStd.action'
 
 def log_in(username, password):
     url = LOGIN
-    session = HTMLSession()
+    session = Session()
     response = session.get(url)
-    token = response.html.search(
-        u"    		form['password'].value = CryptoJS.SHA1('{}' + form['password'].value);")[0]
+    token = search_all(
+        u"    		form['password'].value = CryptoJS.SHA1('{}' + form['password'].value);", response.text)[0][0]
+    print(token)
     key = hashlib.sha1((token + password).encode('utf-8')).hexdigest()
     data = {'username': username, 'password': key}
     time.sleep(0.5)
@@ -46,7 +48,7 @@ def get_std_ids(session):
     """课表查询之前，一定要访问，因此只支持 session 模式"""
     url = CLASS_TABLE_OF_STD_IDS
     response = session.get(url)
-    stu_id = response.html.search('(form,"ids","{}");')[0]
+    stu_id = search_all('(form,"ids","{}");', html=response.text)[0][0]
     print(stu_id)
     return stu_id
 
@@ -55,7 +57,7 @@ def get_class_table(username, password, semester=626, session=None):
     url = CLASS_TABLE
     if not session:
         session = log_in(username, password)
-    """获取课表之前必须访问 get_std_id """
+    """获取课表之前必须访问 get_std_id() """
     ids = get_std_ids(session)
     data = {
         'ignoreHead': 1,
@@ -65,9 +67,14 @@ def get_class_table(username, password, semester=626, session=None):
         'semester.id': semester,
     }
     response = session.post(url, data=data)
-    html = response.html
-    course_total_dict = LNTUParser.parse_class_table_bottom(html)
-    LNTUParser.parse_class_table_body(html_text=html.text, course_total_dict=course_total_dict)
+    html_text = response.text
+    html_doc = etree.HTML(html_text)
+    # save_html(html_text)
+    all_course_dict = LNTUParser.parse_class_table_bottom(html_doc)
+    # print(all_course_dict)
+    results = LNTUParser.parse_class_table_body(html_text=html_text, all_course_dict=all_course_dict)
+    print(results)
+    return results
 
 
 def get_std_info(username, password, session=None):
@@ -76,11 +83,11 @@ def get_std_info(username, password, session=None):
     url = STUDENT_INFO
     response = session.get(url)
     if "学籍信息" in response.text:
-        LNTUParser.parse_std_info(response.html)
+        # save_html(response.text)
+        html_doc = etree.HTML(response.text)
+        results = LNTUParser.parse_std_info(html_doc)
+        print(results)
+        return results
     else:
         return 503
-    # TODO
-
-
-if __name__ == '__main__':
-    main()
+        # TODO

@@ -1,6 +1,8 @@
 import datetime
 from configparser import NoSectionError
 
+from parse import findall
+
 
 class GetWeek:
     def __init__(self):
@@ -108,6 +110,12 @@ class Logger:
         print("{date}: ERROR [{tag}] {content}".format(date=date_string, tag=tag, content=content))
 
 
+def save_html(html_text):
+    with open('testHTML/tmp.html', 'w') as fp:
+        fp.write(html_text)
+    print("output to current directory successfully!")
+
+
 def load_config(config_path='static/config.ini'):
     """load static/config.ini"""
     from configparser import ConfigParser
@@ -120,3 +128,13 @@ def load_config(config_path='static/config.ini'):
         return config_dict
     except NoSectionError:
         raise FileNotFoundError("Please confirm static/config.ini")
+
+
+def search_all(template: str, html: str):
+    """Search the :class:`Element <Element>` (multiple times) for the given parse
+    template.
+
+    :param html: html_text
+    :param template: The Parse template to use.
+    """
+    return [r for r in findall(template, html)]

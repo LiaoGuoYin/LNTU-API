@@ -1,6 +1,7 @@
 from lxml import etree
 
-from core.spider import get_class_table, get_std_info
+from core.parser import LNTUParser
+from core.spider import get_std_info, get_class_table
 from util import GetWeek
 
 
@@ -42,10 +43,23 @@ def test_parse_week():
     ]
 
 
-def test_parse():
-    with open('output.html', 'r+') as fp:
+def test_parse_stu_info():
+    with open('testHTML/stu-info.html', 'r') as fp:
         html_text = fp.read()
         html_doc = etree.HTML(html_text)
+    results = LNTUParser.parse_std_info(html_doc)
+    print(results)
+
+
+def test_parse_class_table():
+    with open('testHTML/class-table.html', 'r') as fp:
+        html_text = fp.read()
+        html_doc = etree.HTML(html_text)
+    all_course_dict = LNTUParser.parse_class_table_bottom(html_doc=html_doc)
+    # print(all_course_dict)
+    results = LNTUParser.parse_class_table_body(html_text=html_text, all_course_dict=all_course_dict)
+    print(results)
+    return results
 
 
 def test_login():
@@ -55,10 +69,11 @@ def test_login():
     }
     # session = HTMLSession()
     # session.headers = headers
-    get_class_table('username', 'password')
-    get_std_info('username', 'password')
+    get_std_info('1710030215', '')
+    get_class_table('1710030215', '')
 
 
-# test_parse()
-test_parse_week()
-test_login()
+# test_login()
+# test_parse_week()
+test_parse_stu_info()
+test_parse_class_table()

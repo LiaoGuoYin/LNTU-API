@@ -1,7 +1,6 @@
 from lxml import etree
 
 from core.parser import LNTUParser
-from core.spider import get_std_info, get_class_table
 from util import GetWeek
 
 
@@ -62,6 +61,25 @@ def test_parse_class_table():
     return results
 
 
+def test_parse_all_scores():
+    with open('testHTML/scores.html', 'r') as fp:
+        html_text = fp.read()
+        html_doc = etree.HTML(html_text)
+    results = LNTUParser.parse_all_scores(html_doc=html_doc)
+    # print(all_course_dict)
+    # results = LNTUParser.parse_class_table_body(html_text=html_text, all_course_dict=all_course_dict)
+    print(results)
+    return results
+
+
+def test_parse_all_GPAs():
+    with open('testHTML/scores.html', 'r') as fp:
+        html_text = fp.read()
+        html_doc = etree.HTML(html_text)
+    results = LNTUParser.parse_all_GPAs(html_doc=html_doc)
+    return results
+
+
 def test_login():
     headers = {
         # 'Cookie': 'JSESSIONID=EEA62A7475AD2D07C1700281287B7BE4',
@@ -69,11 +87,13 @@ def test_login():
     }
     # session = HTMLSession()
     # session.headers = headers
-    get_std_info('1710030215', '')
-    get_class_table('1710030215', '')
+    # get_std_info('1710030215', '')
+    # get_class_table('1710030215', '')
 
 
 # test_login()
 # test_parse_week()
-test_parse_stu_info()
-test_parse_class_table()
+# test_parse_stu_info()
+# test_parse_class_table()
+test_parse_all_scores()
+# test_parse_all_GPAs()

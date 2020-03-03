@@ -7,11 +7,14 @@ from requests import Session
 from core.parser import LNTUParser
 from util import Logger, search_all
 
+# TODO enum
 URL_ROOT = 'http://202.199.224.119:8080/eams'
 LOGIN = URL_ROOT + '/loginExt.action'
 STUDENT_INFO = URL_ROOT + '/stdDetail.action'
 CLASS_TABLE = URL_ROOT + '/courseTableForStd!courseTable.action'
 CLASS_TABLE_OF_STD_IDS = URL_ROOT + '/courseTableForStd.action'
+# SCORE = '/teach/grade/course/person!search.action'
+ALL_SCORES = URL_ROOT + '/teach/grade/course/person!historyCourseGrade.action?projectType=MAJOR'
 
 
 # fetchScore = URL_ROOT + '/teach/grade/course/person!historyCourseGrade.action'
@@ -25,7 +28,7 @@ def log_in(username, password):
     session = Session()
     response = session.get(url)
     token = search_all(
-        u"    		form['password'].value = CryptoJS.SHA1('{}' + form['password'].value);", response.text)[0][0]
+        u"form['password'].value = CryptoJS.SHA1('{}' + form['password'].value);", response.text)[0][0]
     print(token)
     key = hashlib.sha1((token + password).encode('utf-8')).hexdigest()
     data = {'username': username, 'password': key}
@@ -69,6 +72,7 @@ def get_class_table(username, password, semester=626, session=None):
     response = session.post(url, data=data)
     html_text = response.text
     html_doc = etree.HTML(html_text)
+    print(html_text)
     # save_html(html_text)
     all_course_dict = LNTUParser.parse_class_table_bottom(html_doc)
     # print(all_course_dict)
@@ -91,3 +95,32 @@ def get_std_info(username, password, session=None):
     else:
         return 503
         # TODO
+
+
+def get_all_scores(username, password, session=None):
+    if not session:
+        session = log_in(username, password)
+    url = ALL_SCORES
+    response = session.post(url)
+    if "学年学期" in response.text:
+        html_doc = etree.HTML(response.text)
+        # save_html(response.text)
+        results = LNTUParser.parse_all_scores(html_doc=html_doc)
+        print(results)
+        return results
+    else:
+        return 503
+
+
+def get_all_GPAs(username, password, session=None):
+    if not session:
+        session = log_in(username, password)
+    url = ALL_SCORES
+    response = session.post(url)
+    if "学年学期" in response.text:
+        html_doc = etree.HTML(response.text)
+        results = LNTUParser.parse_all_GPAs(html_doc=html_doc)
+        print(results)
+        return results
+    else:
+        return 503

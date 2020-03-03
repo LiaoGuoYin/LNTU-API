@@ -1,9 +1,13 @@
+import uvicorn
 from fastapi import FastAPI
 
-from core.spider import get_std_info, get_class_table
+from core.spider import get_std_info, get_class_table, get_all_scores
 from models import User
 
 app = FastAPI()
+
+if __name__ == '__main__':
+    uvicorn.run('main:app', host="127.0.0.1", port=3000, log_level="info", reload=True)
 
 
 @app.get('/')
@@ -31,7 +35,20 @@ async def get_user_class_table(user: User):
     return {'status': True,
             'results': results}
 
-#
+
+@app.post('/user/score')
+async def get_user_all_scores(user: User):
+    results = get_all_scores(username=user.username, password=user.password)
+    return {'status': True,
+            'results': results}
+
+
+@app.post('/user/gpa')
+async def get_user_all_GPAs(user: User):
+    results = get_all_scores(username=user.username, password=user.password)
+    return {'status': True,
+            'results': results}
+
 # @app.post('/login')
 # async def login(user: User):
 #     print(user.dict())

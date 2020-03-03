@@ -11,13 +11,13 @@
     - [ ] class room
     - [ ] evaluate teachers
     - [ ] exam plannings
-    - [ ] exam scores
+    - [x] exam scores
     - [ ] CET scores
     
 - Prettify API format in proper style
 
 - Others:
-    - [ ] Calculate GPA(Grade Point Average)
+    - [x] Calculate GPA(Grade Point Average)
     - [ ] SunnyRunning(Aipao app)
     - [ ] Student Quality expansion Spider
     - [ ] Water-card Balance

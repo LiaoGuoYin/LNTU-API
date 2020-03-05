@@ -38,24 +38,19 @@ async def get_user_class_table(user: User):
 
 @app.post('/user/score')
 async def get_user_all_scores(user: User):
-    results = get_all_scores(username=user.username, password=user.password)
+    try:
+        results = get_all_scores(username=user.username, password=user.password)
+    except Exception as e:
+        results = {'error': e}
     return {'status': True,
             'results': results}
 
 
 @app.post('/user/gpa')
 async def get_user_all_GPAs(user: User):
-    results = get_all_scores(username=user.username, password=user.password)
+    try:
+        results = get_all_scores(username=user.username, password=user.password)
+    except Exception as e:
+        results = {'error': e}
     return {'status': True,
             'results': results}
-
-# @app.post('/login')
-# async def login(user: User):
-#     print(user.dict())
-#     return user
-
-# @app.post('/user/course')
-# async def get_user_courses(user: User):
-#     # results = get_user_courses(username=user.username, password=user.password)
-#     results = 'TODO'
-#     return {'status': True, 'results': results}

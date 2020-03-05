@@ -101,6 +101,7 @@ class GetWeek:
 
 
 class Logger:
+    # TODO 保留？
     def i(self, tag, content):
         date_string = str(datetime.datetime.today())[:16]
         print("{date}: INFO [{tag}] {content}".format(date=date_string, tag=tag, content=content))
@@ -134,7 +135,7 @@ def search_all(template: str, html: str):
     return [r for r in findall(template, html)]
 
 
-def save_html(html_text):
+def save_html_to_file(html_text):
     with open('testHTML/tmp.html', 'w') as fp:
         fp.write(html_text)
     print("output to current directory successfully!")

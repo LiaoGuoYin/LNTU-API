@@ -1,7 +1,7 @@
 from lxml import etree
 
 from core.parser import LNTUParser
-from util import GetWeek
+from core.util import GetWeek
 
 
 def test_parse_week():
@@ -87,13 +87,13 @@ def test_login():
     }
     # session = HTMLSession()
     # session.headers = headers
-    # get_std_info('1710030215', '')
+    # get_std_info()
     # get_class_table('1710030215', '')
 
 
-# test_login()
+test_login()
 # test_parse_week()
 # test_parse_stu_info()
 # test_parse_class_table()
-test_parse_all_scores()
+# test_parse_all_scores()
 # test_parse_all_GPAs()

@@ -1,6 +1,5 @@
 # LNTUME
     A Python Spider for Crawling LiaoNing Technology University Teaching Management Online.
-    And confirming UUIA API standard to implement UUIA's WeChat Mini Programs.
 
 ## Demo
 ​    [API test and docs online]: https://api.liaoguoyin.com/docs

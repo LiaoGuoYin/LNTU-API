@@ -1,5 +1,5 @@
 from core.exceptions import ParserException
-from core.util import GetWeek, Logger, search_all
+from core.util import GetWeek, search_all
 
 
 class LNTUParser:
@@ -54,7 +54,6 @@ class LNTUParser:
                 # print(data_dict)
                 return data_dict
             except IndexError:
-                Logger().e(tag="parser_class_table_bottom", content="解析课表底部失败，数据越界")
                 return "课表底部数组越界"
             except AttributeError:
                 return "课表底部解析错误，xpath 失败"
@@ -63,7 +62,8 @@ class LNTUParser:
     def parse_class_table_body(html_text, all_course_dict):
         course_table_template = "new TaskActivity(actTeacherId.join(','),actTeacherName.join(','),{});"
         courses = search_all(course_table_template, html_text)
-        print(len(courses))
+        # TODO
+        # print(len(courses))
         """index = 4*unitCount+0;"""
         # 可能有不配对的风险
         # column = search_all(u"index ={:d}*unitCount+{:d};", html_text)

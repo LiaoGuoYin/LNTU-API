@@ -1,7 +1,16 @@
+import configparser
+
 from lxml import etree
 
 from core.parser import LNTUParser
+from core.spider import get_class_table, get_std_info
+from core.urls import URLEnums, URLManager
 from core.util import GetWeek
+
+
+def test_url_utils():
+    print(list(URLEnums))
+    print(URLManager.get_all_urls())
 
 
 def test_parse_week():
@@ -80,20 +89,32 @@ def test_parse_all_GPAs():
     return results
 
 
-def test_login():
-    headers = {
-        # 'Cookie': 'JSESSIONID=EEA62A7475AD2D07C1700281287B7BE4',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 Safari/603.3.8',
-    }
-    # session = HTMLSession()
-    # session.headers = headers
-    # get_std_info()
-    # get_class_table('1710030215', '')
+def test_login(username, password):
+    get_std_info(username, password)
+    get_class_table(username, password)
 
 
-test_login()
-# test_parse_week()
-# test_parse_stu_info()
-# test_parse_class_table()
-# test_parse_all_scores()
-# test_parse_all_GPAs()
+def load_account():
+    config_path = 'static/config.ini'
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    # print(config.sections())
+    for key in config.sections():
+        if key == 'account':
+            return config.items(key)
+
+
+if __name__ == '__main__':
+    try:
+        accounts = load_account()
+        for each in accounts:
+            username, password = each[0], each[1]
+            test_login(username, password)
+            # print(username, password)
+            # test_parse_week()
+            # test_parse_stu_info()
+            # test_parse_class_table()
+            # test_parse_all_scores()
+            # test_parse_all_GPAs()
+    except Exception as e:
+        print(e)

@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from core.spider import get_std_info, get_class_table, get_all_scores
+from core.spider import get_std_info, get_class_table, get_all_scores, get_all_GPAs
 from models import User
 
 app = FastAPI()
@@ -49,7 +49,7 @@ async def get_user_all_scores(user: User):
 @app.post('/user/gpa')
 async def get_user_all_GPAs(user: User):
     try:
-        results = get_all_scores(username=user.username, password=user.password)
+        results = get_all_GPAs(username=user.username, password=user.password)
     except Exception as e:
         results = {'error': e}
     return {'status': True,

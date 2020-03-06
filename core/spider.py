@@ -29,14 +29,14 @@ def log_in(username, password):
     time.sleep(0.5)
     response = session.post(URLEnums.LOGIN, data=data)
     if '密码错误' in response.text:
-        raise SpiderException(F"{username}用户名或密码错误")
+        raise SpiderException(F"{username} 用户名或密码错误")
     elif '请不要过快点击' in response.text:
         raise SpiderException("页面请求过快")
     elif '您当前位置' in response.text:
         print(F"{username} Login success!")
         return session
     elif '账户不存在' in response.text:
-        raise SpiderException(F"{username}}用户不存在")
+        raise SpiderException(F"{username} 用户不存在")
     else:
         raise SpiderException("登陆页飞了")
 

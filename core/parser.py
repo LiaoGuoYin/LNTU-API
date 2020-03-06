@@ -30,9 +30,9 @@ class LNTUParser:
     def parse_class_table_bottom(html_doc):
         rows = html_doc.xpath('//*[@id="tasklesson"]/div/table/tbody/tr')
         data_dict = {}
-        for row in rows:
-            cells = row.xpath('./td')
-            try:
+        try:
+            for row in rows:
+                cells = row.xpath('./td')
                 """['2', 'H101730023056', '信息系统分析与设计', '3.5', '', '', '杨彤骥', '', '', '', '']"""
                 row_data = ["".join(cell.xpath('string(.)').split()) for cell in cells]
                 # cid = row_data[1]
@@ -52,11 +52,11 @@ class LNTUParser:
                 # row_data = ["".join(cell.text.split()) for cell in cells]
                 # print(row_data)
                 # print(data_dict)
-                return data_dict
-            except IndexError:
-                return "课表底部数组越界"
-            except AttributeError:
-                return "课表底部解析错误，xpath 失败"
+            return data_dict
+        except IndexError:
+            return "课表底部数组越界"
+        except AttributeError:
+            return "课表底部解析错误，xpath 失败"
 
     @staticmethod
     def parse_class_table_body(html_text, all_course_dict):
@@ -104,8 +104,8 @@ class LNTUParser:
             }],
             'time': ''}
         gpa_dict.get('GPAs').clear()
-        for row in gpa_table:
-            try:
+        try:
+            for row in gpa_table:
                 cells = [cells.text.strip() for cells in row]
                 cell_type = len(cells)
                 # print(cells)
@@ -118,7 +118,7 @@ class LNTUParser:
                     gpa_dict['courseCredits'] = cells[2]
                     gpa_dict['GPA'] = cells[3]
                 elif cell_type is 5:
-                    print(cells[1])
+                    # print(cells[1])
                     # semester_half = '秋' if cells[1] == '1' else '春'
                     gpa_dict['GPAs'].append({
                         'semester': F"{cells[0]}学年第{cells[1]}学期",
@@ -126,11 +126,11 @@ class LNTUParser:
                         'courseCredit': cells[3],
                         'averageGPA': cells[4],
                     })
-                return gpa_dict
-            except IndexError:
-                return "GPA 数组越界"
-            except AttributeError:
-                return "GPA 解析错误，xpath 失败"
+            return gpa_dict
+        except IndexError:
+            return "GPA 数组越界"
+        except AttributeError:
+            return "GPA 解析错误，xpath 失败"
 
     @staticmethod
     def parse_all_scores(html_doc):
@@ -165,8 +165,8 @@ class LNTUParser:
         }
         course_dict['courses'].clear()  # 以上字典示例用，清空
         score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
-        for row in score_table_rows:
-            try:
+        try:
+            for row in score_table_rows:
                 cells = [td.text.strip() for td in row]
                 # print(cells)
                 """['2017-2018 1', 'H271780001036', 'H271780001036.18', '军事理论', '专业必修', '1', '-- (正常)', '47 (正常)', '50 (正常)', '74 (正常)', '74', '1']"""
@@ -195,9 +195,8 @@ class LNTUParser:
                         "value": cells[4]
                     }]
                 })
-                # print(cells)
-                return course_dict
-            except IndexError:
-                return "成绩详情页数组越界"
-            except AttributeError:
-                return "成绩详情页结构，xpath 失败"
+            return course_dict
+        except IndexError:
+            return "成绩详情页数组越界"
+        except AttributeError:
+            return "成绩详情页结构，xpath 失败"

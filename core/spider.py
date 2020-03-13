@@ -46,7 +46,7 @@ def get_std_info(username, password, session=None):
         session = log_in(username, password)
     response = session.get(URLEnums.STUDENT_INFO)
     if "学籍信息" in response.text:
-        # save_html(response.text)
+        # save_html_to_file(response.text)
         html_doc = etree.HTML(response.text)
         results = LNTUParser.parse_std_info(html_doc)
         return results
@@ -72,21 +72,20 @@ def get_class_table(username, password, semester=626, session=None):
     ids = get_std_ids(session)
     data = {
         'ignoreHead': 1,
-        'startWeek': 1,
         'setting.kind': 'std',
         'ids': ids,
         'semester.id': semester,
     }
-    response = session.post(URLEnums.CLASS_TABLE, data=data)
+    response = session.get(URLEnums.CLASS_TABLE, params=data)
     html_text = response.text
     html_doc = etree.HTML(html_text)
-    if '' in html_text:
-        # save_html(html_text)
-        all_course_dict = LNTUParser.parse_class_table_bottom(html_doc)
-        results = LNTUParser.parse_class_table_body(html_text=html_text, all_course_dict=all_course_dict)
+    if '课表格式说明' in html_text:
+        # save_html_to_file(response.text)
+        course_bottom_list = LNTUParser.parse_class_table_bottom(html_doc)
+        results = LNTUParser.parse_class_table_body(html_text=html_text, course_bottom_list=course_bottom_list)
         return results
     else:
-        raise SpiderException("成绩查询页请求失败")
+        raise SpiderException("服务器解析错误：成绩查询页请求失败")
 
 
 def get_all_scores(username, password, session=None):

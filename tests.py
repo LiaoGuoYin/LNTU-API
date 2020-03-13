@@ -1,4 +1,6 @@
 import configparser
+import traceback
+from pprint import pprint
 
 from lxml import etree
 
@@ -46,7 +48,7 @@ def test_parse_week():
          '"01111111111111000000000000000000000000000000000000000"', 'null', 'null', 'assistantName', '""',
          '""']]
     [
-        print(F"{course[1]}-{GetWeek().marshal(course[4], 3, 1, 100)}")
+        print(F"{course[4]}-{GetWeek().marshal(course[4], 3, 1, 100)}")
         for course in courses
     ]
 
@@ -63,10 +65,10 @@ def test_parse_class_table():
     with open('testHTML/class-table.html', 'r') as fp:
         html_text = fp.read()
         html_doc = etree.HTML(html_text)
-    all_course_dict = LNTUParser.parse_class_table_bottom(html_doc=html_doc)
+    course_bottom_list = LNTUParser.parse_class_table_bottom(html_doc=html_doc)
     # print(all_course_dict)
-    results = LNTUParser.parse_class_table_body(html_text=html_text, all_course_dict=all_course_dict)
-    print(results)
+    results = LNTUParser.parse_class_table_body(html_text=html_text, course_bottom_list=course_bottom_list)
+    pprint(results)
     return results
 
 
@@ -77,7 +79,7 @@ def test_parse_all_scores():
     results = LNTUParser.parse_all_scores(html_doc=html_doc)
     # print(all_course_dict)
     # results = LNTUParser.parse_class_table_body(html_text=html_text, all_course_dict=all_course_dict)
-    print(results)
+    pprint(results)
     return results
 
 
@@ -86,6 +88,7 @@ def test_parse_all_GPAs():
         html_text = fp.read()
         html_doc = etree.HTML(html_text)
     results = LNTUParser.parse_all_GPAs(html_doc=html_doc)
+    pprint(results)
     return results
 
 
@@ -109,12 +112,14 @@ if __name__ == '__main__':
         accounts = load_account()
         for each in accounts:
             username, password = each[0], each[1]
-            test_login(username, password)
+            # test_login(username, password)
             # print(username, password)
             # test_parse_week()
             # test_parse_stu_info()
-            # test_parse_class_table()
+            # pprint(test_parse_class_table())
             # test_parse_all_scores()
-            # test_parse_all_GPAs()
+            test_parse_all_GPAs()
     except Exception as e:
-        print(e)
+        traceback.format_exc(e)
+
+# test_parse_week()

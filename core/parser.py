@@ -1,5 +1,5 @@
 from core.exceptions import ParserException
-from core.util import GetWeek, search_all
+from core.util import search_all, GetWeek
 
 
 class LNTUParser:
@@ -29,61 +29,54 @@ class LNTUParser:
     @staticmethod
     def parse_class_table_bottom(html_doc):
         rows = html_doc.xpath('//*[@id="tasklesson"]/div/table/tbody/tr')
-        data_dict = {}
+        data_list = []
         try:
             for row in rows:
                 cells = row.xpath('./td')
                 """['2', 'H101730023056', '信息系统分析与设计', '3.5', '', '', '杨彤骥', '', '', '', '']"""
                 row_data = ["".join(cell.xpath('string(.)').split()) for cell in cells]
-                # cid = row_data[1]
-                name = row_data[2]
-                credit = row_data[3]
-                cid = row_data[4]
-                teacher = row_data[5]
-                data_dict.update({
-                    cid: {
-                        'name': name,
-                        'teacher': teacher,
-                        'credit': credit,
-                        'timeRoom': [],
-                    }
-                })
-                # 另一种解析
-                # row_data = ["".join(cell.text.split()) for cell in cells]
-                # print(row_data)
-                # print(data_dict)
-            return data_dict
+                data_list.append(row_data)
+                # 另一种解析 row_data = ["".join(cell.text.split()) for cell in cells]
+            return data_list
         except IndexError:
             return "课表底部数组越界"
         except AttributeError:
             return "课表底部解析错误，xpath 失败"
 
     @staticmethod
-    def parse_class_table_body(html_text, all_course_dict):
-        course_table_template = "new TaskActivity(actTeacherId.join(','),actTeacherName.join(','),{});"
+    def parse_class_table_body(html_text, course_bottom_list):
+        course_table_template = "new TaskActivity(actTeacherId.join(','),actTeacherName.join(','),{});{}index ={:d}*unitCount+{:d};"
         courses = search_all(course_table_template, html_text)
-        # TODO
-        # print(len(courses))
-        """index = 4*unitCount+0;"""
-        # 可能有不配对的风险
-        # column = search_all(u"index ={:d}*unitCount+{:d};", html_text)
-        # row = search_all("index =unitCount+{}", html_text)[1:]
-        # print(column)
-        # section_template = 'var teachers = [{}];{}table0.activities[index][table0.activities[index].length]=activity;'
-        # sections = search_all(section_template, html_text)
-        # print([print(each) for each in sections])
-        # print(row)
+        """<Result ('"206427(H101730023056.01)","信息系统分析与设计(H101730023056.01)","4809","静远楼239(辽宁工大葫芦岛校区)","00111111111100000000000000000000000000000000000000000",null,null,assistantName,"",""', '\n\t\t\t', 4, 0) {}>"""
+        """function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
+        # TODO performance optimize
+        course_list = []
         try:
-            data_lists = [course[0].replace('\"', '').split(',') for course in courses]
-            # print(list(courses))
-            for each in data_lists:
-                id = each[1].split('(')[1][:-1]
-                room = each[3]
-                time = GetWeek().marshal(each[4], 2, 1, 50)
-                timeRoom = F"{time} {room}"
-                course_ori = all_course_dict.get(id)
-                course_ori.get('timeRoom').append(timeRoom)
-            return all_course_dict
+            course_body_list = []
+            for course in courses:
+                course_data = course[0].replace('\"', '').split(',')
+                course_data.append(course[-2] + 1)  # course_week
+                course_data.append(course[-1] + 1)  # course_index
+                course_body_list.append(course_data)
+            """['206427(H101730023056.01)', '信息系统分析与设计(H101730023056.01)', '4809', '静远楼239(辽宁工大葫芦岛校区)', '00111111111100000000000000000000000000000000000000000', 'null', 'null', 'assistantName', '', '', 5, 1]"""
+            for row in course_bottom_list:
+                single_course_dict = {}
+                single_course_dict['name'] = row[2]
+                single_course_dict['credit'] = row[3]
+                single_course_dict['code'] = row[4]
+                single_course_dict['teacher'] = row[5]
+                single_course_dict['schedules'] = []
+                for each in course_body_list:
+                    if each[1].startswith(row[2]):
+                        single_course_dict.get('schedules').append({
+                            'code': each[1].split('(')[1][:-1],
+                            'room': each[3],  # room = each[3].split('(')[0]
+                            'weeks': GetWeek().marshal(each[4], 2, 1, 50),
+                            'days': each[-2],
+                            'sections': each[-1],
+                        })
+                course_list.append(single_course_dict)
+            return {"results:": course_list}
         except IndexError:
             return "课表体数组越界"
         except AttributeError:
@@ -100,7 +93,7 @@ class LNTUParser:
                 'semester': '',
                 'courseCount': '',
                 'courseCredit': '',
-                'averageGPA': '',
+                'annualGPA': '',
             }],
             'time': ''}
         gpa_dict.get('GPAs').clear()
@@ -108,7 +101,6 @@ class LNTUParser:
             for row in gpa_table:
                 cells = [cells.text.strip() for cells in row]
                 cell_type = len(cells)
-                # print(cells)
                 """['2019-2020', '1', '13', '23.5', '3.77']"""
                 if cell_type is 1:
                     # 学期类型：1是秋季，2是春季
@@ -118,13 +110,13 @@ class LNTUParser:
                     gpa_dict['courseCredits'] = cells[2]
                     gpa_dict['GPA'] = cells[3]
                 elif cell_type is 5:
-                    # print(cells[1])
                     # semester_half = '秋' if cells[1] == '1' else '春'
                     gpa_dict['GPAs'].append({
-                        'semester': F"{cells[0]}学年第{cells[1]}学期",
+                        'yearSection': cells[0],
+                        'semester': cells[1],
                         'courseCount': cells[2],
                         'courseCredit': cells[3],
-                        'averageGPA': cells[4],
+                        'semesterGPA': cells[4],
                     })
             return gpa_dict
         except IndexError:

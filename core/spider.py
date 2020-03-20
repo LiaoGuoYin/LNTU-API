@@ -48,8 +48,7 @@ def get_std_info(username, password, session=None):
     if "学籍信息" in response.text:
         # save_html_to_file(response.text)
         html_doc = etree.HTML(response.text)
-        results = LNTUParser.parse_std_info(html_doc)
-        return results
+        return LNTUParser.parse_std_info(html_doc)
     else:
         raise SpiderException("个人信息页请求失败")
 
@@ -70,20 +69,19 @@ def get_class_table(username, password, semester=626, session=None):
         session = log_in(username, password)
     """获取课表之前必须 get_std_id() """
     ids = get_std_ids(session)
-    data = {
+    bodyData = {
         'ignoreHead': 1,
         'setting.kind': 'std',
         'ids': ids,
         'semester.id': semester,
     }
-    response = session.get(URLEnums.CLASS_TABLE, params=data)
+    response = session.get(URLEnums.CLASS_TABLE, params=bodyData)
     html_text = response.text
     html_doc = etree.HTML(html_text)
     if '课表格式说明' in html_text:
         # save_html_to_file(response.text)
         course_bottom_list = LNTUParser.parse_class_table_bottom(html_doc)
-        results = LNTUParser.parse_class_table_body(html_text=html_text, course_bottom_list=course_bottom_list)
-        return results
+        return LNTUParser.parse_class_table_body(html_text=html_text, course_bottom_list=course_bottom_list)
     else:
         raise SpiderException("服务器解析错误：成绩查询页请求失败")
 
@@ -94,8 +92,7 @@ def get_all_scores(username, password, session=None):
     response = session.post(URLEnums.ALL_SCORES)
     if "学年学期" in response.text:
         html_doc = etree.HTML(response.text)
-        results = LNTUParser.parse_all_scores(html_doc=html_doc)
-        return results
+        return LNTUParser.parse_all_scores(html_doc=html_doc)
     else:
         raise SpiderException("成绩查询页请求失败")
 
@@ -106,7 +103,6 @@ def get_all_GPAs(username, password, session=None):
     response = session.post(URLEnums.ALL_SCORES)
     if "学年学期" in response.text:
         html_doc = etree.HTML(response.text)
-        results = LNTUParser.parse_all_GPAs(html_doc=html_doc)
-        return results
+        return LNTUParser.parse_all_GPAs(html_doc=html_doc)
     else:
         raise SpiderException("GPA 查询页请求失败")

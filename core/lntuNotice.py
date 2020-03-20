@@ -30,7 +30,6 @@ def notice_detail_spider(notice: Notice):
     notice.detail.title = notice_elements.xpath('./div/h1/text()')[0]
     notice.detail.date = notice_elements.xpath('./div/h3/text()')[1][3:]
     notice.detail.content = notice_elements.xpath('string(./div[@id="vsb_content"]/div)')
-    notice.detail.appendix.clear()
     if '附件' in notice.detail.content:
         get_appendix(html_doc, notice)
     return notice

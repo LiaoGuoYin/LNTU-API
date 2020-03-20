@@ -101,12 +101,13 @@ class GetWeek:
 
 
 class Logger:
-    # TODO 保留？
-    def i(self, tag, content):
+    @staticmethod
+    def i(tag, content):
         date_string = str(datetime.datetime.today())[:16]
         print("{date}: INFO [{tag}] {content}".format(date=date_string, tag=tag, content=content))
 
-    def e(self, tag, content):
+    @staticmethod
+    def e(tag, content):
         date_string = str(datetime.datetime.today())[:16]
         print("{date}: ERROR [{tag}] {content}".format(date=date_string, tag=tag, content=content))
 

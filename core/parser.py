@@ -1,5 +1,6 @@
 from core.exceptions import ParserException
 from core.util import search_all, GetWeek
+from modelset.schemas import ClassTable, ClassTableSchedule, GPA, semesterGPA, Grade, GradeDetail
 
 
 class LNTUParser:
@@ -7,10 +8,10 @@ class LNTUParser:
     def parse_std_info(html_doc):
         rows = html_doc.xpath('/html/body/div/div[2]/div[1]/table/tr')[1:-1]
         data_keys = [
-            'username', 'name', 'photoURL', 'nickname', 'gender', 'grade', 'duration', 'project',
-            'diplomas', 'studentType', 'college', 'major', 'direction', 'entranceDate', 'graduateDate',
-            'collegeAdmin', 'trainForm', 'isRecordingNow', 'isInSchool', 'campus', 'studentClass',
-            'recordEffectDate', 'isOwnRecord', 'recordStatus', 'isWorking']
+            'username', 'name', 'photoURL', 'nickname', 'gender', 'grade', 'eduLength', 'project',
+            'education', 'studentType', 'college', 'major', 'direction', 'enrollDate', 'graduateDate',
+            'chiefCollege', 'studyType', 'membership', 'isInSchool', 'withCampus', 'withClass',
+            'recordEffectDate', 'isOwnRecord', 'studentStatus', 'isWorking']
         try:
             data_values = [cell.text
                            for row in rows
@@ -50,7 +51,7 @@ class LNTUParser:
         """<Result ('"206427(H101730023056.01)","信息系统分析与设计(H101730023056.01)","4809","静远楼239(辽宁工大葫芦岛校区)","00111111111100000000000000000000000000000000000000000",null,null,assistantName,"",""', '\n\t\t\t', 4, 0) {}>"""
         """function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
         # TODO performance optimize
-        course_list = []
+        classTables: [ClassTable] = []
         try:
             course_body_list = []
             for course in courses:
@@ -60,23 +61,22 @@ class LNTUParser:
                 course_body_list.append(course_data)
             """['206427(H101730023056.01)', '信息系统分析与设计(H101730023056.01)', '4809', '静远楼239(辽宁工大葫芦岛校区)', '00111111111100000000000000000000000000000000000000000', 'null', 'null', 'assistantName', '', '', 5, 1]"""
             for row in course_bottom_list:
-                single_course_dict = {}
-                single_course_dict['name'] = row[2]
-                single_course_dict['credit'] = row[3]
-                single_course_dict['code'] = row[4]
-                single_course_dict['teacher'] = row[5]
-                single_course_dict['schedules'] = []
+                code = row[4]
+                course = ClassTable(code=code)
+                course.name = row[2]
+                course.credit = row[3]
+                course.teacher = row[5]
                 for each in course_body_list:
-                    if each[1].startswith(row[2]):
-                        single_course_dict.get('schedules').append({
-                            'code': each[1].split('(')[1][:-1],
-                            'room': each[3],  # room = each[3].split('(')[0]
-                            'weeks': GetWeek().marshal(each[4], 2, 1, 50),
-                            'days': each[-2],
-                            'sections': each[-1],
-                        })
-                course_list.append(single_course_dict)
-            return {"results:": course_list}
+                    if each[1].startswith(row[2]):  # 对比字段合并
+                        code = each[1].split('(')[1][:-1]
+                        schedule = ClassTableSchedule(code=code)
+                        schedule.room = each[3],  # room = each[3].split('(')[0]
+                        schedule.weeks = GetWeek().marshal(each[4], 2, 1, 50)  # TODO 单1-9 -> [1,3,5,7,9]
+                        schedule.weekday = each[-2]
+                        schedule.index = each[-1]
+                        course.schedule.append(schedule)
+                classTables.append(course)
+            return classTables
         except IndexError:
             return "课表体数组越界"
         except AttributeError:
@@ -85,40 +85,29 @@ class LNTUParser:
     @staticmethod
     def parse_all_GPAs(html_doc):
         gpa_table = html_doc.xpath('/html/body/table/tbody/tr')
-        gpa_dict = {
-            'GPA': '',
-            'courseCounts': '',
-            'courseCredits': '',
-            'GPAs': [{
-                'semester': '',
-                'courseCount': '',
-                'courseCredit': '',
-                'annualGPA': '',
-            }],
-            'time': ''}
-        gpa_dict.get('GPAs').clear()
         try:
+            gpa = GPA(GPA="-1")  # 初始化
             for row in gpa_table:
                 cells = [cells.text.strip() for cells in row]
-                cell_type = len(cells)
-                """['2019-2020', '1', '13', '23.5', '3.77']"""
-                if cell_type is 1:
-                    # 学期类型：1是秋季，2是春季
-                    gpa_dict['time'] = cells[0].split('统计时间:')[1]
-                elif cell_type is 4:
-                    gpa_dict['courseCounts'] = cells[1]
-                    gpa_dict['courseCredits'] = cells[2]
-                    gpa_dict['GPA'] = cells[3]
-                elif cell_type is 5:
-                    # semester_half = '秋' if cells[1] == '1' else '春'
-                    gpa_dict['GPAs'].append({
-                        'yearSection': cells[0],
-                        'semester': cells[1],
-                        'courseCount': cells[2],
-                        'courseCredit': cells[3],
-                        'semesterGPA': cells[4],
-                    })
-            return gpa_dict
+                row_type = len(cells)  # 判断表头表身表尾
+                if row_type is 1:
+                    # 表尾元素是统计时间
+                    gpa.effectiveTime = cells[0].split('统计时间:')[1]
+                elif row_type is 4:
+                    # 表头是总体信息
+                    gpa.counts = cells[1]
+                    gpa.credits = cells[2]
+                    gpa.GPA = cells[3]
+                elif row_type is 5:
+                    # 表身是学期行
+                    yearSection = cells[0]
+                    singleGPA = semesterGPA(yearSection=yearSection)
+                    singleGPA.semester = '秋' if cells[1] == '1' else '春'
+                    singleGPA.count = cells[2]
+                    singleGPA.credit = cells[3]
+                    singleGPA.semesterGPA = cells[4]
+                    gpa.GPAs.append(singleGPA)
+            return gpa
         except IndexError:
             return "GPA 数组越界"
         except AttributeError:
@@ -126,68 +115,27 @@ class LNTUParser:
 
     @staticmethod
     def parse_all_scores(html_doc):
-        course_dict = {
-            "courses": [{
-                "name": "高等数学1",
-                "courseCode": "H271780001036.18",
-                "credit": '2.0',
-                "grade": '99',
-                "extraData": [
-                    {
-                        "key": "平时成绩",
-                        "value": "99"
-                    }, {
-                        "key": "期中 (实验) 成绩",
-                        "value": "96"
-                    }, {
-                        "key": "期末成绩",
-                        "value": "93"
-                    }, {
-                        "key": "总评成绩",
-                        "value": "99",
-                    }, {
-                        "key": "学期学年",
-                        "value": "2017-2018 1",
-                    }, {
-                        "key": "课程类别",
-                        "value": "专业必修"
-                    }
-                ]
-            }]
-        }
-        course_dict['courses'].clear()  # 以上字典示例用，清空
+        courses: [Grade] = []
         score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
         try:
             for row in score_table_rows:
                 cells = [td.text.strip() for td in row]
-                # print(cells)
                 """['2017-2018 1', 'H271780001036', 'H271780001036.18', '军事理论', '专业必修', '1', '-- (正常)', '47 (正常)', '50 (正常)', '74 (正常)', '74', '1']"""
-                course_dict['courses'].append({
-                    'name': cells[3],
-                    'courseCode': cells[2],
-                    'credit': cells[5],
-                    'grade': cells[-2],
-                    'extraData': [{
-                        "key": "平时成绩",
-                        "value": cells[8]
-                    }, {
-                        "key": "期中 (实验) 成绩",
-                        "value": cells[6]
-                    }, {
-                        "key": "期末成绩",
-                        "value": cells[7]
-                    }, {
-                        "key": "总评成绩",
-                        "value": cells[9],
-                    }, {
-                        "key": "学期学年",
-                        "value": cells[0],
-                    }, {
-                        "key": "课程类别",
-                        "value": cells[4]
-                    }]
-                })
-            return course_dict
+                course = Grade(code=cells[2])
+                course.name = cells[3]
+                course.credit = cells[5]
+                course.grade = cells[-2]
+                course.semester = cells[0]
+                course.courseType = cells[4]
+
+                course_detail = GradeDetail()
+                course_detail.usual = cells[8]
+                course_detail.interim = cells[6]
+                course_detail.final = cells[7]
+                course_detail.general = cells[9]
+                course.gradeDetail.update(course_detail)
+                courses.append(course)
+            return courses
         except IndexError:
             return "成绩详情页数组越界"
         except AttributeError:

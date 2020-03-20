@@ -1,78 +1,63 @@
 import requests
 from lxml import etree
 
+from modelset.schemas import Notice, NoticeDetailAppendix
 
-def get_notice_url_list_from(page_url, notice_url_list: list):
+
+def get_notice_url_list_from(page_url):
     xpath_str = '/html/body/div[3]/div[2]/div[2]/ul/li'
     response = requests.get(page_url)
     response.encoding = 'utf-8'
     html_doc = etree.HTML(response.text)
     ul_list = html_doc.xpath(xpath_str)
-    notice_list = []
+    url_list = []
     for row in ul_list[::-1]:
         url_origin = row.xpath("./a/@href")[0]
-        page_url = ('http://jwzx.lntu.edu.cn/index/' + url_origin) if url_origin.startswith(
+        url = ('http://jwzx.lntu.edu.cn/index/' + url_origin) if url_origin.startswith(
             '..') else url_origin
         # notice_dict['title'] = row.xpath("./a/em/text()")[0]
         # notice_dict['date'] = row.xpath("./a/span/text()")[0]
-        notice_list.append({'url': page_url})
-    notice_url_list.extend(notice_list)
+        url_list.append(url)
+    return url_list
 
 
-def text_spider(notice: dict):
-    url = notice['url']
+def notice_detail_spider(notice: Notice):
     xpath_str = '/html/body/div[3]/form/div[1]'
-    response = requests.get(url)
+    response = requests.get(notice.url)
     response.encoding = 'utf-8'
     html_doc = etree.HTML(response.text)
     notice_elements = html_doc.xpath(xpath_str)[0]
-    notice['title'] = notice_elements.xpath('./div/h1/text()')[0]
-    notice['date'] = notice_elements.xpath('./div/h3/text()')[1][3:]
-    notice_detail_dict = {}
-    notice_detail_dict['body'] = notice_elements.xpath('string(./div[@id="vsb_content"]/div)')
-    notice_detail_dict['appendix'] = 'None'
-    if '附件' in notice_detail_dict['body']:
-        notice_detail_dict['appendix'] = get_appendix(html_doc)
-    notice['detail'] = notice_detail_dict
+    notice.detail.title = notice_elements.xpath('./div/h1/text()')[0]
+    notice.detail.date = notice_elements.xpath('./div/h3/text()')[1][3:]
+    notice.detail.content = notice_elements.xpath('string(./div[@id="vsb_content"]/div)')
+    notice.detail.appendix.clear()
+    if '附件' in notice.detail.content:
+        get_appendix(html_doc, notice)
     return notice
 
 
-def get_appendix(html_doc):
+def get_appendix(html_doc, notice: Notice):
     appendix_xpath = '/html/body/div[3]/form/div[1]/ul/li'
     appendix_elements = html_doc.xpath(appendix_xpath)
-    appendix_list = []
     for row in appendix_elements:
-        appendix_dict = {}
-        appendix_dict['name'] = 'http://jwzx.lntu.edu.cn/' + row.xpath('./a/@href')[0]
-        appendix_dict['url'] = row.xpath('./a/text()')[0]
-        appendix_list.append(appendix_dict)
-    return appendix_list
+        name = 'http://jwzx.lntu.edu.cn/' + row.xpath('./a/@href')[0]
+        url = row.xpath('./a/text()')[0]
+        appendix = NoticeDetailAppendix(url=url, name=name)
+        notice.detail.appendix.append(appendix)
 
 
 def get_public_notice():
-    # page_list = ['http://jwzx.lntu.edu.cn/index/jwgg/{page}.htm'.format(page=i)
-    # for i in range(1, 15)]  # TODO
-    # url_list.append('http://jwzx.lntu.edu.cn/index/jwgg.htm')
-    # for page_url in page_list:
-    #     get_notice_url_list_from(page_url, notice_url_dict_list)
     try:
-        notice_url_list = []
-        notice_data_list = []
         page_list = ['http://jwzx.lntu.edu.cn/index/jwgg.htm']
-        get_notice_url_list_from(page_list[0], notice_url_list)
-        for url_dict in notice_url_list:
-            notice = {
-                'url': url_dict['url'],
-                'detail': {
-                    'title': '',
-                    'date': '',
-                    'content': '',
-                    'appendix': [],
-                }
-            }
-            notice = text_spider(notice)
-            notice_data_list.append(notice)
-        return notice_data_list
+        # page_list.extend(['http://jwzx.lntu.edu.cn/index/jwgg/{page}.htm'.format(page=i)
+        #                   for i in range(1, 15)])
+        url_list = list(map(get_notice_url_list_from, page_list))[0]
+        notices: [Notice] = []
+        for url in url_list:
+            notice = Notice(url=url)
+            notice = notice_detail_spider(notice)
+            notices.append(notice)
+        return notices
     except IndexError:
         return "教务在线通知爬虫爆炸"
 

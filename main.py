@@ -1,10 +1,13 @@
+from typing import List
+
 import uvicorn
 from fastapi import FastAPI
+from starlette import status
 from starlette.requests import Request
 
 from core.lntuNotice import get_public_notice
 from core.spider import get_std_info, get_class_table, get_all_scores, get_all_GPAs
-from models import User
+from modelset.schemas import User, Notice, ResponseT
 
 app = FastAPI(
     title="LNTUHelper APIs",
@@ -23,21 +26,19 @@ responseBase = {'code': 200,
 
 @app.get('/', tags=["public"])
 def index(request: Request):
-    client_host = request.client.host
-    response = responseBase.copy()
-    response['data'] = "You just successfully deployed FastAPI: {}".format(client_host)
+    response = ResponseT(data=str)
+    response.data = "Hello LNTUHelper! " + request.client.host
     return response
 
 
-@app.get('/notice', tags=["public"])
+@app.get('/notice', tags=["public"], response_model=ResponseT)
 async def get_notice():
-    response = responseBase.copy()
+    response = ResponseT(data=List[Notice])
     try:
-        results = get_public_notice()
-        response['data'] = results
+        response.data = get_public_notice()
     except Exception as e:
-        response['code'] = 500
-        response['msg'] = str(e)
+        response.code = status.HTTP_404_NOT_FOUND
+        response.message = str(e)
     return response
 
 

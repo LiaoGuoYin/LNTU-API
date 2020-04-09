@@ -22,7 +22,7 @@ def get_notice_url_list_from(page_url):
 
 
 def notice_detail_spider(notice: Notice):
-    xpath_str = '/html/body/div[3]/form/div[1]'
+    xpath_str = '/html/body/div/form/div[1]'
     response = requests.get(notice.url)
     response.encoding = 'utf-8'
     html_doc = etree.HTML(response.text)
@@ -54,11 +54,12 @@ def get_public_notice():
         notices: [Notice] = []
         for url in url_list:
             notice = Notice(url=url)
-            notice = notice_detail_spider(notice)
-            notices.append(notice)
+            if notice.url.endswith('htm'):
+                notice = notice_detail_spider(notice)
+                notices.append(notice)
         return notices
-    except IndexError:
-        return "教务在线通知爬虫爆炸"
+    except IndexError as e:
+        return "教务在线通知爬虫爆炸：" + str(e)
 
 
 if __name__ == '__main__':

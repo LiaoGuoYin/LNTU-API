@@ -113,13 +113,10 @@ if __name__ == '__main__':
         for each in accounts:
             username, password = each[0], each[1]
             # test_login(username, password)
-            # print(username, password)
             # test_parse_week()
-            # test_parse_stu_info()
-            # pprint(test_parse_class_table())
-            # test_parse_all_scores()
+            test_parse_stu_info()
+            pprint(test_parse_class_table())
+            test_parse_all_scores()
             test_parse_all_GPAs()
     except Exception as e:
         traceback.format_exc(e)
-
-# test_parse_week()

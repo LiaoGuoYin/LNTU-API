@@ -137,6 +137,6 @@ def search_all(template: str, html: str):
 
 
 def save_html_to_file(html_text):
-    with open('../testHTML/tmp.html', 'w+') as fp:
+    with open('./testHTML/tmp.html', 'w+') as fp:
         fp.write(html_text)
     print("output to current directory successfully!")

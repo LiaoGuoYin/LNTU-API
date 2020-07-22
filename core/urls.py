@@ -13,7 +13,8 @@ class URLEnums(Enum):
     STUDENT_INFO = URL_ROOT + '/stdDetail.action'
     CLASS_TABLE = URL_ROOT + '/courseTableForStd!courseTable.action'
     CLASS_TABLE_OF_STD_IDS = URL_ROOT + '/courseTableForStd.action'
-    ALL_SCORES = URL_ROOT + '/teach/grade/course/person!historyCourseGrade.action?projectType=MAJOR'
+    ALL_SCORES = URL_ROOT + '/teach/grade/course/person!search.action'
+    # ALL_SCORES = URL_ROOT + '/teach/grade/course/person!historyCourseGrade.action?projectType=MAJOR' 20200722 下线
 
     # CLASSROOMS = URL_ROOT + '/classroom/apply/free!search.action'
     # 学期成绩：http://202.199.224.119:8080/eams/teach/grade/course/person!search.action?semesterId = 学期 ID

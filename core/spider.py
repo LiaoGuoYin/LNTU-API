@@ -8,7 +8,7 @@ from requests import Session
 from core.exceptions import NetworkException, SpiderException, ParserException
 from core.parser import LNTUParser
 from core.urls import URLEnums
-from core.util import search_all
+from core.util import search_all, save_html_to_file
 
 
 def test_network():
@@ -86,10 +86,11 @@ def get_class_table(username, password, semester=626, session=None):
         raise SpiderException("服务器解析错误：成绩查询页请求失败")
 
 
-def get_all_scores(username, password, session=None):
+def get_all_scores(username, password, session=None, semesterId=626):
     if not session:
         session = log_in(username, password)
-    response = session.post(URLEnums.ALL_SCORES)
+    response = session.get(URLEnums.ALL_SCORES, params={'semesterId': semesterId})
+    # save_html_to_file(response.text)
     if "学年学期" in response.text:
         html_doc = etree.HTML(response.text)
         return LNTUParser.parse_all_scores(html_doc=html_doc)

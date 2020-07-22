@@ -1,3 +1,5 @@
+from lxml import etree
+
 from core.exceptions import ParserException
 from core.util import search_all, GetWeek
 from modelset.schemas import ClassTable, ClassTableSchedule, GPA, semesterGPA, Grade, GradeDetail
@@ -90,15 +92,15 @@ class LNTUParser:
             for row in gpa_table:
                 cells = [cells.text.strip() for cells in row]
                 row_type = len(cells)  # 判断表头表身表尾
-                if row_type is 1:
+                if row_type == 1:
                     # 表尾元素是统计时间
                     gpa.effectiveTime = cells[0].split('统计时间:')[1]
-                elif row_type is 4:
+                elif row_type == 4:
                     # 表头是总体信息
                     gpa.counts = cells[1]
                     gpa.credits = cells[2]
                     gpa.GPA = cells[3]
-                elif row_type is 5:
+                elif row_type == 5:
                     # 表身是学期行
                     yearSection = cells[0]
                     singleGPA = semesterGPA(yearSection=yearSection)
@@ -119,7 +121,12 @@ class LNTUParser:
         score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
         try:
             for row in score_table_rows:
-                cells = [td.text.strip() for td in row]
+                cells = []
+                for td in row:
+                    if td.text is not None:
+                        cells.append(td.text.strip())
+                    else:
+                        cells.append('')
                 """['2017-2018 1', 'H271780001036', 'H271780001036.18', '军事理论', '专业必修', '1', '-- (正常)', '47 (正常)', '50 (正常)', '74 (正常)', '74', '1']"""
                 course = Grade(code=cells[2])
                 course.name = cells[3]
@@ -138,5 +145,7 @@ class LNTUParser:
             return courses
         except IndexError:
             return "成绩详情页数组越界"
-        except AttributeError:
+        except AttributeError as e:
+            print(etree.tounicode(row))
+            print(e.with_traceback())
             return "成绩详情页结构，xpath 失败"

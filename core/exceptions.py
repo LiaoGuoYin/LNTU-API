@@ -1,5 +1,5 @@
 class FormException(Exception):
-    def __init(self, msg):
+    def __init__(self, msg):
         self.msg = msg
 
     def __str__(self):
@@ -7,7 +7,7 @@ class FormException(Exception):
 
 
 class NetworkException(Exception):
-    def __init(self, msg):
+    def __init__(self, msg):
         self.msg = msg
 
     def __str__(self):

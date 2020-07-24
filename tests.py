@@ -1,7 +1,7 @@
 import configparser
-import traceback
 from pprint import pprint
 
+import requests
 from lxml import etree
 
 from core.parser import LNTUParser
@@ -72,19 +72,19 @@ def test_parse_class_table():
     return results
 
 
-def test_parse_all_scores():
-    with open('testHTML/scores.html', 'r') as fp:
+def test_parse_grades():
+    with open('testHTML/grades.html', 'r') as fp:
         html_text = fp.read()
         html_doc = etree.HTML(html_text)
-    results = LNTUParser.parse_all_scores(html_doc=html_doc)
-    # print(all_course_dict)
+    results = LNTUParser.parse_grades(html_doc=html_doc)
+    # print(results)
     # results = LNTUParser.parse_class_table_body(html_text=html_text, all_course_dict=all_course_dict)
     pprint(results)
     return results
 
 
 def test_parse_all_GPAs():
-    with open('testHTML/scores.html', 'r') as fp:
+    with open('testHTML/grades.html', 'r') as fp:
         html_text = fp.read()
         html_doc = etree.HTML(html_text)
     results = LNTUParser.parse_all_GPAs(html_doc=html_doc)
@@ -101,22 +101,33 @@ def load_account():
     config_path = 'static/config.ini'
     config = configparser.ConfigParser()
     config.read(config_path)
-    # print(config.sections())
+    print(config.sections())
     for key in config.sections():
         if key == 'account':
             return config.items(key)
 
 
+def testing():
+    accounts = load_account()
+    print(accounts)
+    for each in accounts:
+        username, password = each[0], each[1]
+        print(username, password)
+        requests.post('http://127.0.0.1:3000/user/grades', json={
+            'username': username,
+            'password': password
+        })
+
+
 if __name__ == '__main__':
     try:
-        accounts = load_account()
-        for each in accounts:
-            username, password = each[0], each[1]
-            # test_login(username, password)
-            # test_parse_week()
-            test_parse_stu_info()
-            pprint(test_parse_class_table())
-            test_parse_all_scores()
-            test_parse_all_GPAs()
+        testing()
+        # test_parse_week()
+        # test_parse_stu_info()
+        # pprint(test_parse_class_table())
+        # test_parse_grades()
+        # print(URLManager.get_all_urls())
+        # test_parse_all_GPAs()
     except Exception as e:
-        traceback.format_exc(e)
+        # traceback.format_exc()
+        print(e)

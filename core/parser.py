@@ -1,8 +1,9 @@
-from lxml import etree
+import traceback
 
 from core.exceptions import ParserException
 from core.util import search_all, GetWeek
-from modelset.schemas import ClassTable, ClassTableSchedule, GPA, semesterGPA, Grade, GradeDetail
+from modelset import schemas
+from modelset.schemas import ClassTable, ClassTableSchedule, GPA, semesterGPA
 
 
 class LNTUParser:
@@ -116,8 +117,8 @@ class LNTUParser:
             return "GPA 解析错误，xpath 失败"
 
     @staticmethod
-    def parse_all_scores(html_doc):
-        courses: [Grade] = []
+    def parse_grades(html_doc):
+        course_list: [schemas.Grade] = []
         score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
         try:
             for row in score_table_rows:
@@ -128,24 +129,21 @@ class LNTUParser:
                     else:
                         cells.append('')
                 """['2017-2018 1', 'H271780001036', 'H271780001036.18', '军事理论', '专业必修', '1', '-- (正常)', '47 (正常)', '50 (正常)', '74 (正常)', '74', '1']"""
-                course = Grade(code=cells[2])
+                course = schemas.Grade(code=cells[2])
                 course.name = cells[3]
                 course.credit = cells[5]
                 course.grade = cells[-2]
                 course.semester = cells[0]
                 course.courseType = cells[4]
 
-                course_detail = GradeDetail()
-                course_detail.usual = cells[8]
-                course_detail.interim = cells[6]
-                course_detail.final = cells[7]
-                course_detail.general = cells[9]
-                course.gradeDetail.update(course_detail)
-                courses.append(course)
-            return courses
-        except IndexError:
+                course.usual = cells[8]
+                course.midterm = cells[6]
+                course.termEnd = cells[7]
+                course.result = cells[9]
+                course_list.append(course)
+            return course_list
+        except IndexError as e:
+            traceback.format_exc()
             return "成绩详情页数组越界"
         except AttributeError as e:
-            print(etree.tounicode(row))
-            print(e.with_traceback())
             return "成绩详情页结构，xpath 失败"

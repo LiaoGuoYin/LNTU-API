@@ -1,4 +1,4 @@
-from typing import List, Optional, TypeVar, Generic, Set
+from typing import List, Optional, TypeVar, Generic
 
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
@@ -8,11 +8,16 @@ from starlette import status
 DataT = TypeVar('DataT')
 
 
-class ResponseT(GenericModel, Generic[DataT]):
+class Response(BaseModel):
     code: int = status.HTTP_200_OK
     message: str = "success"
     data: Optional[DataT]
 
+
+class ResponseT(GenericModel, Generic[DataT]):
+    code: int = status.HTTP_200_OK
+    message: str = "success"
+    data: Optional[DataT]
     # @validator('code', always=True)
     # def check_consistency(cls, v, values):
     #     if v is not None and values['data'] is not None:
@@ -22,41 +27,32 @@ class ResponseT(GenericModel, Generic[DataT]):
     #     return v
 
 
-class User(BaseModel):
-    username: str
-    password: str
-
-
 # Notice
 noticeTemplate = {
     'url': '',
-    'detail': {
-        'title': '',
-        'date': '',
-        'content': '',
-        'appendix': [{
-            'url': '',
-            'name': '',
-        }],
-    }
+    'title': '',
+    'date': '',
+    'content': '',
+    'appendix': [{
+        'url': '',
+        'name': '',
+    }],
 }
 
 
-class NoticeDetailAppendix(BaseModel):
-    url: str
-    name: str
-
-
 class NoticeDetail(BaseModel):
+    class NoticeDetailAppendix(BaseModel):
+        url: str
+        name: str
+
     title: str = None
     date: str = None
     content: str = None
     appendix: List[NoticeDetailAppendix] = []
 
 
-class Notice(BaseModel):
+class Notice(NoticeDetail):
     url: str
-    detail: Set[NoticeDetail] = NoticeDetail()
 
 
 ## ClassTable
@@ -123,35 +119,41 @@ class GPA(BaseModel):
     GPAs: List[semesterGPA] = []
 
 
-# Score
-ScoreTemplate = {
+# Grade
+GradeTemplate = {
     "code": "H271780001036.18",
     "name": "高等数学1",
-    "grade": '99',
     "semester": "2017-2018 1",
     "courseType": "必修",
-    "credit": '2.0',
-    "gradeDetail": {
-        "ususl": "100",
-        "interim": "40",
-        "final": "23",
-        "general": "99",
-    }
+    "credit": "2.0",
+    "usual": "100",
+    "midterm": "40",
+    "termEnd": "23",
+    "result": "99"
 }
 
 
-class GradeDetail(BaseModel):
-    usual: str = None
-    interim: str = None
-    final: str = None
-    general: str = None
-
-
 class Grade(BaseModel):
-    code: str
-    semester: str = None
-    name: str = None
-    courseType: str = None
-    grade: str = None
-    credit: str = None
-    gradeDetail: Set[GradeDetail] = {}
+    code: str = ''
+    name: str = ''
+    semester: str = ''
+    courseType: str = ''
+    grade: str = ''
+    credit: str = ''
+    usual: str = ''
+    midterm: str = ''
+    termEnd: str = ''
+    result: str = ''
+
+    class Config:
+        orm_mode = True
+
+
+class User(BaseModel):
+    username: int
+    password: str
+
+    # grades: List[Grade] = []
+
+    class Config:
+        orm_mode = True

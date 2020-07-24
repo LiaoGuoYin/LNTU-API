@@ -8,7 +8,7 @@ from requests import Session
 from core.exceptions import NetworkException, SpiderException, ParserException
 from core.parser import LNTUParser
 from core.urls import URLEnums
-from core.util import search_all, save_html_to_file
+from core.util import search_all
 
 
 def test_network():
@@ -26,7 +26,7 @@ def log_in(username, password):
         raise ParserException("页面上没找到 SHA1token")
     key = hashlib.sha1((token + password).encode('utf-8')).hexdigest()
     data = {'username': username, 'password': key}
-    time.sleep(0.5)
+    time.sleep(0.5)  # 延迟 0.5 秒防止被 ban
     response = session.post(URLEnums.LOGIN, data=data)
     if '密码错误' in response.text:
         raise SpiderException(F"{username} 用户名或密码错误")
@@ -67,7 +67,7 @@ def get_class_table(username, password, semester=626, session=None):
     """默认学期 626"""
     if not session:
         session = log_in(username, password)
-    """获取课表之前必须 get_std_id() """
+    """获取课表之前必须 get_std_id()"""
     ids = get_std_ids(session)
     bodyData = {
         'ignoreHead': 1,
@@ -86,14 +86,14 @@ def get_class_table(username, password, semester=626, session=None):
         raise SpiderException("服务器解析错误：成绩查询页请求失败")
 
 
-def get_all_scores(username, password, session=None, semesterId=626):
+def get_grades(username, password, session=None, semesterId=626):
     if not session:
         session = log_in(username, password)
-    response = session.get(URLEnums.ALL_SCORES, params={'semesterId': semesterId})
+    response = session.get(URLEnums.GRADES, params={'semesterId': semesterId})
     # save_html_to_file(response.text)
     if "学年学期" in response.text:
         html_doc = etree.HTML(response.text)
-        return LNTUParser.parse_all_scores(html_doc=html_doc)
+        return LNTUParser.parse_grades(html_doc=html_doc)
     else:
         raise SpiderException("成绩查询页请求失败")
 
@@ -101,7 +101,8 @@ def get_all_scores(username, password, session=None, semesterId=626):
 def get_all_GPAs(username, password, session=None):
     if not session:
         session = log_in(username, password)
-    response = session.post(URLEnums.ALL_SCORES)
+    response = session.post(URLEnums.GRADES)
+    print(response.text)
     if "学年学期" in response.text:
         html_doc = etree.HTML(response.text)
         return LNTUParser.parse_all_GPAs(html_doc=html_doc)

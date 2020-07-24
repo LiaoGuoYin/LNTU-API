@@ -118,10 +118,10 @@ def get_all_activity(cookie: str):
 
 # test
 # user_cookie = get_cookie(171003****, "***")
-user_cookie = 'ASP.NET_SessionId=u1qbgwxxujtftg5bw3ynfdcs'
+user_cookie = 'ASP.NET_SessionId=4a1gev1nuayhgadtziy3lkch'
 get_report(user_cookie)
-get_all_activity(user_cookie)
-get_scholarship(user_cookie, year=2019)
-get_scholarship(user_cookie, year=2018)
-get_scholarship(user_cookie, year=2017)
-get_scholarship(user_cookie, year=2016)
+# get_all_activity(user_cookie)
+# get_scholarship(user_cookie, year=2019)
+# get_scholarship(user_cookie, year=2018)
+# get_scholarship(user_cookie, year=2017)
+# get_scholarship(user_cookie, year=2016)

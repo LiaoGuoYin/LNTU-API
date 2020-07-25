@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-config_path = '../static/config.yaml'
+config_path = "../static/config.yaml"
 
 with open(config_path) as f:
     config = yaml.load(f, Loader=yaml.BaseLoader)

@@ -1,9 +1,28 @@
 import uvicorn
 from fastapi import FastAPI
 
+from app import education, quality
 from appDB.database import SessionLocal
 
 app = FastAPI()
+
+
+@app.get("/")
+async def home():
+    return {"Hi": "LNTU-API-v1.0"}
+
+
+app.include_router(
+    education.router,
+    prefix="/education",
+    tags=["education"]
+)
+
+app.include_router(
+    quality.router,
+    prefix="/quality",
+    tags=["quality"]
+)
 
 
 # DB Dependency
@@ -13,11 +32,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-@app.get("/")
-async def home():
-    return {"Hi": "LNTU-API-v1.0"}
 
 
 if __name__ == '__main__':

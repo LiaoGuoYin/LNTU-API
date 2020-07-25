@@ -140,8 +140,9 @@ dmypy.json
 # config
 static/config.ini
 static/ssl/
+static/*.html
+config.yaml
 
 # test
 test.py
 demo.py
-testHTML/

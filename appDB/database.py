@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from appDB.models import Base
-from static.utils import get_db_url_dict
+from appDB.utils import get_db_url_dict
 
 db_url_dict = get_db_url_dict()
 engine = create_engine(db_url_dict['production'], echo=True)

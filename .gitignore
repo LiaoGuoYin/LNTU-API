@@ -146,4 +146,4 @@ static/config.yaml
 # test
 test.py
 demo.py
-config.yaml
+*.html

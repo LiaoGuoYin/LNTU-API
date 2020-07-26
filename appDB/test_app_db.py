@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from app.main import app, get_db
-from static.utils import get_db_url_dict
+from appDB.utils import get_db_url_dict
 
 db_url_dict = get_db_url_dict()
 engine = create_engine(db_url_dict['test'])

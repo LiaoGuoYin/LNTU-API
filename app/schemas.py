@@ -2,9 +2,11 @@ from typing import Union
 
 from pydantic import BaseModel
 
+from app.exceptions import StatusCodeEnum
+
 
 class ResponseT(BaseModel):
-    code: int = 200
+    code: StatusCodeEnum = StatusCodeEnum.SUCCESS
     message: str = "success"
     data: Union[list, dict] = []
 

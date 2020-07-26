@@ -1,24 +1,13 @@
-import yaml
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from app.main import app, get_db
-from appDB.database import config_path
+from static.utils import get_db_url_dict
 
-with open(config_path) as f:
-    # def TODO yield
-    config = yaml.load(f, Loader=yaml.BaseLoader)
-    mysql_config = config['test-mysql']
-    user = mysql_config['user']
-    password = mysql_config['password']
-    host = mysql_config['host']
-    port = mysql_config['port']
-    db_name = mysql_config['name']
-
-DB_URL = F"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
-engine = create_engine(DB_URL)
+db_url_dict = get_db_url_dict()
+engine = create_engine(db_url_dict['test'])
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 Base.metadata.create_all(bind=engine)
@@ -37,5 +26,4 @@ client = TestClient(app)
 
 
 def test_connect_db():
-    # TODO
     pass

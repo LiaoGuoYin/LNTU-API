@@ -1,0 +1,30 @@
+sentry:
+  url: https://"*********"@o396131.ingest.sentry.io/5249091
+
+mysql:
+  #  线上数据库
+  user: root
+  password: root
+  host: 127.0.0.1
+  port: 3306
+  name: hilntu # 线上数据库名
+
+test-mysql:
+  #  测试数据库
+  user: root
+  password: root
+  host: 127.0.0.1
+  port: 3306
+  name: test_hilntu # 测试数据库名
+
+account:
+  # 测试用账号
+  valid:
+    # 有效账号
+    username: 1710031111
+    password: test
+  invalid:
+    # 无效账号
+    username: 1710030215
+    password: test
+

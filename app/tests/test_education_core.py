@@ -8,7 +8,7 @@ from app.exceptions import TokenException, FormException
 
 def get_test_users():
     import yaml
-    with open('static/config.yaml') as f:
+    with open('config.yaml') as f:
         config = yaml.load(f, Loader=yaml.BaseLoader)
     return config['account']
 

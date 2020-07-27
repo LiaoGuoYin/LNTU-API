@@ -1,8 +1,8 @@
 import hashlib
 import re
+import time
 
 import requests
-import time
 from lxml import etree
 from requests import Session
 
@@ -25,7 +25,7 @@ def login(username: int, password: str) -> Session:
         raise NetworkException("3s 未响应，教务在线爆炸")
     session = Session()
     response = session.get(URLEnum.LOGIN)
-    token = re.findall("SHA1\('(.*?)'", response.text)[0]
+    token = re.findall(r"SHA1\('(.*?)'", response.text)[0]
     if token is None:
         raise SpiderParserException("页面上没找到 SHA1token")
     key = hashlib.sha1((token + password).encode('utf-8')).hexdigest()
@@ -65,7 +65,7 @@ def get_class_table(username: int, password: str, semesterId: int = 626, session
         response_inner = session.get(URLEnum.CLASS_TABLE_OF_STD_IDS)
         if is_save:
             save_html_to_file(response_inner.text, "get_ids")
-        stu_id = re.findall('\(form,"ids","(.*?)"\);', response_inner.text)[0]
+        stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[0]
         if stu_id is None:
             raise SpiderParserException("页面上没找到 ids")
         else:

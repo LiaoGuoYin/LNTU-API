@@ -1,3 +1,4 @@
+import datetime
 from typing import Union, List
 
 from pydantic import BaseModel
@@ -48,3 +49,31 @@ class ClassTableCourse(BaseModel):
 
     def self_dict(self):
         return self.dict()
+
+
+class UserInfo(BaseModel):
+    username: int
+    name: str
+    photoUrl: str = None
+    nickname: str = None
+    gender: str = None
+    grade: str = None
+    education_last: str = None
+    project: str = None
+    education: str = None
+    studentType: str = None
+    college: str = None
+    major: str = None
+    direction: str = None
+    enrollDate: datetime.date = None
+    graduateDate: datetime.date = None
+    chiefCollege: str = None
+    studyType: str = None
+    membership: str = None
+    isInSchool: str = None
+    campus: str = None
+    majorClass: str = None
+    effectAt: str = None
+    isInRecord: str = None
+    studentStatus: str = None
+    isWorking: str = None

@@ -1,8 +1,8 @@
 import hashlib
 import re
+import time
 
 import requests
-import time
 from lxml import etree
 from requests import Session
 
@@ -83,8 +83,8 @@ def get_class_table(username: int, password: str, semester: int = 626, session: 
     if is_save:
         save_html_to_file(html_text, "class-table")
     if '课表格式说明' in html_text:
-        course_bottom_list = parse_class_table_bottom(html_doc=etree.HTML(html_text))
-        return parse_class_table_body(html_text, course_bottom_list=course_bottom_list)
+        part_course_list = parse_class_table_bottom(html_doc=etree.HTML(html_text))
+        return parse_class_table_body(html_text, course_dict_list=part_course_list)
     else:
         raise SpiderParserException("服务器解析课表失败")
 

@@ -6,13 +6,13 @@ from app.exceptions import SpiderParserException
 from app.schemas import ClassTableCourseSchedule, ClassTableCourse
 
 
-def parse_stu_info(html_doc) -> dict:
+def parse_stu_info(html_doc) -> schemas.UserInfo:
     rows = html_doc.xpath('/html/body/div/div[2]/div[1]/table/tr')[1:-1]
-    data_keys = [
-        'username', 'name', 'photoURL', 'nickname', 'gender', 'grade', 'eduLength', 'project',
-        'education', 'studentType', 'college', 'major', 'direction', 'enrollDate', 'graduateDate',
-        'chiefCollege', 'studyType', 'membership', 'isInSchool', 'withCampus', 'withClass',
-        'recordEffectDate', 'isOwnRecord', 'studentStatus', 'isWorking']
+    data_keys = ['username', 'name', 'photoUrl', 'nickname', 'gender', 'grade', 'education_last', 'project',
+                 'education',
+                 'studentType', 'college', 'major', 'direction', 'enrollDate', 'graduateDate', 'chiefCollege',
+                 'studyType', 'membership', 'isInSchool', 'campus', 'majorClass', 'effectAt', 'isInRecord',
+                 'studentStatus', 'isWorking']
     try:
         data_values = [cell.text
                        for row in rows
@@ -21,8 +21,8 @@ def parse_stu_info(html_doc) -> dict:
             raise SpiderParserException("个人信息页，数据解析缺失")
         data = dict(zip(data_keys, data_values))
         data[
-            'photoURL'] = F"http://202.199.224.119:8080/eams/showSelfAvatar.action?user.name={data.get('username', 'None')}"
-        return data
+            'photoUrl'] = F"http://202.199.224.119:8080/eams/showSelfAvatar.action?user.name={data.get('username', 'None')}"
+        return schemas.UserInfo(**data)
     except IndexError:
         raise SpiderParserException("个人信息页，数组越界")
     except AttributeError:
@@ -58,14 +58,15 @@ def parse_class_table_body(html_text, course_dict_list: list) -> list:
         body_course_list = re.findall(course_table_pattern, html_text)
         """function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
         for each in body_course_list:
-            """each: ['信息系统分析与设计(H101730023056.01)', '4809', '静远楼239', '00111111111100000000000000000000000000000000000000000', 5, 1]"""
+            """each example: ('206427(H101730023056.01)","信息系统分析与设计(H101730023056.01)","4809","静远楼239","00111111111100000000000000000000000000000000000000000', '1570829', '4', '0')"""
             course_data = each[0].replace('\"', '').split(',')
-            course_data_code = re.findall('\((.*?)\)', course_data[0])[0]
+            course_data.extend(each[-2:])
+            course_data_code = re.findall('\((.*?)\)', course_data[1])[0]
             schedule = ClassTableCourseSchedule()
-            schedule.room = each[2]
-            schedule.weeks = GetWeek().marshal(each[3], 2, 1, 50)  # TODO 单 1-9 -> [1,3,5,7,9]
-            schedule.weekday = int(each[-2]) + 1  # course_week
-            schedule.index = int(each[-1]) + 1  # course_index
+            schedule.room = course_data[3]
+            schedule.weeks = GetWeek().marshal(course_data[4], 2, 1, 50)  # TODO 单 1-9 -> [1,3,5,7,9]
+            schedule.weekday = int(course_data[5]) + 1  # course_week
+            schedule.index = int(course_data[6]) + 1  # course_index
             [course.schedules.append(schedule) for course in course_dict_list if
              course_data_code == course.code]
         return course_dict_list

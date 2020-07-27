@@ -1,8 +1,8 @@
 import hashlib
 import re
-import time
 
 import requests
+import time
 from lxml import etree
 from requests import Session
 
@@ -57,7 +57,8 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
         raise SpiderParserException("个人信息页请求失败")
 
 
-def get_class_table(username: int, password: str, semester: int = 626, session: Session = None, is_save: bool = False):
+def get_class_table(username: int, password: str, semesterId: int = 626, session: Session = None,
+                    is_save: bool = False):
     # 默认学期 626
     def get_std_ids(session):
         # 课表查询之前，一定要访问，因此只支持 session 模式
@@ -77,7 +78,7 @@ def get_class_table(username: int, password: str, semester: int = 626, session: 
         'ignoreHead': 1,
         'setting.kind': 'std',
         'ids': ids,
-        'semester.id': semester,
+        'semester.id': semesterId,
     })
     html_text = response.text
     if is_save:

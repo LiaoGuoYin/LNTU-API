@@ -4,7 +4,7 @@ import time
 
 import requests
 from lxml import etree
-from requests import Session
+from requests import Session, ReadTimeout
 
 from app.education.parser import parse_class_table_bottom, parse_class_table_body, parse_grades, parse_stu_info
 from app.education.urls import URLEnum
@@ -12,18 +12,21 @@ from app.education.utils import save_html_to_file
 from app.exceptions import NetworkException, TokenException, AccessException, FormException, SpiderParserException
 
 
-def is_education_online():
-    response = requests.head(URLEnum.LOGIN, timeout=(1, 3))
-    if response.status_code != 200:
-        return False
-    else:
-        return True
+def check_education_online():
+    try:
+        response = requests.head(URLEnum.LOGIN, timeout=(1, 3))
+        if response.status_code == 200:
+            return True
+    except ReadTimeout:
+        raise NetworkException("3s 未响应，教务在线爆炸")
+    except ConnectionError:
+        raise NetworkException("连接过多，被拒绝")
 
 
 def login(username: int, password: str) -> Session:
-    if not is_education_online():
-        raise NetworkException("3s 未响应，教务在线爆炸")
+    check_education_online()
     session = Session()
+    session.keep_alive = False
     response = session.get(URLEnum.LOGIN)
     token = re.findall(r"SHA1\('(.*?)'", response.text)[0]
     if token is None:

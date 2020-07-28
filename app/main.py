@@ -52,9 +52,10 @@ def get_sentry():
         return "初始化失败，请检查 config.yaml 配置文件是否正确"
 
 
+if get_sentry() is True:
+    print("初始化 Sentry 成功")
+else:
+    print("初始化 Sentry 失败")
+
 if __name__ == '__main__':
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
-    if get_sentry() is True:
-        print("初始化 Sentry 成功")
-    else:
-        print("初始化 Sentry 失败")

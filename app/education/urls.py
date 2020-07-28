@@ -6,6 +6,7 @@ from lxml import etree
 
 class URLEnum(Enum):
     URL_ROOT = 'http://202.199.224.119:8080/eams'
+    # URL_ROOT = 'http://202.199.224.24:8080/eams'
 
     # private urls
     LOGIN = URL_ROOT + '/loginExt.action'

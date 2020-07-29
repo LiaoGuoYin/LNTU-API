@@ -7,7 +7,7 @@ mysql:
   password: root
   host: 127.0.0.1
   port: 3306
-  name: hilntu # 线上数据库名
+  db_name: hilntu # 线上数据库名
 
 test-mysql:
   #  测试数据库
@@ -15,16 +15,16 @@ test-mysql:
   password: root
   host: 127.0.0.1
   port: 3306
-  name: test_hilntu # 测试数据库名
+  db_name: test_hilntu # 测试数据库名
 
 account:
   # 测试用账号
   valid:
     # 有效账号
-    username: 1710031111
+    username: 1711111111
     password: test
   invalid:
     # 无效账号
-    username: 1710030215
+    username: 1711111111
     password: test
 

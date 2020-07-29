@@ -54,14 +54,14 @@ def parse_class_table_bottom(html_doc) -> list:
 
 def parse_class_table_body(html_text, course_dict_list: list) -> list:
     try:
-        course_table_pattern = """activity = new TaskActivity\(actTeacherId\.join\(','\),actTeacherName\.join\(','\),"(.*?)",null,null,assistantName,"","","(.*?)"\);\s+index =(\d)\*unitCount\+(\d+);"""
+        course_table_pattern = r"""activity = new TaskActivity\(actTeacherId\.join\(','\),actTeacherName\.join\(','\),"(.*?)",null,null,assistantName,"","","(.*?)"\);\s+index =(\d)\*unitCount\+(\d+);"""
         body_course_list = re.findall(course_table_pattern, html_text)
         """function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
         for each in body_course_list:
             """each example: ('206427(H101730023056.01)","信息系统分析与设计(H101730023056.01)","4809","静远楼239","00111111111100000000000000000000000000000000000000000', '1570829', '4', '0')"""
             course_data = each[0].replace('\"', '').split(',')
             course_data.extend(each[-2:])
-            course_data_code = re.findall('\((.*?)\)', course_data[1])[0]
+            course_data_code = re.findall(r'\((.*?)\)', course_data[1])[0]
             schedule = ClassTableCourseSchedule()
             schedule.room = course_data[3]
             schedule.weeks = GetWeek().marshal(course_data[4], 2, 1, 50)  # TODO 单 1-9 -> [1,3,5,7,9]

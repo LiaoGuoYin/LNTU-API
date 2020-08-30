@@ -1,10 +1,10 @@
 # LNTU-API
+LNTU-API Online Demo: [https://api.liaoguoyin.com/docs](https://api.liaoguoyin.com/docs)
+
+
 
 An elegant backend API of [LNTU Course Management Information System](http://202.199.224.119:8080/eams/loginExt.action) and [LNTU Students Quality Expansion Activity Management System](http://202.199.224.119:8080/eams/loginExt.action).
 
-
-
-LNTU-API Online Demo: [https://api.liaoguoyin.com/docs](https://api.liaoguoyin.com/docs)
 
 
 
@@ -49,4 +49,4 @@ LNTU-API Online Demo: [https://api.liaoguoyin.com/docs](https://api.liaoguoyin.c
     
 ## License
 
-[GPL v3](LINCENSE)
+[GPL v3](LICENSE)

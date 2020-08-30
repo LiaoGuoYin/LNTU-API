@@ -15,28 +15,28 @@ async def home():
 
 # Offline(DB) Operation Mode
 # data = class-table + grades + info 数据合集
-@router.get("/data", response_model=ResponseT)
-async def get_education_data(username: int, password: str, semesterId: int = 627):
-    response = ResponseT()
-    return response
+# @router.get("/data", response_model=ResponseT)
+# async def get_education_data(username: int, password: str, semesterId: int = 627):
+#     response = ResponseT()
+#     return response
+
+#
+# @router.get("/info", response_model=ResponseT)
+# async def get_education_info(username: int, password: str):
+#     response = ResponseT(data={username: password})
+#     return response
 
 
-@router.get("/info", response_model=ResponseT)
-async def get_education_info(username: int, password: str):
-    response = ResponseT(data={username: password})
-    return response
+# @router.get("/grades", response_model=ResponseT)
+# async def get_education_grades(username: int, password: str, semesterId: int = 627):
+#     response = ResponseT(data={username: password})
+#     return response
 
 
-@router.get("/grades", response_model=ResponseT)
-async def get_education_grades(username: int, password: str, semesterId: int = 627):
-    response = ResponseT(data={username: password})
-    return response
-
-
-@router.get("/class-table", response_model=ResponseT)
-async def get_education_class_table(user: schemas.User, semesterId: int = 627):
-    response = ResponseT()
-    return response
+# @router.get("/class-table", response_model=ResponseT)
+# async def get_education_class_table(user: schemas.User, semesterId: int = 627):
+#     response = ResponseT()
+#     return response
 
 
 # Online Operation Mode

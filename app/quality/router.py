@@ -8,6 +8,6 @@ async def quality_home():
     return {"API-location": "/quality/"}
 
 
-@router.get("/report", )
+@router.post("/report", )
 async def quality_home():
     return {"API-location": "/quality/report"}

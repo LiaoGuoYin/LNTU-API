@@ -27,7 +27,7 @@ class UserInfo(Base):
     nickname = Column(String(32))
     gender = Column(String(32))
     grade = Column(String(32))
-    education_last = Column(String(32))
+    educationLast = Column(String(32))
     project = Column(String(32))
     education = Column(String(32))
     studentType = Column(String(32))

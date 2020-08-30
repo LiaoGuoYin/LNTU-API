@@ -8,7 +8,7 @@ from app.schemas import ClassTableCourseSchedule, ClassTableCourse
 
 def parse_stu_info(html_doc) -> schemas.UserInfo:
     rows = html_doc.xpath('/html/body/div/div[2]/div[1]/table/tr')[1:-1]
-    data_keys = ['username', 'name', 'photoUrl', 'nickname', 'gender', 'grade', 'education_last', 'project',
+    data_keys = ['username', 'name', 'photoUrl', 'nickname', 'gender', 'grade', 'educationLast', 'project',
                  'education',
                  'studentType', 'college', 'major', 'direction', 'enrollDate', 'graduateDate', 'chiefCollege',
                  'studyType', 'membership', 'isInSchool', 'campus', 'majorClass', 'effectAt', 'isInRecord',
@@ -66,8 +66,21 @@ def parse_class_table_body(html_text, course_dict_list: list) -> list:
             course_data.extend(each[-2:])
             course_data_code = re.findall(r'\((.*?)\)', course_data[1])[0]
             schedule = ClassTableCourseSchedule()
-            schedule.room = course_data[3]
-            schedule.weeks = GetWeek().marshal(course_data[4], 2, 1, 50)  # TODO 单 1-9 -> [1,3,5,7,9]
+            # '静远楼313(JY313)' -> '静远楼313'
+            schedule.room = course_data[3] if course_data[3].find('(') == -1 else course_data[3].split('(')[0]
+            tmp_weeks = GetWeek().marshal(course_data[4], 2, 1, 50)
+            """"
+            转换周为列表：
+            单 1-9 -> [1,3,5,7,9]
+            双 2-10 -> [2,4,6,8,10]
+            2-15 -> [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+            """
+            if tmp_weeks.startswith('双') or tmp_weeks.startswith('单'):
+                start_week, end_week = map(int, tmp_weeks[1:].split('-'))
+                schedule.weeks = list(range(start_week, end_week + 1, 2))
+            else:
+                start_week, end_week = map(int, tmp_weeks.split('-'))
+                schedule.weeks = list(range(start_week, end_week + 1))
             schedule.weekday = int(course_data[5]) + 1  # course_week
             schedule.index = int(course_data[6]) + 1  # course_index
             [course.schedules.append(schedule) for course in course_dict_list if

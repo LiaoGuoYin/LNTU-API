@@ -35,7 +35,7 @@ class Grade(BaseModel):
 
 class ClassTableCourseSchedule(BaseModel):
     room: str = None
-    weeks: str = None
+    weeks: Union[list, None] = []
     weekday: int = None
     index: int = None
 
@@ -58,7 +58,7 @@ class UserInfo(BaseModel):
     nickname: str = None
     gender: str = None
     grade: str = None
-    education_last: str = None
+    educationLast: str = None
     project: str = None
     education: str = None
     studentType: str = None

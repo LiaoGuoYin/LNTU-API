@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app import schemas
-from app.education.core import get_stu_info, get_class_table, get_grades
+from app.education.core import get_stu_info, get_class_table, get_grade, get_grade_table
 from app.exceptions import CommonException
 from app.schemas import ResponseT
 
@@ -14,7 +14,7 @@ async def home():
 
 
 # Offline(DB) Operation Mode
-# data = class-table + grades + info 数据合集
+# data = class-table + grade + info 数据合集
 # @router.get("/data", response_model=ResponseT)
 # async def get_education_data(username: int, password: str, semesterId: int = 627):
 #     response = ResponseT()
@@ -27,8 +27,8 @@ async def home():
 #     return response
 
 
-# @router.get("/grades", response_model=ResponseT)
-# async def get_education_grades(username: int, password: str, semesterId: int = 627):
+# @router.get("/grade", response_model=ResponseT)
+# async def get_education_grade(username: int, password: str, semesterId: int = 627):
 #     response = ResponseT(data={username: password})
 #     return response
 
@@ -40,7 +40,7 @@ async def home():
 
 
 # Online Operation Mode
-# data = class-table + grades + info 数据合集
+# data = class-table + grade + info 数据合集
 @router.post("/data", response_model=ResponseT)
 async def refresh_education_data(user: schemas.User, semesterId: int = 627):
     response = ResponseT()
@@ -67,11 +67,21 @@ async def refresh_education_class_table(user: schemas.User, semesterId: int = 62
     return response
 
 
-@router.post("/grades", response_model=ResponseT)
-async def refresh_education_grades(user: schemas.User, semesterId: int = 627):
+@router.post("/grade", response_model=ResponseT)
+async def refresh_education_grade(user: schemas.User, semesterId: int = 627):
     response = ResponseT()
     try:
-        response.data = get_grades(**user.dict(), semesterId=semesterId)
+        response.data = get_grade(**user.dict(), semesterId=semesterId)
+    except CommonException as e:
+        response.code, response.message = e.code, e.msg
+    return response
+
+
+@router.post("/grade-table", response_model=ResponseT)
+async def refresh_education_grade(user: schemas.User):
+    response = ResponseT()
+    try:
+        response.data = get_grade_table(**user.dict())
     except CommonException as e:
         response.code, response.message = e.code, e.msg
     return response

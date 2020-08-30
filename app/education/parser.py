@@ -92,7 +92,7 @@ def parse_class_table_body(html_text, course_dict_list: list) -> list:
         return "课表体解析错误，xpath 失败"
 
 
-def parse_grades(html_doc) -> list:
+def parse_grade(html_doc) -> list:
     course_list: [schemas.Grade] = []
     score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
     try:
@@ -122,3 +122,27 @@ def parse_grades(html_doc) -> list:
         raise SpiderParserException("成绩详情页，数组越界")
     except AttributeError as e:
         raise SpiderParserException("成绩详情页，结构解析失败")
+
+
+def parse_grade_table(html_doc) -> list:
+    course_list: [schemas.GradeTable] = []
+    score_table_rows = html_doc.xpath('/html/body/table[2]/tr')
+    try:
+        needed_append_cells = []
+        cells = []
+        for row in score_table_rows[1:]:
+            if row[-1].text == '\xa0':
+                cells.append([each.text for each in row[:4]])
+            else:
+                cells.append([each.text for each in row[:4]])
+                needed_append_cells.append([each.text for each in row[4:]])
+        cells.extend(needed_append_cells)
+        for each in cells:
+            grade_table = schemas.GradeTable(name=each[0])
+            grade_table.credit = each[1]
+            grade_table.score = each[2]
+            grade_table.semester = each[3]
+            course_list.append(grade_table)
+        return course_list
+    except Exception as e:
+        return e

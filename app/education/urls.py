@@ -6,14 +6,14 @@ from lxml import etree
 
 class URLEnum(Enum):
     URL_ROOT = 'http://202.199.224.119:8080/eams'
-    # URL_ROOT = 'http://202.199.224.24:8080/eams'
 
     # private urls
     LOGIN = URL_ROOT + '/loginExt.action'
     STUDENT_INFO = URL_ROOT + '/stdDetail.action'
     CLASS_TABLE = URL_ROOT + '/courseTableForStd!courseTable.action'
     CLASS_TABLE_OF_STD_IDS = URL_ROOT + '/courseTableForStd.action'
-    GRADES = URL_ROOT + '/teach/grade/course/person!search.action'
+    GRADE = URL_ROOT + '/teach/grade/course/person!search.action'
+    GRADE_TABLE = URL_ROOT + '/teach/grade/course/person!report.action'
 
     # CLASSROOMS = URL_ROOT + '/classroom/apply/free!search.action'
     # 学期成绩：http://202.199.224.119:8080/eams/teach/grade/course/person!search.action?semesterId = 学期 ID
@@ -35,7 +35,7 @@ class URLEnum(Enum):
 def get_all_urls():
     try:
         url_dict = {}
-        response = requests.get(URLEnum.EDU_URL)
+        response = requests.get(URLEnum.EDU_URL.value)
         html_doc = etree.HTML(response.text)
         p_elements = html_doc.xpath('/html/body/div[3]/div[2]/div[1]/div[1]/div/p')
         data = [each.xpath('a/@href') for each in p_elements]

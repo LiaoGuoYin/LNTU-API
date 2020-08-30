@@ -77,3 +77,10 @@ class UserInfo(BaseModel):
     isInRecord: str = None
     studentStatus: str = None
     isWorking: str = None
+
+
+class GradeTable(BaseModel):
+    name: str
+    credit: str = None
+    score: str = None
+    semester: str = None

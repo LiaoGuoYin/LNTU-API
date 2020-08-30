@@ -60,15 +60,15 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
         raise SpiderParserException("个人信息页请求失败")
 
 
-def get_class_table(username: int, password: str, semesterId: int = 626, session: Session = None,
+def get_class_table(username: int, password: str, semesterId: int = 627, session: Session = None,
                     is_save: bool = False):
-    # 默认学期 626
+    # 默认学期 627
     def get_std_ids(session):
         # 课表查询之前，一定要访问，因此只支持 session 模式
         response_inner = session.get(URLEnum.CLASS_TABLE_OF_STD_IDS)
         if is_save:
             save_html_to_file(response_inner.text, "get_ids")
-        stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[0]
+        stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[1]
         if stu_id is None:
             raise SpiderParserException("页面上没找到 ids")
         else:
@@ -79,7 +79,7 @@ def get_class_table(username: int, password: str, semesterId: int = 626, session
     ids = get_std_ids(session)
     response = session.get(URLEnum.CLASS_TABLE, params={
         'ignoreHead': 1,
-        'setting.kind': 'std',
+        'setting.kind': 'class',# std/class
         'ids': ids,
         'semester.id': semesterId,
     })
@@ -93,7 +93,7 @@ def get_class_table(username: int, password: str, semesterId: int = 626, session
         raise SpiderParserException("服务器解析课表失败")
 
 
-def get_grades(username: int, password: str, session: Session = None, semesterId: int = 626, is_save: bool = False):
+def get_grades(username: int, password: str, session: Session = None, semesterId: int = 627, is_save: bool = False):
     if not session:
         session = login(username, password)
     response = session.get(URLEnum.GRADES, params={'semesterId': semesterId})

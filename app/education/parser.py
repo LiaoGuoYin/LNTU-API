@@ -35,6 +35,9 @@ def parse_class_table_bottom(html_doc) -> list:
     try:
         for row in rows:
             cells = row.xpath('./td')
+            if not len(cells):
+                # 处理课表为空的情况（可能是学期字段错误）
+                return []
             row_data = ["".join(cell.xpath('string(.)').split()) for cell in cells[2:-2]]
             """['大数据开发技术', '3', 'H101750042048.01', '杨韬']"""
             single_course_dict = {

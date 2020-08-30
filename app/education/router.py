@@ -16,7 +16,7 @@ async def home():
 # Offline(DB) Operation Mode
 # data = class-table + grades + info 数据合集
 @router.get("/data", response_model=ResponseT)
-async def get_education_data(username: int, password: str, semesterId: int = 626):
+async def get_education_data(username: int, password: str, semesterId: int = 627):
     response = ResponseT()
     return response
 
@@ -28,13 +28,13 @@ async def get_education_info(username: int, password: str):
 
 
 @router.get("/grades", response_model=ResponseT)
-async def get_education_grades(username: int, password: str):
+async def get_education_grades(username: int, password: str, semesterId: int = 627):
     response = ResponseT(data={username: password})
     return response
 
 
 @router.get("/class-table", response_model=ResponseT)
-async def get_education_class_table(user: schemas.User, semesterId: int = 626):
+async def get_education_class_table(user: schemas.User, semesterId: int = 627):
     response = ResponseT()
     return response
 
@@ -42,7 +42,7 @@ async def get_education_class_table(user: schemas.User, semesterId: int = 626):
 # Online Operation Mode
 # data = class-table + grades + info 数据合集
 @router.post("/data", response_model=ResponseT)
-async def refresh_education_data(user: schemas.User, semesterId: int = 626):
+async def refresh_education_data(user: schemas.User, semesterId: int = 627):
     response = ResponseT()
     return response
 
@@ -58,17 +58,17 @@ async def refresh_education_info(user: schemas.User):
 
 
 @router.post("/class-table", response_model=ResponseT)
-async def refresh_education_class_table(user: schemas.User, semesterId: int = 626):
+async def refresh_education_class_table(user: schemas.User, semesterId: int = 627):
     response = ResponseT()
     try:
-        response.data = get_class_table(**user.dict())
+        response.data = get_class_table(**user.dict(), semesterId=semesterId)
     except CommonException as e:
         response.code, response.message = e.code, e.msg
     return response
 
 
 @router.post("/grades", response_model=ResponseT)
-async def refresh_education_grades(user: schemas.User, semesterId: int = 626):
+async def refresh_education_grades(user: schemas.User, semesterId: int = 627):
     response = ResponseT()
     try:
         response.data = get_grades(**user.dict(), semesterId=semesterId)

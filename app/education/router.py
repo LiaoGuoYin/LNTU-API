@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app import schemas
+from app.common import notice
 from app.education.core import get_stu_info, get_class_table, get_grade, get_grade_table
 from app.exceptions import CommonException
 from app.schemas import ResponseT
@@ -82,6 +83,16 @@ async def refresh_education_grade(user: schemas.User):
     response = ResponseT()
     try:
         response.data = get_grade_table(**user.dict())
+    except CommonException as e:
+        response.code, response.message = e.code, e.msg
+    return response
+
+
+@router.get("/notice", )
+async def refresh_notice(limit: int = 10):
+    response = ResponseT()
+    try:
+        response.data = notice.run()
     except CommonException as e:
         response.code, response.message = e.code, e.msg
     return response

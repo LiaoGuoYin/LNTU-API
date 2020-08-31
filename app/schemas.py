@@ -20,6 +20,39 @@ class User(BaseModel):
         orm_mode = True
 
 
+# Notice
+class NoticeDetail(BaseModel):
+    class NoticeDetailAppendix(BaseModel):
+        url: str
+        name: str
+
+    title: str = None
+    date: str = None
+    content: str = None
+    appendix: List[NoticeDetailAppendix] = []
+
+
+class Notice(NoticeDetail):
+    url: str
+
+
+# ClassRoom
+class ClassRoom(BaseModel):
+    name: str = None
+    # building_id: int = -1
+    capacity: int = -1
+    category: str = None  # TODO 多媒体教室	语音室	专用教室
+    week: int = -1
+    monday: str = None
+    tuesday: str = None
+    wednesday: str = None
+    thursday: str = None
+    friday: str = None
+    saturday: str = None
+    sunday: str = None
+    # updated_at = models.DateTimeField(auto_now=True)
+
+
 class Grade(BaseModel):
     code: str = None
     name: str = None

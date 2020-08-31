@@ -32,21 +32,20 @@ An elegant backend API of [LNTU Course Management Information System](http://202
     - [x] personal information
     - [ ] teaching plannings
     - [x] class table
-    - [ ] class room
+    - [x] class room
     - [ ] exam plannings
     - [ ] school calendar
     - [ ] CET scores
-    - [ ] public notification
+    - [x] public notice
 
 - Others:
     - [ ] SunnyRunning(AiPao app)
-    
     - [ ] Student Quality expansion Spider
-    
     - [ ] Water-card Balance
     
       
     
 ## License
-
 [GPL v3](LICENSE)
+
+注意：对于基于本项目 **衍生、再发行的所有项目、所有子节点项目和使用了 LNTU-API 提供的部分开源组件**  的项目，其需公开注明 LNTU-API 标识。

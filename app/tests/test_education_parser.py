@@ -10,7 +10,7 @@ from app.education.parser import parse_stu_info, parse_grade, parse_class_table_
 
 class TestEducationParser(unittest.TestCase):
     def test_education_parse_info(self):
-        with open('app/tests/static/info.html', 'r') as f:
+        with open('static/info.html', 'r') as f:
             html_text = f.read()
         self.assertIn('学籍信息', html_text)
 
@@ -19,7 +19,7 @@ class TestEducationParser(unittest.TestCase):
         print(data_dict)
 
     def test_education_parse_class_table(self):
-        with open('app/tests/static/class-table.html', 'r') as f:
+        with open('static/class-table.html', 'r') as f:
             html_text = f.read()
         self.assertIn('课表格式说明', html_text)
 
@@ -32,7 +32,7 @@ class TestEducationParser(unittest.TestCase):
         [print(json.dumps(each.self_dict(), ensure_ascii=False)) for each in data_list]
 
     def test_education_parse_grade(self):
-        with open('app/tests/static/grade.html', 'r') as f:
+        with open('static/grade.html', 'r') as f:
             html_text = f.read()
         self.assertIn('学年学期', html_text)
 
@@ -41,7 +41,7 @@ class TestEducationParser(unittest.TestCase):
         print(grade_list)
 
     def test_education_parse_grade_table(self):
-        with open('app/tests/static/grade-table.html', 'r') as f:
+        with open('static/grade-table.html', 'r') as f:
             html_text = f.read()
         self.assertIn('个人成绩总表打印', html_text)
 

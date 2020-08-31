@@ -9,7 +9,6 @@ def get_db_url_dict(config_path=CONFIG_ABSOLUTE_PATH) -> dict:
     db_url_dict = {}
     with open(config_path) as f:
         config = yaml.load(f, Loader=yaml.BaseLoader)
-
         sql = config['mysql']
         user = sql['user']
         password = sql['password']

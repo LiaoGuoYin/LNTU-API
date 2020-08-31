@@ -13,7 +13,7 @@ from app.education.utils import save_html_to_file
 from app.exceptions import NetworkException, TokenException, AccessException, FormException, SpiderParserException
 
 
-def check_education_online():
+def check_education_online() -> bool:
     try:
         response = requests.head(URLEnum.LOGIN.value, timeout=(1, 3))
         if response.status_code == 200:
@@ -62,7 +62,7 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
 
 
 def get_class_table(username: int, password: str, semesterId: int = 627, session: Session = None,
-                    is_save: bool = False):
+                    is_save: bool = False) -> list:
     # 默认学期 627
     def get_std_ids(session):
         # 课表查询之前，一定要访问，因此使用 session 模式
@@ -94,7 +94,8 @@ def get_class_table(username: int, password: str, semesterId: int = 627, session
         raise SpiderParserException("课表页请求失败")
 
 
-def get_grade(username: int, password: str, session: Session = None, semesterId: int = 627, is_save: bool = False):
+def get_grade(username: int, password: str, session: Session = None, semesterId: int = 626,
+              is_save: bool = False) -> list:
     if not session:
         session = login(username, password)
     response = session.get(URLEnum.GRADE.value, params={'semesterId': semesterId})
@@ -106,7 +107,7 @@ def get_grade(username: int, password: str, session: Session = None, semesterId:
         raise SpiderParserException("成绩查询页请求失败")
 
 
-def get_grade_table(username: int, password: str, session: Session = None, is_save: bool = False):
+def get_grade_table(username: int, password: str, session: Session = None, is_save: bool = False) -> list:
     if not session:
         session = login(username, password)
     response = session.post(URLEnum.GRADE_TABLE.value, params={'template': 'grade.origin'})

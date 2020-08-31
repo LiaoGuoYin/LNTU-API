@@ -96,7 +96,7 @@ def parse_grade(html_doc) -> list:
     course_list: [schemas.Grade] = []
     score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
     try:
-        for row in score_table_rows:
+        for row in score_table_rows[1:]:
             cells = []
             for td in row:
                 if td.text is not None:
@@ -118,10 +118,11 @@ def parse_grade(html_doc) -> list:
             course_list.append(course)
         return course_list
     except IndexError as e:
+        # traceback.print_exc(e)
         # raise SpiderParserException("成绩详情页，数组越界" + traceback.extract_stack(e,limit=3)) TODO traceback
-        raise SpiderParserException("成绩详情页，数组越界")
+        raise SpiderParserException(f"成绩详情页，数组越界: {e}")
     except AttributeError as e:
-        raise SpiderParserException("成绩详情页，结构解析失败")
+        raise SpiderParserException(f"成绩详情页，结构解析失败: {e}")
 
 
 def parse_grade_table(html_doc) -> list:

@@ -1,4 +1,5 @@
 import json
+import os
 import unittest
 
 from lxml import etree
@@ -7,10 +8,19 @@ from app import schemas
 from app.education.parser import parse_stu_info, parse_grade, parse_class_table_bottom, parse_class_table_body, \
     parse_grade_table
 
+APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+local_file_dict = {
+    'config': f'{APP_ABSOLUTE_PATH}/../config.yaml',
+    'info': f'{APP_ABSOLUTE_PATH}/tests/static/info.html',
+    'class-table': f'{APP_ABSOLUTE_PATH}/tests/static/class-table.html',
+    'grade': f'{APP_ABSOLUTE_PATH}/tests/static/grade.html',
+    'grade-table': f'{APP_ABSOLUTE_PATH}/tests/static/grade-table.html',
+}
+
 
 class TestEducationParser(unittest.TestCase):
     def test_education_parse_info(self):
-        with open('static/info.html', 'r') as f:
+        with open(local_file_dict['info']) as f:
             html_text = f.read()
         self.assertIn('学籍信息', html_text)
 
@@ -19,7 +29,7 @@ class TestEducationParser(unittest.TestCase):
         print(data_dict)
 
     def test_education_parse_class_table(self):
-        with open('static/class-table.html', 'r') as f:
+        with open(local_file_dict['class-table']) as f:
             html_text = f.read()
         self.assertIn('课表格式说明', html_text)
 
@@ -32,7 +42,7 @@ class TestEducationParser(unittest.TestCase):
         [print(json.dumps(each.self_dict(), ensure_ascii=False)) for each in data_list]
 
     def test_education_parse_grade(self):
-        with open('static/grade.html', 'r') as f:
+        with open(local_file_dict['grade']) as f:
             html_text = f.read()
         self.assertIn('学年学期', html_text)
 
@@ -41,7 +51,7 @@ class TestEducationParser(unittest.TestCase):
         print(grade_list)
 
     def test_education_parse_grade_table(self):
-        with open('static/grade-table.html', 'r') as f:
+        with open(local_file_dict['grade-table']) as f:
             html_text = f.read()
         self.assertIn('个人成绩总表打印', html_text)
 

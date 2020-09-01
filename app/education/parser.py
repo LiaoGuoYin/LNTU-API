@@ -104,6 +104,8 @@ def parse_grade(html_doc) -> [schemas.Grade]:
                 else:
                     cells.append('')
             """['2017-2018 1', 'H271780001036', 'H271780001036.18', ' 军事理论 ', ' 专业必修 ', '1', '-- (正常)', '47 (正常)', '50 (正常)', '74 (正常)', '74', '1']"""
+            if len(cells) == 0:
+                return []
             course = schemas.Grade(code=cells[2])
             course.name = cells[3]
             course.credit = cells[5]

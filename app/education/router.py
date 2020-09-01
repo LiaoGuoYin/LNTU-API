@@ -2,8 +2,9 @@ from fastapi import APIRouter
 
 from app import schemas
 from app.common import notice
+from app.const import choose_semester_id
 from app.education.core import get_stu_info, get_class_table, get_grade, get_grade_table, login
-from app.education.utils import gpa_util
+from app.education.gpa import gpa_util
 from app.exceptions import CommonException
 from app.schemas import ResponseT
 
@@ -28,7 +29,8 @@ async def refresh_notice(limit: int = 10):
 # Online Operation Mode
 # data = info + class-table + grade-table + gpa-table
 @router.post("/data", response_model=ResponseT)
-async def refresh_education_data(user: schemas.User, semesterId: int = 627):
+async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
+    semesterId = choose_semester_id(semester)
     response = ResponseT()
     try:
         session = login(**user.dict())
@@ -57,7 +59,8 @@ async def refresh_education_info(user: schemas.User):
 
 
 @router.post("/class-table", response_model=ResponseT)
-async def refresh_education_class_table(user: schemas.User, semesterId: int = 627):
+async def refresh_education_class_table(user: schemas.User, semester: str = '2020-2'):
+    semesterId = choose_semester_id(semester)
     response = ResponseT()
     try:
         response.data = get_class_table(**user.dict(), semesterId=semesterId)
@@ -77,7 +80,8 @@ async def refresh_education_grade(user: schemas.User):
 
 
 @router.post("/grade", response_model=ResponseT)
-async def refresh_education_grade(user: schemas.User, semesterId: int = 626):
+async def refresh_education_grade(user: schemas.User, semester: str = '2020-2'):
+    semesterId = choose_semester_id(semester)
     response = ResponseT()
     try:
         semester_grade = get_grade(**user.dict(), semesterId=semesterId)

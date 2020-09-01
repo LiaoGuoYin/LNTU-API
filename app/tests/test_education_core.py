@@ -5,8 +5,8 @@ from lxml import etree
 from requests import Session
 
 from app.education.core import login, get_stu_info, get_class_table, get_grade, check_education_online, get_grade_table
+from app.education.gpa import gpa_util
 from app.education.parser import parse_grade, parse_grade_table
-from app.education.utils import gpa_util
 from app.exceptions import TokenException, FormException
 
 APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

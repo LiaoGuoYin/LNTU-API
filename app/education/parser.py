@@ -110,7 +110,6 @@ def parse_grade(html_doc) -> list:
             course.grade = cells[-2]
             course.semester = cells[0]
             course.courseType = cells[4]
-
             course.usual = cells[8]
             course.midterm = cells[6]
             course.termEnd = cells[7]

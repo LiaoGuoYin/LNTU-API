@@ -53,19 +53,6 @@ class ClassRoom(BaseModel):
     # updated_at = models.DateTimeField(auto_now=True)
 
 
-class Grade(BaseModel):
-    code: str = None
-    name: str = None
-    semester: str = None
-    courseType: str = None
-    grade: str = None
-    credit: str = None
-    usual: str = None
-    midterm: str = None
-    termEnd: str = None
-    result: str = None
-
-
 class ClassTableCourseSchedule(BaseModel):
     room: str = None
     weeks: Union[list, None] = []
@@ -110,6 +97,19 @@ class UserInfo(BaseModel):
     isInRecord: str = None
     studentStatus: str = None
     isWorking: str = None
+
+
+class Grade(BaseModel):
+    code: str = None
+    name: str = None
+    semester: str = None
+    courseType: str = None
+    grade: str = None
+    credit: str = None
+    usual: str = None
+    midterm: str = None
+    termEnd: str = None
+    score: str = None
 
 
 class GradeTable(BaseModel):

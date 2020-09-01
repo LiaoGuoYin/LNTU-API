@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app import schemas
 from app.common import notice
 from app.education.core import get_stu_info, get_class_table, get_grade, get_grade_table, login
+from app.education.utils import gpa_util
 from app.exceptions import CommonException
 from app.schemas import ResponseT
 
@@ -21,11 +22,13 @@ async def refresh_education_data(user: schemas.User, semesterId: int = 627):
     response = ResponseT()
     try:
         session = login(**user.dict())
+        semester_grade = get_grade_table(**user.dict(), session=session)
         data = {
             'info': get_stu_info(**user.dict(), session=session),
             'classTable': get_class_table(**user.dict(), session=session, semesterId=semesterId),
             # 'grade': get_grade(**user.dict(), session=session, semesterId=semesterId - 1),  # TODO: other semester
-            'gradeTable': get_grade_table(**user.dict(), session=session),
+            'gradeTable': semester_grade,
+            'gpa': gpa_util(semester_grade),
         }
         response.data = data
     except CommonException as e:
@@ -53,6 +56,16 @@ async def refresh_education_class_table(user: schemas.User, semesterId: int = 62
     return response
 
 
+@router.post("/grade-table", response_model=ResponseT)
+async def refresh_education_grade(user: schemas.User):
+    response = ResponseT()
+    try:
+        response.data = get_grade_table(**user.dict())
+    except CommonException as e:
+        response.code, response.message = e.code, e.msg
+    return response
+
+
 @router.post("/grade", response_model=ResponseT)
 async def refresh_education_grade(user: schemas.User, semesterId: int = 626):
     response = ResponseT()
@@ -63,11 +76,12 @@ async def refresh_education_grade(user: schemas.User, semesterId: int = 626):
     return response
 
 
-@router.post("/grade-table", response_model=ResponseT)
-async def refresh_education_grade(user: schemas.User):
+@router.post("/gpa", response_model=ResponseT)
+async def refresh_education_gpa(user: schemas.User, semesterId: int = 626):
     response = ResponseT()
     try:
-        response.data = get_grade_table(**user.dict())
+        semester_grade = get_grade(**user.dict(), semesterId=semesterId)
+        response.data = gpa_util(semester_grade)
     except CommonException as e:
         response.code, response.message = e.code, e.msg
     return response

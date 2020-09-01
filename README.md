@@ -28,7 +28,7 @@ An elegant backend API of [LNTU Course Management Information System](http://202
 ## Scheduling
 - With Python crawling student's info:
     - [x] login
-    - [x] exam scores
+    - [x] exam score
     - [x] personal information
     - [ ] teaching plannings
     - [x] class table

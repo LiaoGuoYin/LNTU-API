@@ -96,7 +96,7 @@ def parse_grade(html_doc) -> list:
     course_list: [schemas.Grade] = []
     score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
     try:
-        for row in score_table_rows[1:]:
+        for row in score_table_rows:
             cells = []
             for td in row:
                 if td.text is not None:
@@ -113,7 +113,7 @@ def parse_grade(html_doc) -> list:
             course.usual = cells[8]
             course.midterm = cells[6]
             course.termEnd = cells[7]
-            course.result = cells[9]
+            course.score = cells[9]
             course_list.append(course)
         return course_list
     except IndexError as e:
@@ -124,7 +124,7 @@ def parse_grade(html_doc) -> list:
         raise SpiderParserException(f"成绩详情页，结构解析失败: {e}")
 
 
-def parse_grade_table(html_doc) -> list:
+def parse_grade_table(html_doc) -> [schemas.GradeTable]:
     course_list: [schemas.GradeTable] = []
     score_table_rows = html_doc.xpath('/html/body/table[2]/tr')
     try:

@@ -15,8 +15,18 @@ async def home():
     return {"API-location": "/education/"}
 
 
+@router.get("/notice", )
+async def refresh_notice(limit: int = 10):
+    response = ResponseT()
+    try:
+        response.data = notice.run()
+    except CommonException as e:
+        response.code, response.message = e.code, e.msg
+    return response
+
+
 # Online Operation Mode
-# data = info + class-table + grade + grade-table
+# data = info + class-table + grade-table + gpa-table
 @router.post("/data", response_model=ResponseT)
 async def refresh_education_data(user: schemas.User, semesterId: int = 627):
     response = ResponseT()
@@ -70,28 +80,12 @@ async def refresh_education_grade(user: schemas.User):
 async def refresh_education_grade(user: schemas.User, semesterId: int = 626):
     response = ResponseT()
     try:
-        response.data = get_grade(**user.dict(), semesterId=semesterId)
-    except CommonException as e:
-        response.code, response.message = e.code, e.msg
-    return response
-
-
-@router.post("/gpa", response_model=ResponseT)
-async def refresh_education_gpa(user: schemas.User, semesterId: int = 626):
-    response = ResponseT()
-    try:
         semester_grade = get_grade(**user.dict(), semesterId=semesterId)
-        response.data = gpa_util(semester_grade)
-    except CommonException as e:
-        response.code, response.message = e.code, e.msg
-    return response
-
-
-@router.get("/notice", )
-async def refresh_notice(limit: int = 10):
-    response = ResponseT()
-    try:
-        response.data = notice.run()
+        semester_gpa = gpa_util(semester_grade)
+        response.data = {
+            'grade': semester_grade,
+            'gpa': semester_gpa
+        }
     except CommonException as e:
         response.code, response.message = e.code, e.msg
     return response

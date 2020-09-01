@@ -4,13 +4,25 @@ from fastapi import FastAPI
 
 from app import education, quality
 
-app = FastAPI()
+tags_metadata = [
+    {
+        "name": "education",
+        "description": "API for [LNTU Course Management Information System.](http://202.199.224.119:8080/eams/loginExt.action)",
+    },
+    {
+        "name": "quality",
+        "description": "API for [LNTU Students Quality Expansion Activity Management System.](http://202.199.224.19:8080/)",
+    },
+]
 
-
-@app.get("/")
-async def home():
-    return {"Hi": "LNTU-API-v1.0"}
-
+app = FastAPI(
+    title="LNTU-API",
+    description="An elegant backend API of LNTU. You can find more on [GitHub/LiaoGuoYin/LNTU-API](https://github.com/LiaoGuoYin/LNTU-API)",
+    version="v1.0",
+    docs_url="/",
+    redoc_url="/readme",
+    openapi_tags=tags_metadata
+)
 
 app.include_router(
     education.router,

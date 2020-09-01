@@ -92,7 +92,7 @@ def parse_class_table_body(html_text, course_dict_list: list) -> list:
         return "课表体解析错误，xpath 失败"
 
 
-def parse_grade(html_doc) -> list:
+def parse_grade(html_doc) -> [schemas.Grade]:
     course_list: [schemas.Grade] = []
     score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
     try:

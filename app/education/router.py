@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from sentry_sdk import capture_exception
 
 from app import schemas
 from app.common import notice
@@ -22,6 +23,7 @@ async def refresh_notice(limit: int = 10):
     try:
         response.data = notice.run()
     except CommonException as e:
+        capture_exception(e)
         response.code, response.message = e.code, e.msg
     return response
 
@@ -44,6 +46,7 @@ async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
         }
         response.data = data
     except CommonException as e:
+        capture_exception(e)
         response.code, response.message = e.code, e.msg
     return response
 
@@ -54,6 +57,7 @@ async def refresh_education_info(user: schemas.User):
     try:
         response.data = get_stu_info(**user.dict())
     except CommonException as e:
+        capture_exception(e)
         response.code, response.message = e.code, e.msg
     return response
 
@@ -65,6 +69,7 @@ async def refresh_education_class_table(user: schemas.User, semester: str = '202
     try:
         response.data = get_class_table(**user.dict(), semesterId=semesterId)
     except CommonException as e:
+        capture_exception(e)
         response.code, response.message = e.code, e.msg
     return response
 
@@ -75,6 +80,7 @@ async def refresh_education_grade(user: schemas.User):
     try:
         response.data = get_grade_table(**user.dict())
     except CommonException as e:
+        capture_exception(e)
         response.code, response.message = e.code, e.msg
     return response
 
@@ -91,5 +97,6 @@ async def refresh_education_grade(user: schemas.User, semester: str = '2020-2'):
             'gpa': semester_gpa
         }
     except CommonException as e:
+        capture_exception(e)
         response.code, response.message = e.code, e.msg
     return response

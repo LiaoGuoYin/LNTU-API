@@ -5,6 +5,7 @@ import time
 import requests
 from lxml import etree
 from requests import Session, ReadTimeout
+from sentry_sdk import capture_exception
 
 from app.education.parser import parse_class_table_bottom, parse_class_table_body, parse_grade, parse_stu_info, \
     parse_grade_table
@@ -18,6 +19,8 @@ def check_education_online() -> bool:
         response = requests.head(URLEnum.LOGIN.value, timeout=(1, 3))
         if response.status_code == 200:
             return True
+        else:
+            raise ReadTimeout("教务在线爆炸")
     except ReadTimeout:
         raise NetworkException("3s 未响应，教务在线爆炸")
     except ConnectionError:

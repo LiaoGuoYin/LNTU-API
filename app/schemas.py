@@ -117,3 +117,14 @@ class GradeTable(BaseModel):
     credit: str = None
     score: str = None
     semester: str = None
+
+
+# GPA
+class GPA(BaseModel):
+    semester: str = "1999-1"
+    gradePointAverage: float = 0.0
+    weightedAverage: float = 0.0
+    gradePointTotal: float = 0.0
+    scoreTotal: float = 0.0
+    creditTotal: float = 0.0
+    courseCount: int = 0

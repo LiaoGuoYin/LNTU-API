@@ -148,3 +148,58 @@ def parse_grade_table(html_doc) -> [schemas.GradeTable]:
         return course_list
     except Exception as e:
         return e
+
+
+def calculate_gpa(grade_list) -> schemas.GPA:
+    # TODO bug，重修有学分折半
+    """GPA计算规则:
+        "二级制: 合格(85),不合格(0)"
+        "五级制: 优秀(95),良(85),中(75),及格(65),不及格(0)"
+    """
+    gpa_result = schemas.GPA()
+    rule_dict = {"合格": 85, "不合格": 0,
+                 "优秀": 95, "良": 85, "中": 75, "及格": 65, "不及格": 0}
+    for grade in grade_list:
+        # 分数等级置换
+        print(F"{grade.name}：{grade.score} ", end='')
+        grade.score = rule_dict.get(grade.score, grade.score)
+        if grade.score:
+            print(F" -> {grade.score}")
+        else:
+            print(F" None -> {grade.score}(异常)")
+            continue
+
+        # 计算GPA
+        point = float(grade.score)
+        grade.credit = float(grade.credit)
+        gpa_result.courseCount += 1
+        gpa_result.creditTotal += grade.credit
+        gpa_result.scoreTotal += point * grade.credit
+
+        # 计算学分绩
+        if 95 <= point <= 100:
+            gpa_result.gradePointTotal += grade.credit * 4.5
+        elif 90 <= point < 95:
+            gpa_result.gradePointTotal += grade.credit * 4.0
+        elif 85 <= point < 90:
+            gpa_result.gradePointTotal += grade.credit * 3.5
+        elif 80 <= point < 85:
+            gpa_result.gradePointTotal += grade.credit * 3.0
+        elif 75 <= point < 80:
+            gpa_result.gradePointTotal += grade.credit * 2.5
+        elif 70 <= point < 75:
+            gpa_result.gradePointTotal += grade.credit * 2.0
+        elif 65 <= point < 70:
+            gpa_result.gradePointTotal += grade.credit * 1.5
+        elif 60 <= point < 65:
+            gpa_result.gradePointTotal += grade.credit * 1.0
+        else:
+            gpa_result.gradePointTotal += 0
+
+    if gpa_result.courseCount == 0:
+        return gpa_result
+
+    # 计算平均学分绩 GPA
+    gpa_result.gradePointAverage = round(gpa_result.gradePointTotal / gpa_result.creditTotal, 4)  # 绩点
+    gpa_result.weightedAverage = round(gpa_result.scoreTotal / gpa_result.creditTotal, 4)  # 加权平均分
+    return gpa_result

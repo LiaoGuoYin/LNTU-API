@@ -5,7 +5,6 @@ import time
 import requests
 from lxml import etree
 from requests import Session, ReadTimeout
-from sentry_sdk import capture_exception
 
 from app.education.parser import parse_class_table_bottom, parse_class_table_body, parse_grade, parse_stu_info, \
     parse_grade_table

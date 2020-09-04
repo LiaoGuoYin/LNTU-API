@@ -5,7 +5,7 @@ from app import schemas
 from app.common import notice
 from app.const import choose_semester_id
 from app.education.core import get_stu_info, get_class_table, get_grade, get_grade_table, login
-from app.education.gpa import gpa_util
+from app.education.parser import calculate_gpa
 from app.exceptions import CommonException
 from app.schemas import ResponseT
 
@@ -42,7 +42,7 @@ async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
             'classTable': get_class_table(**user.dict(), session=session, semesterId=semesterId),
             # 'grade': get_grade(**user.dict(), session=session, semesterId=semesterId - 1),  # TODO: other semester
             'gradeTable': semester_grade,
-            'gpa': gpa_util(semester_grade),
+            'gpa': calculate_gpa(semester_grade),
         }
         response.data = data
     except CommonException as e:
@@ -91,7 +91,8 @@ async def refresh_education_grade(user: schemas.User, semester: str = '2020-2'):
     response = ResponseT()
     try:
         semester_grade = get_grade(**user.dict(), semesterId=semesterId)
-        semester_gpa = gpa_util(semester_grade)
+        semester_gpa = calculate_gpa(semester_grade)
+        semester_gpa.semester = semester
         response.data = {
             'grade': semester_grade,
             'gpa': semester_gpa

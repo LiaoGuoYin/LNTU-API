@@ -56,5 +56,6 @@ class TestEducationParser(unittest.TestCase):
         self.assertIn('个人成绩总表打印', html_text)
 
         grade_table_list = parse_grade_table(html_doc=etree.HTML(html_text))
-        self.assertIsInstance(grade_table_list, list)
+        self.assertTrue(len(grade_table_list) != 0)
+        self.assertIsInstance(grade_table_list[0], schemas.GradeTable)
         print(grade_table_list)

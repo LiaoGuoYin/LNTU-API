@@ -113,10 +113,17 @@ class Grade(BaseModel):
 
 
 class GradeTable(BaseModel):
+    from enum import Enum
+    class CourseStatusEnum(str, Enum):
+        normal = "正常"
+        makeUp = "补考"
+        reStudy = "重修"
+
     name: str
     credit: str = None
     score: str = None
     semester: str = None
+    status: CourseStatusEnum = CourseStatusEnum.normal
 
 
 # GPA

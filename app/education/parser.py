@@ -100,10 +100,10 @@ def parse_grade(html_doc) -> [schemas.Grade]:
             cells = []
             for td in row:
                 if td.text is not None:
-                    cells.append(td.text.strip())
+                    cells.append(''.join(td.xpath('string(.)').split()))
                 else:
                     cells.append('')
-            """['2017-2018 1', 'H271780001036', 'H271780001036.18', ' 军事理论 ', ' 专业必修 ', '1', '-- (正常)', '47 (正常)', '50 (正常)', '74 (正常)', '74', '1']"""
+            # cells: ['2017-2018 1', 'H271780001036', 'H271780001036.18', ' 军事理论 ', ' 专业必修 ', '1', '-- (正常)', '47 (正常)', '50 (正常)', '74 (正常)', '74', '1']
             if len(cells) == 0:
                 return []
             course = schemas.Grade(code=cells[2])
@@ -130,20 +130,37 @@ def parse_grade_table(html_doc) -> [schemas.GradeTable]:
     course_list: [schemas.GradeTable] = []
     score_table_rows = html_doc.xpath('/html/body/table[2]/tr')
     try:
-        needed_append_cells = []
+        cells_element = []
         cells = []
         for row in score_table_rows[1:]:
-            if row[-1].text == '\xa0':
-                cells.append([each.text for each in row[:4]])
+            cells_element.append(row[:4])
+            if row[-1].text != '\xa0':
+                # 处理一行多个成绩的情况
+                cells_element.append(row[4:])
+        for tr in cells_element:
+            tmp_course_info = []
+            for td in tr:
+                tmp_course_info.append(td.text)
+            course_style = tr[2].xpath('./@style')
+            # 重修、补考、正常 元素的样式不同:
+            # 斜体为补考成绩: ['font-style:italic; ']
+            # 下划线为重新学习成绩: ['text-decoration:underline; ']
+            if len(course_style) != 0:
+                course_style = course_style[0]
+                # course_style = '重修' if ('underline' in course_style) else '补考'
+                course_style = schemas.GradeTable.CourseStatusEnum.reStudy if (
+                        'underline' in course_style) else schemas.GradeTable.CourseStatusEnum.makeUp
             else:
-                cells.append([each.text for each in row[:4]])
-                needed_append_cells.append([each.text for each in row[4:]])
-        cells.extend(needed_append_cells)
+                course_style = schemas.GradeTable.CourseStatusEnum.normal
+            tmp_course_info.append(course_style)
+            cells.append(tmp_course_info)
         for each in cells:
+            # each: ['数据结构与算法分析', '4', '95', '2018-2019(1)', '重修']
             grade_table = schemas.GradeTable(name=each[0])
             grade_table.credit = each[1]
             grade_table.score = each[2]
             grade_table.semester = each[3]
+            grade_table.status = each[4]
             course_list.append(grade_table)
         return course_list
     except Exception as e:

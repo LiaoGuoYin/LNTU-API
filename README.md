@@ -39,7 +39,7 @@ An elegant backend API of [LNTU Course Management Information System](http://202
     - [x] public notice
 
 - Others:
-    - [ ] SunnyRunning(AiPao app)
+    - [x] SunnyRunning(AiPao app)
     - [ ] Student Quality expansion Spider
     - [ ] Water-card Balance
     

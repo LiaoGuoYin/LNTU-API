@@ -2,16 +2,20 @@ import sentry_sdk
 import uvicorn
 from fastapi import FastAPI
 
-from app import education, quality
+from app import education, quality, aipao
 
 tags_metadata = [
     {
-        "name": "education",
+        "name": "Education",
         "description": "API for [LNTU Course Management Information System.](http://202.199.224.119:8080/eams/loginExt.action)",
     },
     {
-        "name": "quality",
+        "name": "Quality",
         "description": "API for [LNTU Students Quality Expansion Activity Management System.](http://202.199.224.19:8080/)",
+    },
+    {
+        "name": "AiPao",
+        "description": "API for [AiPao](http://client3.aipao.me/)",
     },
 ]
 
@@ -27,13 +31,19 @@ app = FastAPI(
 app.include_router(
     education.router,
     prefix="/education",
-    tags=["education"]
+    tags=["Education"]
 )
 
 app.include_router(
     quality.router,
     prefix="/quality",
-    tags=["quality"]
+    tags=["Quality"]
+)
+
+app.include_router(
+    aipao.router,
+    prefix="/aipao",
+    tags=["AiPao"]
 )
 
 

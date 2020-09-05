@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from sentry_sdk import capture_exception
 
 from app import schemas
-from app.common import notice
+from app.common import notice, room
 from app.const import choose_semester_id
 from app.education.core import get_stu_info, get_class_table, get_grade, get_grade_table, login
 from app.education.parser import calculate_gpa
@@ -15,6 +15,17 @@ router = APIRouter()
 @router.get("/")
 async def home():
     return {"API-location": "/education/"}
+
+
+@router.get("/classroom", )
+async def refresh_classroom(weeks, buildingname, campus=0):
+    response = ResponseT()
+    try:
+        response.data = room.run(week=weeks, building_name=buildingname)
+    except CommonException as e:
+        capture_exception(e)
+        response.code, response.message = e.code, e.msg
+    return response
 
 
 @router.get("/notice", )

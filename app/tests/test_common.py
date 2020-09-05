@@ -26,13 +26,7 @@ class TestEducationParser(unittest.TestCase):
         print(building_dict)
 
     def test_room_get_class_room_html(self):
-        request_room_params = {
-            'semesterId': 627,
-            'iWeek': 1,
-            'room.building.id': 14,
-            'buildingname': '耘慧楼'
-        }
-        html_text = get_class_room_html(request_room_params=request_room_params, is_save=True)
+        html_text = get_class_room_html(1, 14, is_save=True)
         self.assertIn('2020-2021学年第1学期教室占用情况', html_text)
 
     def test_room_parse_class_room_html(self):

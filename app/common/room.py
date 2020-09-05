@@ -42,17 +42,13 @@ def parse_building_html(html_doc, xpath_str: str) -> dict:
     return tmp_building_dict
 
 
-def get_class_room_html(request_room_params, is_save=False):
-    '''
-    :param request_room_params:
-     request_room_params = {
-        'semesterId': 627,
-        'iWeek': 11,
-        'room.building.id': 14,
-        'buildingname': '耘慧楼',
+def get_class_room_html(week: int, building_id: int, is_save=False):
+    request_room_params = {
+        'semesterId': 627,  # TODO semesterId
+        'iWeek': week,
+        'room.building.id': building_id,
+        # 'buildingname': '耘慧楼',
     }
-    :return:
-    '''
     response = requests.get(
         'http://202.199.224.119:8080/eams/classroom/occupy/class-details!unitDetail.action',
         params=request_room_params)
@@ -64,8 +60,8 @@ def get_class_room_html(request_room_params, is_save=False):
         return response.text
 
 
-def parse_class_room_html(html_text: str) -> list:
-    room_list = []
+def parse_class_room_html(html_text: str) -> [schemas.ClassRoom]:
+    room_list: [schemas.ClassRoom] = []
     html_doc = etree.HTML(html_text)
     class_room_row = html_doc.xpath('/html/body/table[2]/tr')
     for data in class_room_row[1:]:
@@ -74,34 +70,50 @@ def parse_class_room_html(html_text: str) -> list:
             continue
         room_week_str = html_doc.xpath('/html/body/table[1]/tr[2]/td')[0].text
         room_week = int(re.findall(r"第(\d+)周教室占用情况:", room_week_str)[0])
-        room_name = data[0].text
-        room = schemas.ClassRoom(name=room_name, week=room_week)
-        room.capacity = int(data[1].text)
-        room.category = data[2].text
-        room.monday = data[3].xpath('string(.)').split()
-        room.tuesday = data[4].xpath('string(.)').split()
-        room.wednesday = data[5].xpath('string(.)').split()
-        room.thursday = data[6].xpath('string(.)').split()
-        room.friday = data[7].xpath('string(.)').split()
-        room.saturday = data[8].xpath('string(.)').split()
-        room.sunday = data[9].xpath('string(.)').split()
-        print(room)
+        room = schemas.ClassRoom(
+            address=data[0].text,
+            num=int(data[1].text),
+            type=data[2].text
+        )
+        mini_index_list = []
+        for i in range(3, 10):
+            # monday, tuesday, wednesday, thursday, friday, saturday...
+            room_single_day_index_list = data[i].xpath('string(.)').split()  # 每一天单个教室情况 ['3', '4']
+            # 12345678910 小节课转大节课 12345
+            room_single_day = filter(lambda x: int(x) % 2 != 0, room_single_day_index_list)  # 清除偶数小节课
+            mini_index_tmp = list(map(lambda x: (int(x) - (int(x) // 2)), room_single_day))  # 大课转小课
+            index_dict = dict(zip(list('12345'), list('abcde')))
+            mini_index = schemas.ClassRoom.MiniIndex()
+            for i in mini_index_tmp:
+                setattr(mini_index, index_dict.get(str(i)), 1)
+            mini_index_list.append(mini_index)
+        room.data = mini_index_list
         room_list.append(room)
     return room_list
 
 
-def run(room_params):
-    html_text = get_class_room_html(room_params)
-    parse_class_room_html(html_text)
+def run(week, building_name) -> [schemas.ClassRoom]:
+    building_id = building_dict.get(building_name)
+    if not building_id:
+        return "参数错误"  # TODO
 
+    html_text = get_class_room_html(
+        week=week,
+        building_id=building_id
+    )
+    return parse_class_room_html(html_text)
+
+
+# building_dict = {'fuxin': {'博文楼': 7, '博雅楼': 13, '新华楼': 19, '中和楼': 17, '致远楼': 18, '知行楼': 8, '物理实验室': 15, '主楼机房': 9},
+#                  'huludao': {'尔雅楼': 20, '静远楼': 11, '葫芦岛物理实验室': 16, '葫芦岛机房': 21, '耘慧楼': 14}}
+
+building_dict = {'eyl': 20, 'jyl': 11, 'hldwlsys': 16, 'hldjf': 21, 'yhl': 14, 'bwl': 7, 'byl': 13, 'xhl': 19,
+                 'zhl': 17, 'zyl': 18, 'zxl': 8, 'wlsys': 15, 'zljf': 9}
 
 if __name__ == '__main__':
-    building_dict = {'fuxin': {'博文楼': 7, '博雅楼': 13, '新华楼': 19, '中和楼': 17, '致远楼': 18, '知行楼': 8, '物理实验室': 15, '主楼机房': 9},
-                     'huludao': {'尔雅楼': 20, '静远楼': 11, '葫芦岛物理实验室': 16, '葫芦岛机房': 21, '耘慧楼': 14}}
-    request_room_params = {
-        'semesterId': 627,
-        'iWeek': 11,
-        'room.building.id': 14,
-        'buildingname': '耘慧楼',
-    }
-    run(request_room_params)
+    demo_request_parameter = schemas.ClassRoomRequest(
+        campus=0,
+        weeks=1,
+        buildingname='yhl'
+    )
+    print(run(demo_request_parameter))

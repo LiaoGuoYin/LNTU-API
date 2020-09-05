@@ -38,18 +38,20 @@ class Notice(NoticeDetail):
 
 # ClassRoom
 class ClassRoom(BaseModel):
-    name: str = None
-    # building_id: int = -1
-    capacity: int = -1
-    category: str = None  # TODO 多媒体教室	语音室	专用教室
-    week: int = -1
-    monday: str = None
-    tuesday: str = None
-    wednesday: str = None
-    thursday: str = None
-    friday: str = None
-    saturday: str = None
-    sunday: str = None
+    class MiniIndex(BaseModel):
+        # a, b, c, d, e 代表每一天的大节课数：
+        # 0 -> 没课，1 -> 有课
+        a: int = 0
+        b: int = 0
+        c: int = 0
+        d: int = 0
+        e: int = 0
+
+    address: str = None
+    num: int = -1
+    type: str = None  # TODO 多媒体教室	语音室	专用教室
+    data: List[MiniIndex] = []
+    # week: int = -1
     # updated_at = models.DateTimeField(auto_now=True)
 
 

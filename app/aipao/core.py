@@ -24,7 +24,7 @@ def check_imei_code(code: str) -> dict:
         data_result['validCount'] = get_record(data_result['id'], is_valid=True)['AllCount']
         data_result['inValidCount'] = get_record(data_result['id'], is_valid=False)['AllCount']
     if not len(data_result):
-        raise exceptions.TokenException("IMEICode 无效")
+        raise exceptions.FormException("IMEICode 无效")
     return data_result
 
 
@@ -49,18 +49,18 @@ def get_record(user_id: int, page: int = 1, offsets: int = 10, is_valid: bool = 
 def run_sunny(imei_code: str) -> dict:
     data_dict = check_imei_code(code=imei_code)
     if not len(data_dict):
-        raise exceptions.TokenException("IMEICode 无效")
+        raise exceptions.FormException("IMEICode 无效")
     token = data_dict['token']
 
     client = AiPaoClient(token=token)
     if not client.get_info():
-        raise exceptions.FormException("获取个人跑步规则信息失败")
+        raise exceptions.SpiderParserException("获取个人跑步规则信息失败")
     if not client.get_run_id():
-        raise exceptions.FormException("开始跑步失败")
+        raise exceptions.SpiderParserException("开始跑步失败")
 
     run_response = client.upload_record()
     if not run_response:
-        raise exceptions.FormException("结束跑步失败（上传成绩失败）")
+        raise exceptions.SpiderParserException("结束跑步失败（上传成绩失败）")
     run_response['uploaded'] = client
     return run_response
 
@@ -144,5 +144,4 @@ class AiPaoClient(object):
             'S9': encrypt(step)
         }
         response = requests.get(url, params=params)
-        print(response.request.url)
         return response.json()

@@ -10,7 +10,7 @@ from app.education.parser import parse_class_table_bottom, parse_class_table_bod
     parse_grade_table
 from app.education.urls import URLEnum
 from app.education.utils import save_html_to_file
-from app.exceptions import NetworkException, TokenException, AccessException, FormException, SpiderParserException
+from app.exceptions import NetworkException, AccessException, FormException, SpiderParserException
 
 
 def check_education_online() -> bool:
@@ -38,7 +38,7 @@ def login(username: int, password: str) -> Session:
     time.sleep(0.5)  # 延迟 0.5 秒防止被 ban
     response = session.post(URLEnum.LOGIN.value, data={'username': username, 'password': key})
     if '密码错误' in response.text:
-        raise TokenException(F"{username} 用户名或密码错误")
+        raise FormException(F"{username} 用户名或密码错误")
     elif '请不要过快点击' in response.text:
         raise AccessException("页面请求过快")
     elif '账户不存在' in response.text:

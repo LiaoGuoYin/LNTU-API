@@ -111,9 +111,4 @@ building_dict = {'eyl': 20, 'jyl': 11, 'hldwlsys': 16, 'hldjf': 21, 'yhl': 14, '
                  'zhl': 17, 'zyl': 18, 'zxl': 8, 'wlsys': 15, 'zljf': 9}
 
 if __name__ == '__main__':
-    demo_request_parameter = schemas.ClassRoomRequest(
-        campus=0,
-        weeks=1,
-        buildingname='yhl'
-    )
-    print(run(demo_request_parameter))
+    print(run(week=1, building_name='yhl'))

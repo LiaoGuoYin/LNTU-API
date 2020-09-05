@@ -178,12 +178,13 @@ def calculate_gpa(grade_list) -> schemas.GPA:
                  "优秀": 95, "良": 85, "中": 75, "及格": 65, "不及格": 0}
     for grade in grade_list:
         # 分数等级置换
-        print(F"{grade.name}：{grade.score} ", end='')
+        # print(F"{grade.name}：{grade.score} ", end='')
         grade.score = rule_dict.get(grade.score, grade.score)
         if grade.score:
-            print(F" -> {grade.score}")
+            pass
+            # print(F" -> {grade.score}")
         else:
-            print(F" None -> {grade.score}(异常)")
+            # print(F" None -> {grade.score}(异常)")
             continue
 
         # 计算GPA

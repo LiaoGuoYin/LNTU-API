@@ -6,7 +6,7 @@ from requests import Session
 
 from app.education.core import login, get_stu_info, get_class_table, get_grade, check_education_online, get_grade_table
 from app.education.parser import parse_grade, parse_grade_table, calculate_gpa
-from app.exceptions import TokenException, FormException
+from app.exceptions import FormException
 
 APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 local_file_dict = {
@@ -38,7 +38,7 @@ class TestEducationCore(unittest.TestCase):
         self.assertIsInstance(response, Session)
 
     def test_education_core_login_invalid_user(self):
-        self.assertRaises(TokenException, login, **user_dict['invalid'])
+        self.assertRaises(FormException, login, **user_dict['invalid'])
         username = 10000000
         self.assertRaises(FormException, login, username, 'test')
 

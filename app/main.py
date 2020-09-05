@@ -3,6 +3,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from app import education, quality, aipao
+from app.exceptions import FormException
 
 tags_metadata = [
     {
@@ -57,6 +58,15 @@ def get_db():
         db.close()
 
 
+def filter_sentry_alert(event, hint):
+    if 'exc_info' in hint:
+        exc_type, exc_value, tb = hint['exc_info']
+        if isinstance(exc_value, FormException):
+            # 来源于用户的表单错误，不应被埋点记录
+            return None
+    return event
+
+
 # Sentry monitor
 def get_sentry():
     import yaml
@@ -64,7 +74,10 @@ def get_sentry():
         with open('config.yaml') as f:
             config = yaml.load(f, Loader=yaml.BaseLoader)
         if config['sentry']['url']:
-            sentry_sdk.init(config['sentry']['url'], max_breadcrumbs=50)
+            sentry_sdk.init(
+                config['sentry']['url'],
+                before_send=filter_sentry_alert,
+                max_breadcrumbs=50)
             return True
         else:
             return False

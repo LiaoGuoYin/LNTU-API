@@ -1,9 +1,13 @@
 import sentry_sdk
 import uvicorn
 from fastapi import FastAPI
+from fastapi_sqlalchemy import DBSessionMiddleware
+from sqlalchemy import create_engine
 
 from app import education, quality, aipao
 from app.exceptions import FormException
+from appDB.models import Base
+from appDB.utils import get_db_url_dict
 
 tags_metadata = [
     {
@@ -29,6 +33,11 @@ app = FastAPI(
     openapi_tags=tags_metadata
 )
 
+db_url_dict = get_db_url_dict()
+engine = create_engine(db_url_dict['production'], echo=True)
+Base.metadata.create_all(bind=engine)  # 创建数据库
+app.add_middleware(DBSessionMiddleware, db_url=db_url_dict['production'], custom_engine=engine)
+
 app.include_router(
     education.router,
     prefix="/education",
@@ -46,16 +55,6 @@ app.include_router(
     prefix="/aipao",
     tags=["AiPao"]
 )
-
-
-# DB Dependency
-def get_db():
-    from appDB.database import SessionLocal
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def filter_sentry_alert(event, hint):

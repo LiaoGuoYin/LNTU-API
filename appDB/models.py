@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -12,16 +12,15 @@ class User(Base):
 
     username = Column(Integer, primary_key=True, index=True)
     password = Column(String(32))
-    lastLogin = Column(Date, default=datetime.datetime.now())
+    lastLogin = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
-    info = relationship("UserInfo", back_populates="user")
+    info = relationship("UserInfo")
 
 
 class UserInfo(Base):
     __tablename__ = "user_info"
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
-    username = Column(Integer)
+    username = Column(Integer, autoincrement=True, primary_key=True, index=True)
     name = Column(String(32))
     photoUrl = Column(String(128))
     nickname = Column(String(32))
@@ -34,8 +33,8 @@ class UserInfo(Base):
     college = Column(String(32))
     major = Column(String(32))
     direction = Column(String(32))
-    enrollDate: datetime.date
-    graduateDate: datetime.date
+    enrollDate = Column(Date)
+    graduateDate = Column(Date)
     chiefCollege = Column(String(32))  # TODO 转专业情况
     studyType = Column(String(32))
     membership = Column(String(32))
@@ -48,5 +47,4 @@ class UserInfo(Base):
     isWorking = Column(String(32))
 
     # Foreign key
-    owner_username = Column(Integer, ForeignKey(User.username))
-    owner = relationship("User", back_populates="info")
+    ownerUsername = Column(Integer, ForeignKey(User.username))

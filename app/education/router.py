@@ -8,6 +8,8 @@ from app.education.core import get_stu_info, get_class_table, get_grade, get_gra
 from app.education.parser import calculate_gpa
 from app.exceptions import CommonException
 from app.schemas import ResponseT
+from appDB import crud
+from fastapi_sqlalchemy import db
 
 router = APIRouter()
 
@@ -56,6 +58,8 @@ async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
             'gpa': calculate_gpa(semester_grade),
         }
         response.data = data
+        crud.update_user(user, db.session)
+        crud.update_info(data['info'], db.session)
     except CommonException as e:
         capture_exception(e)
         response.code, response.message = e.code, e.msg

@@ -24,6 +24,3 @@ def test_parse_expansion_mind_activity():
         html_doc = etree.HTML(html_text)
     parse_activity(html_doc)
 
-
-test_parse_expansion_report()
-# test_parse_expansion_mind_activity()

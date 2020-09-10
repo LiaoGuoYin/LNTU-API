@@ -1,7 +1,7 @@
 import requests
 from lxml import etree
 
-from app import schemas
+from app import schemas, exceptions
 
 
 def get_notice_url_list() -> list:
@@ -26,18 +26,18 @@ def get_notice_url_list() -> list:
         notice_url_list = list(map(get_notice_url_list_from, page_list))[0]
         return notice_url_list
     except IndexError as e:
-        return F"教务在线通知爬虫爆炸：{e}"
+        raise exceptions.AccessException(f'教务在线通知爬虫爆炸：{e}')
 
 
 def get_notice_detail(notice: schemas.Notice) -> schemas.Notice:
-    def get_appendix(html_doc, notice: schemas.Notice):
+    def get_appendix(ori_html_doc, ori_notice: schemas.Notice):
         appendix_xpath = '/html/body/div[3]/form/div[1]/ul/li'
-        appendix_elements = html_doc.xpath(appendix_xpath)
+        appendix_elements = ori_html_doc.xpath(appendix_xpath)
         for row in appendix_elements:
             name = 'http://jwzx.lntu.edu.cn/' + row.xpath('./a/@href')[0]
             url = row.xpath('./a/text()')[0]
             appendix = schemas.NoticeDetail.NoticeDetailAppendix(url=url, name=name)
-            notice.appendix.append(appendix)
+            ori_notice.appendix.append(appendix)
 
     xpath_str = '/html/body/div/form/div[1]'
     response = requests.get(notice.url)
@@ -52,7 +52,7 @@ def get_notice_detail(notice: schemas.Notice) -> schemas.Notice:
     return notice
 
 
-def run():
+def run() -> [schemas.Notice]:
     # 通过页面获取 url 列表
     notice_url_list = get_notice_url_list()
     # 通过 url 获取详情

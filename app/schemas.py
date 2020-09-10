@@ -49,7 +49,7 @@ class ClassRoom(BaseModel):
 
     address: str = None
     num: int = -1
-    type: str = None  # TODO 多媒体教室	语音室	专用教室
+    type: str = None
     data: List[MiniIndex] = []
     # week: int = -1
     # updated_at = models.DateTimeField(auto_now=True)

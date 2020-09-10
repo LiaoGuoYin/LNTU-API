@@ -3,6 +3,8 @@ from enum import Enum
 import requests
 from lxml import etree
 
+from app import exceptions
+
 
 class URLEnum(Enum):
     URL_ROOT = 'http://202.199.224.119:8080/eams'
@@ -32,7 +34,7 @@ class URLEnum(Enum):
         return self.value
 
 
-def get_all_urls():
+def get_all_urls() -> dict:
     try:
         url_dict = {}
         response = requests.get(URLEnum.EDU_URL.value)
@@ -45,15 +47,15 @@ def get_all_urls():
         url_dict['teacher_urls'] = data[3]
         return url_dict
     except requests.RequestException as e:
-        return F" 请求错误: {e}"
+        raise exceptions.NetworkException(f'请求错误: {e}')
     except IndexError as e:
-        return F" 官网爆炸，抓不到: {e}"
+        raise exceptions.NetworkException(f'官网爆炸，抓不到: {e}')
 
 
-def ping(url):
+def ping(url) -> float:
     try:
         response = requests.head(url, timeout=(0.1, 2))
         cost_ms = response.elapsed.total_seconds() * 1000
         return cost_ms
     except requests.ConnectionError:
-        return 99999
+        return 99999.9

@@ -18,7 +18,8 @@ semester_dict = {'2008-1': 638, '2008-2': 636,
 
 
 def choose_semester_id(semester: str) -> int:
-    import yaml, os
+    import yaml
+    import os
     APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # TODO App absolute directory
     with open(f'{APP_ABSOLUTE_PATH}/config.yaml') as f:

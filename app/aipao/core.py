@@ -2,8 +2,8 @@ from random import uniform, randint
 
 import requests
 
-from app.aipao.url import AIPAOURLEnum
 from app import exceptions
+from app.aipao.url import AIPAOURLEnum
 
 
 def check_imei_code(code: str) -> dict:
@@ -76,8 +76,8 @@ class AiPaoClient(object):
         self.minSpeed = 2.0
         self.maxSpeed = 3.0
 
-        def __str__(self):
-            return str(self.__dict__).replace('\"', '\'')
+    def __str__(self):
+        return str(self.__dict__).replace('\"', '\'')
 
     def get_info(self) -> bool:
         token = self.token
@@ -112,9 +112,9 @@ class AiPaoClient(object):
                 self.runId = response.json()['Data']['RunId']
                 return response.json()['Data']['RunId']
             else:
-                return None
+                return ''
         except KeyError:
-            return None
+            return ''
 
     def upload_record(self) -> dict:
         def encrypt(number):

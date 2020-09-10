@@ -8,7 +8,7 @@ class QualityExpansionURLEnum(Enum):
     INFO = URL_ROOT + '/SutuoSoft_htgl/Student/XSGL_xsxx_view.aspx'
     REPORT = URL_ROOT + '/SutuoSoft_htgl/Student/XSGL_grcjd.aspx'
 
-    SCHOLARSHIP = URL_ROOT + '/SutuoSoft_htgl/Student/jxjsqb/sqb2017.aspx'  # TODO
+    SCHOLARSHIP = URL_ROOT + '/SutuoSoft_htgl/Student/jxjsqb/sqb2017.aspx'
 
     MIND = URL_ROOT + '/SutuoSoft_htgl/Student/HDJL_ztsxjyhd_index.aspx'
     COMPETITION = URL_ROOT + '/SutuoSoft_htgl/Student/HDJL_xskydclw_index.aspx'
@@ -18,12 +18,12 @@ class QualityExpansionURLEnum(Enum):
     SKILL = URL_ROOT + '/SutuoSoft_htgl/Student/HDJL_jinengrenzheng_index.aspx'
 
     @classmethod
-    def get_activity(self):
+    def get_activity(cls):
         return {
-            'mind': self.MIND,
-            'competition': self.COMPETITION,
-            'social': self.SOCIAL,
-            'reading': self.READING,
-            'employment': self.EMPLOYMENT,
-            'skill': self.SKILL,
+            'mind': cls.MIND,
+            'competition': cls.COMPETITION,
+            'social': cls.SOCIAL,
+            'reading': cls.READING,
+            'employment': cls.EMPLOYMENT,
+            'skill': cls.SKILL,
         }

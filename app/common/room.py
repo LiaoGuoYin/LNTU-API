@@ -3,11 +3,11 @@ import re
 import requests
 from lxml import etree
 
-from app import schemas
+from app import schemas, exceptions
 from app.education.utils import save_html_to_file
 
 
-def get_building_html(is_save=False):
+def get_building_html(is_save=False) -> str:
     url = 'http://jwzx.lntu.edu.cn/info/1086/1116.htm'
     response = requests.get(url)
     response.encoding = 'utf-8'
@@ -42,9 +42,9 @@ def parse_building_html(html_doc, xpath_str: str) -> dict:
     return tmp_building_dict
 
 
-def get_class_room_html(week: int, building_id: int, is_save=False):
+def get_class_room_html(week: int, building_id: int, is_save=False) -> str:
     request_room_params = {
-        'semesterId': 627,  # TODO semesterId
+        'semesterId': 627,
         'iWeek': week,
         'room.building.id': building_id,
         # 'buildingname': '耘慧楼',
@@ -84,8 +84,8 @@ def parse_class_room_html(html_text: str) -> [schemas.ClassRoom]:
             mini_index_tmp = list(map(lambda x: (int(x) - (int(x) // 2)), room_single_day))  # 大课转小课
             index_dict = dict(zip(list('12345'), list('abcde')))
             mini_index = schemas.ClassRoom.MiniIndex()
-            for i in mini_index_tmp:
-                setattr(mini_index, index_dict.get(str(i)), 1)
+            for j in mini_index_tmp:
+                setattr(mini_index, index_dict.get(str(j)), 1)
             mini_index_list.append(mini_index)
         room.data = mini_index_list
         room_list.append(room)
@@ -95,7 +95,7 @@ def parse_class_room_html(html_text: str) -> [schemas.ClassRoom]:
 def run(week, building_name) -> [schemas.ClassRoom]:
     building_id = building_dict.get(building_name)
     if not building_id:
-        return "参数错误"  # TODO
+        raise exceptions.FormException("参数错误：请输入正确的教学楼")
 
     html_text = get_class_room_html(
         week=week,

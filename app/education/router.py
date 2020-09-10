@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from fastapi_sqlalchemy import db
 from sentry_sdk import capture_exception
 
 from app import schemas
@@ -9,7 +10,6 @@ from app.education.parser import calculate_gpa
 from app.exceptions import CommonException
 from app.schemas import ResponseT
 from appDB import crud
-from fastapi_sqlalchemy import db
 
 router = APIRouter()
 
@@ -20,10 +20,10 @@ async def home():
 
 
 @router.get("/classroom", )
-async def refresh_classroom(weeks, buildingname, campus=0):
+async def refresh_classroom(week, name):
     response = ResponseT()
     try:
-        response.data = room.run(week=weeks, building_name=buildingname)
+        response.data = room.run(week=week, building_name=name)
     except CommonException as e:
         capture_exception(e)
         response.code, response.message = e.code, e.msg
@@ -31,7 +31,7 @@ async def refresh_classroom(weeks, buildingname, campus=0):
 
 
 @router.get("/notice", )
-async def refresh_notice(limit: int = 10):
+async def refresh_notice():  # TODO, limit offsets
     response = ResponseT()
     try:
         response.data = notice.run()
@@ -45,15 +45,15 @@ async def refresh_notice(limit: int = 10):
 # data = info + class-table + grade-table + gpa-table
 @router.post("/data", response_model=ResponseT)
 async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
-    semesterId = choose_semester_id(semester)
+    semester_id = choose_semester_id(semester)
     response = ResponseT()
     try:
         session = login(**user.dict())
         semester_grade = get_grade_table(**user.dict(), session=session)
         data = {
             'info': get_stu_info(**user.dict(), session=session),
-            'classTable': get_class_table(**user.dict(), session=session, semesterId=semesterId),
-            # 'grade': get_grade(**user.dict(), session=session, semesterId=semesterId - 1),  # TODO: other semester
+            'classTable': get_class_table(**user.dict(), session=session, semester_id=semester_id),
+            # TODO，本方法是否返回和学期无关的信息
             'gradeTable': semester_grade,
             'gpa': calculate_gpa(semester_grade),
         }
@@ -79,10 +79,10 @@ async def refresh_education_info(user: schemas.User):
 
 @router.post("/class-table", response_model=ResponseT)
 async def refresh_education_class_table(user: schemas.User, semester: str = '2020-2'):
-    semesterId = choose_semester_id(semester)
+    semester_id = choose_semester_id(semester)
     response = ResponseT()
     try:
-        response.data = get_class_table(**user.dict(), semesterId=semesterId)
+        response.data = get_class_table(**user.dict(), semester_id=semester_id)
     except CommonException as e:
         capture_exception(e)
         response.code, response.message = e.code, e.msg
@@ -102,10 +102,10 @@ async def refresh_education_grade(user: schemas.User):
 
 @router.post("/grade", response_model=ResponseT)
 async def refresh_education_grade(user: schemas.User, semester: str = '2020-2'):
-    semesterId = choose_semester_id(semester)
+    semester_id = choose_semester_id(semester)
     response = ResponseT()
     try:
-        semester_grade = get_grade(**user.dict(), semesterId=semesterId)
+        semester_grade = get_grade(**user.dict(), semester_id=semester_id)
         semester_gpa = calculate_gpa(semester_grade)
         semester_gpa.semester = semester
         response.data = {

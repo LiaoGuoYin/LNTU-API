@@ -12,7 +12,7 @@ local_file_dict = {
 }
 
 
-class TestEducationParser(unittest.TestCase):
+class TestCommon(unittest.TestCase):
     def test_room_get_building_html(self):
         html_text = get_building_html(is_save=True)
         self.assertIn('教室占用查询-辽宁工程技术大学教务处', html_text)
@@ -42,7 +42,6 @@ class TestEducationParser(unittest.TestCase):
         print(notice_url_list)
 
     def test_notice_get_notice_detail(self):
-        # TODO
         url = 'http://jwzx.lntu.edu.cn/index/../info/1103/1503.htm'
         notice = schemas.Notice(url=url)
         notice = get_notice_detail(notice)

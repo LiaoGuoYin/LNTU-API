@@ -27,17 +27,17 @@ class CommonException(Exception):
         yield from [self.code, self.msg]
 
 
+class FormException(CommonException):
+    # 用户提交的表单有误（来源于用户的不可信表单，不应该被 sentry 捕获）
+    def __init__(self, msg):
+        self.code = StatusCodeEnum.INVALID_REQUEST
+        self.msg = msg
+
+
 class NetworkException(CommonException):
     # 代表客户端、服务器、教务服务器之间网络不通畅
     def __init__(self, msg):
         self.code = StatusCodeEnum.SERVER_INTERNAL_ERROR
-        self.msg = msg
-
-
-class FormException(CommonException):
-    # 用户提交的表单有误
-    def __init__(self, msg):
-        self.code = StatusCodeEnum.INVALID_REQUEST
         self.msg = msg
 
 
@@ -56,7 +56,7 @@ class SpiderParserException(CommonException):
 
 
 class TokenException(CommonException):
-    # TODO，JWT
+    # TODO, JWT
     def __init__(self, msg):
         self.code = StatusCodeEnum.UNAUTHORIZED
         self.msg = msg

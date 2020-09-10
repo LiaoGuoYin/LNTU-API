@@ -4,8 +4,9 @@ import time
 
 import requests
 from lxml import etree
-from requests import Session, ReadTimeout
+from requests import Session, Timeout
 
+from app import schemas
 from app.education.parser import parse_class_table_bottom, parse_class_table_body, parse_grade, parse_stu_info, \
     parse_grade_table
 from app.education.urls import URLEnum
@@ -19,9 +20,9 @@ def check_education_online() -> bool:
         if response.status_code == 200:
             return True
         else:
-            raise ReadTimeout("教务在线爆炸")
-    except ReadTimeout:
-        raise NetworkException("3s 未响应，教务在线爆炸")
+            raise Timeout("教务无响应，爆炸爆炸")
+    except Timeout as e:
+        raise NetworkException(e)
     except ConnectionError:
         raise NetworkException("连接过多，被拒绝")
 
@@ -50,7 +51,7 @@ def login(username: int, password: str) -> Session:
         return session
 
 
-def get_stu_info(username: int, password: str, session=None, is_save: bool = False):
+def get_stu_info(username: int, password: str, session=None, is_save: bool = False) -> schemas.UserInfo:
     if not session:
         session = login(username, password)
     response = session.get(URLEnum.STUDENT_INFO.value)
@@ -63,12 +64,12 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
         raise SpiderParserException("个人信息页请求失败")
 
 
-def get_class_table(username: int, password: str, semesterId: int = 627, session: Session = None,
-                    is_save: bool = False) -> list:
+def get_class_table(username: int, password: str, semester_id: int = 627, session: Session = None,
+                    is_save: bool = False) -> [schemas.ClassTableCourse]:
     # 默认学期 627
-    def get_std_ids(session):
+    def get_std_ids(tmp_session):
         # 课表查询之前，一定要访问，因此使用 session 模式
-        response_inner = session.get(URLEnum.CLASS_TABLE_OF_STD_IDS)
+        response_inner = tmp_session.get(URLEnum.CLASS_TABLE_OF_STD_IDS)
         if is_save:
             save_html_to_file(response_inner.text, "get_ids")
         stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[1]
@@ -84,7 +85,7 @@ def get_class_table(username: int, password: str, semesterId: int = 627, session
         'ignoreHead': 1,
         'setting.kind': 'class',  # std/class
         'ids': ids,
-        'semester.id': semesterId,
+        'semester.id': semester_id,
     })
     html_text = response.text
     if is_save:
@@ -96,11 +97,11 @@ def get_class_table(username: int, password: str, semesterId: int = 627, session
         raise SpiderParserException("课表页请求失败")
 
 
-def get_grade(username: int, password: str, session: Session = None, semesterId: int = 626,
-              is_save: bool = False) -> list:
+def get_grade(username: int, password: str, session: Session = None, semester_id: int = 626,
+              is_save: bool = False) -> [schemas.Grade]:
     if not session:
         session = login(username, password)
-    response = session.get(URLEnum.GRADE.value, params={'semesterId': semesterId})
+    response = session.get(URLEnum.GRADE.value, params={'semesterId': semester_id})
     if is_save:
         save_html_to_file(response.text, "grade")
     if '学年学期' in response.text:
@@ -109,7 +110,8 @@ def get_grade(username: int, password: str, session: Session = None, semesterId:
         raise SpiderParserException("成绩查询页请求失败")
 
 
-def get_grade_table(username: int, password: str, session: Session = None, is_save: bool = False) -> list:
+def get_grade_table(username: int, password: str, session: Session = None, is_save: bool = False) -> [
+    schemas.GradeTable]:
     if not session:
         session = login(username, password)
     response = session.post(URLEnum.GRADE_TABLE.value, params={'template': 'grade.origin'})

@@ -29,7 +29,7 @@ def parse_stu_info(html_doc) -> schemas.UserInfo:
         raise SpiderParserException("个人信息页，结构不正常解析失败")
 
 
-def parse_class_table_bottom(html_doc) -> list:
+def parse_class_table_bottom(html_doc) -> [schemas.ClassTableCourse]:
     rows = html_doc.xpath('//*[@id="tasklesson"]/div/table/tbody/tr')
     course_list = []
     try:
@@ -55,13 +55,13 @@ def parse_class_table_bottom(html_doc) -> list:
         raise SpiderParserException("课表页，底部解析失败")
 
 
-def parse_class_table_body(html_text, course_dict_list: list) -> list:
+def parse_class_table_body(html_text, course_dict_list: [schemas.ClassTableCourse]) -> [schemas.ClassTableCourse]:
     try:
         course_table_pattern = r"""activity = new TaskActivity\(actTeacherId\.join\(','\),actTeacherName\.join\(','\),"(.*?)",null,null,assistantName,"","","(.*?)"\);\s+index =(\d)\*unitCount\+(\d+);"""
         body_course_list = re.findall(course_table_pattern, html_text)
-        """function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
+        # function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
         for each in body_course_list:
-            """each example: ('206427(H101730023056.01)","信息系统分析与设计(H101730023056.01)","4809","静远楼239","00111111111100000000000000000000000000000000000000000', '1570829', '4', '0')"""
+            # each example: ('206427(H101730023056.01)","信息系统分析与设计(H101730023056.01)","4809","静远楼239","00111111111100000000000000000000000000000000000000000', '1570829', '4', '0')"""
             course_data = each[0].replace('\"', '').split(',')
             course_data.extend(each[-2:])
             course_data_code = re.findall(r'\((.*?)\)', course_data[1])[0]
@@ -119,8 +119,6 @@ def parse_grade(html_doc) -> [schemas.Grade]:
             course_list.append(course)
         return course_list
     except IndexError as e:
-        # traceback.print_exc(e)
-        # raise SpiderParserException("成绩详情页，数组越界" + traceback.extract_stack(e,limit=3)) TODO traceback
         raise SpiderParserException(f"成绩详情页，数组越界: {e}")
     except AttributeError as e:
         raise SpiderParserException(f"成绩详情页，结构解析失败: {e}")
@@ -147,7 +145,6 @@ def parse_grade_table(html_doc) -> [schemas.GradeTable]:
             # 下划线为重新学习成绩: ['text-decoration:underline; ']
             if len(course_style) != 0:
                 course_style = course_style[0]
-                # course_style = '重修' if ('underline' in course_style) else '补考'
                 course_style = schemas.GradeTable.CourseStatusEnum.reStudy if (
                         'underline' in course_style) else schemas.GradeTable.CourseStatusEnum.makeUp
             else:

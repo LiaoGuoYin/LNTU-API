@@ -2,6 +2,7 @@ import requests
 from lxml import etree
 
 from app import exceptions
+from app.education.utils import save_html_to_file
 from app.quality.parser import parse_report, parse_activity, parse_scholarship
 from app.quality.urls import QualityExpansionURLEnum
 
@@ -25,7 +26,7 @@ def get_cookie(username: int, password: str) -> str:
         return response.request.headers.get('Cookie')
 
 
-def get_report(cookie: str) -> list:
+def get_report(cookie: str, is_save=False) -> list:
     url = QualityExpansionURLEnum.REPORT.value
     response = requests.get(url, headers={'Cookie': cookie})
     html_text = response.text
@@ -33,6 +34,8 @@ def get_report(cookie: str) -> list:
     if '您已经长时间没有操作' in response.text:
         raise exceptions.AccessException('登陆过期')
     else:
+        if is_save:
+            save_html_to_file(html_text, 'quality-report')
         return parse_report(html_doc)
 
 
@@ -62,13 +65,15 @@ def get_scholarship(cookie: str, year) -> list:
         return parse_scholarship(html_doc)
 
 
-def get_single_activity(url, cookie: str) -> list:
+def get_single_activity(url, cookie: str, is_save=False) -> list:
     response = requests.get(url, headers={'Cookie': cookie})
     html_text = response.text
     html_doc = etree.HTML(html_text)
     if '您已经长时间没有操作' in html_text:
         raise exceptions.AccessException('登陆过期')
     else:
+        if is_save:
+            save_html_to_file(html_text, 'quality-activity')
         return parse_activity(html_doc=html_doc)
 
 

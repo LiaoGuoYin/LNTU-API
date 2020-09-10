@@ -1,11 +1,13 @@
+# 默认学期等
 default:
   semester: 2020-2
 
+# sentry-sdk-key
 sentry:
   url: https://"*********"@o396131.ingest.sentry.io/5249091
 
+# 线上、测试数据库
 mysql:
-  #  线上、测试数据库
   user: root
   password: root
   host: 127.0.0.1
@@ -13,13 +15,12 @@ mysql:
   db_name: hilntu # 线上数据库名
   test_db_name: test_hilntu # 测试数据库名
 
-account:
-  # 测试用账号
-  valid:
-    # 有效账号
-    username: 1710030215
-    password: *
-  invalid:
-    # 无效账号（密码错误但是账号存在）
-    username: 1710030215
-    password: *
+# 教务有效测试账号
+education-account:
+  username: 1710030215
+  password: test
+
+# 素拓有效测试账号
+quality-account:
+  username: 1710030215
+  password: test

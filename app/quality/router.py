@@ -13,18 +13,6 @@ async def quality_home():
     return {'API-location': '/quality/'}
 
 
-@router.post('/report', )
-async def quality_report(user: schemas.User):
-    response = ResponseT()
-    try:
-        cookie = get_cookie(**user.dict())
-        response.data = get_report(cookie)
-    except exceptions.CommonException as e:
-        capture_exception(e)
-        response.code, response.message = e
-    return response
-
-
 @router.post('/data', )
 async def quality_report(user: schemas.User):
     response = ResponseT()
@@ -36,6 +24,18 @@ async def quality_report(user: schemas.User):
             # 'scholarship': get_scholarship(cookie)
         }
         response.data = data_dict
+    except exceptions.CommonException as e:
+        capture_exception(e)
+        response.code, response.message = e
+    return response
+
+
+@router.post('/report', )
+async def quality_report(user: schemas.User):
+    response = ResponseT()
+    try:
+        cookie = get_cookie(**user.dict())
+        response.data = get_report(cookie)
     except exceptions.CommonException as e:
         capture_exception(e)
         response.code, response.message = e

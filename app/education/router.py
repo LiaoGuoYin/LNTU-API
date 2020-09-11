@@ -52,7 +52,8 @@ async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
         semester_grade = get_grade_table(**user.dict(), session=session)
         data = {
             'info': get_stu_info(**user.dict(), session=session),
-            'courseTable': get_course_table(**user.dict(), session=session, semester_id=semester_id), # TODO，本方法是否返回和学期无关的信息
+            'courseTable': get_course_table(**user.dict(), session=session, semester_id=semester_id),
+            # TODO，本方法是否返回和学期无关的信息
             'gradeTable': semester_grade,
             'gpa': calculate_gpa(semester_grade),
         }
@@ -80,19 +81,6 @@ async def refresh_education_info(user: schemas.User):
     return response
 
 
-@router.post("/course-table", response_model=ResponseT)
-async def refresh_education_course_table(user: schemas.User, semester: str = '2020-2'):
-    semester_id = choose_semester_id(semester)
-    response = ResponseT()
-    try:
-        response.data = get_course_table(**user.dict(), semester_id=semester_id)
-        crud.update_course_table(response.data, db.session)
-    except CommonException as e:
-        capture_exception(e)
-        response.code, response.message = e.code, e.msg
-    return response
-
-
 @router.post("/grade", response_model=ResponseT)
 async def refresh_education_grade(user: schemas.User, semester: str = '2020-1'):
     semester_id = choose_semester_id(semester)
@@ -107,6 +95,19 @@ async def refresh_education_grade(user: schemas.User, semester: str = '2020-1'):
         }
         crud.update_grade_list(user, response.data['grade'], db.session)
         crud.update_gpa(user, response.data['gpa'], db.session)
+    except CommonException as e:
+        capture_exception(e)
+        response.code, response.message = e.code, e.msg
+    return response
+
+
+@router.post("/course-table", response_model=ResponseT)
+async def refresh_education_course_table(user: schemas.User, semester: str = '2020-2'):
+    semester_id = choose_semester_id(semester)
+    response = ResponseT()
+    try:
+        response.data = get_course_table(**user.dict(), semester_id=semester_id)
+        crud.update_course_table(response.data, db.session)
     except CommonException as e:
         capture_exception(e)
         response.code, response.message = e.code, e.msg

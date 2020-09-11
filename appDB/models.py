@@ -109,6 +109,6 @@ class CourseTable(Base):
     name = Column(String(128))
     teacher = Column(String(16))
     credit = Column(String(16))
-    schedules = Column('schedules', JSON)
+    schedules = Column(JSON)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

@@ -3,7 +3,7 @@ import re
 from app import schemas
 from app.education.utils import GetWeek
 from app.exceptions import SpiderParserException
-from app.schemas import ClassTableCourseSchedule, ClassTableCourse
+from app.schemas import CourseTableSchedule, CourseTable
 
 
 def parse_stu_info(html_doc) -> schemas.UserInfo:
@@ -29,7 +29,7 @@ def parse_stu_info(html_doc) -> schemas.UserInfo:
         raise SpiderParserException("个人信息页，结构不正常解析失败")
 
 
-def parse_class_table_bottom(html_doc) -> [schemas.ClassTableCourse]:
+def parse_course_table_bottom(html_doc) -> [schemas.CourseTable]:
     rows = html_doc.xpath('//*[@id="tasklesson"]/div/table/tbody/tr')
     course_list = []
     try:
@@ -46,7 +46,7 @@ def parse_class_table_bottom(html_doc) -> [schemas.ClassTableCourse]:
                 'credit': row_data[1],
                 'teacher': row_data[3],
             }
-            course_list.append(ClassTableCourse(**single_course_dict))
+            course_list.append(CourseTable(**single_course_dict))
             # 另一种解析 row_data = ["".join (cell.text.split ()) for cell in cells]
         return course_list
     except IndexError:
@@ -55,7 +55,7 @@ def parse_class_table_bottom(html_doc) -> [schemas.ClassTableCourse]:
         raise SpiderParserException("课表页，底部解析失败")
 
 
-def parse_class_table_body(html_text, course_dict_list: [schemas.ClassTableCourse]) -> [schemas.ClassTableCourse]:
+def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) -> [schemas.CourseTable]:
     try:
         course_table_pattern = r"""activity = new TaskActivity\(actTeacherId\.join\(','\),actTeacherName\.join\(','\),"(.*?)",null,null,assistantName,"","","(.*?)"\);\s+index =(\d)\*unitCount\+(\d+);"""
         body_course_list = re.findall(course_table_pattern, html_text)
@@ -65,7 +65,7 @@ def parse_class_table_body(html_text, course_dict_list: [schemas.ClassTableCours
             course_data = each[0].replace('\"', '').split(',')
             course_data.extend(each[-2:])
             course_data_code = re.findall(r'\((.*?)\)', course_data[1])[0]
-            schedule = ClassTableCourseSchedule()
+            schedule = CourseTableSchedule()
             # '静远楼313(JY313)' -> '静远楼313'
             schedule.room = course_data[3] if course_data[3].find('(') == -1 else course_data[3].split('(')[0]
             tmp_weeks = GetWeek().marshal(course_data[4], 2, 1, 50)

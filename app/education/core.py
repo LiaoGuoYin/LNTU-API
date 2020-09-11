@@ -7,7 +7,7 @@ from lxml import etree
 from requests import Session, Timeout
 
 from app import schemas
-from app.education.parser import parse_class_table_bottom, parse_class_table_body, parse_grade, parse_stu_info, \
+from app.education.parser import parse_course_table_bottom, parse_course_table_body, parse_grade, parse_stu_info, \
     parse_grade_table
 from app.education.urls import URLEnum
 from app.education.utils import save_html_to_file
@@ -64,12 +64,12 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
         raise SpiderParserException("个人信息页请求失败")
 
 
-def get_class_table(username: int, password: str, semester_id: int = 627, session: Session = None,
-                    is_save: bool = False) -> [schemas.ClassTableCourse]:
+def get_course_table(username: int, password: str, semester_id: int = 627, session: Session = None,
+                     is_save: bool = False) -> [schemas.CourseTable]:
     # 默认学期 627
     def get_std_ids(tmp_session):
         # 课表查询之前，一定要访问，因此使用 session 模式
-        response_inner = tmp_session.get(URLEnum.CLASS_TABLE_OF_STD_IDS)
+        response_inner = tmp_session.get(URLEnum.COURSE_TABLE_OF_STD_IDS)
         if is_save:
             save_html_to_file(response_inner.text, "get_ids")
         stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[1]
@@ -81,7 +81,7 @@ def get_class_table(username: int, password: str, semester_id: int = 627, sessio
     if not session:
         session = login(username, password)
     ids = get_std_ids(session)
-    response = session.get(URLEnum.CLASS_TABLE.value, params={
+    response = session.get(URLEnum.COURSE_TABLE.value, params={
         'ignoreHead': 1,
         'setting.kind': 'class',  # std/class
         'ids': ids,
@@ -89,10 +89,10 @@ def get_class_table(username: int, password: str, semester_id: int = 627, sessio
     })
     html_text = response.text
     if is_save:
-        save_html_to_file(html_text, "class-table")
+        save_html_to_file(html_text, "course-table")
     if '课表格式说明' in html_text:
-        part_course_list = parse_class_table_bottom(html_doc=etree.HTML(html_text))
-        return parse_class_table_body(html_text, course_dict_list=part_course_list)
+        part_course_list = parse_course_table_bottom(html_doc=etree.HTML(html_text))
+        return parse_course_table_body(html_text, course_dict_list=part_course_list)
     else:
         raise SpiderParserException("课表页请求失败")
 

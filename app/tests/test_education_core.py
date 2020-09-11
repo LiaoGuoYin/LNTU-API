@@ -4,7 +4,7 @@ import os
 from lxml import etree
 from requests import Session
 
-from app.education.core import login, get_stu_info, get_class_table, get_grade, check_education_online, get_grade_table
+from app.education.core import login, get_stu_info, get_course_table, get_grade, check_education_online, get_grade_table
 from app.education.parser import parse_grade, parse_grade_table, calculate_gpa
 from app.exceptions import FormException
 
@@ -12,7 +12,7 @@ APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 local_file_dict = {
     'config': f'{APP_ABSOLUTE_PATH}/../config.yaml',
     'info': f'{APP_ABSOLUTE_PATH}/tests/static/info.html',
-    'class-table': f'{APP_ABSOLUTE_PATH}/tests/static/class-table.html',
+    'course-table': f'{APP_ABSOLUTE_PATH}/tests/static/course-table.html',
     'grade': f'{APP_ABSOLUTE_PATH}/tests/static/grade.html',
     'grade-table': f'{APP_ABSOLUTE_PATH}/tests/static/grade-table.html',
 }
@@ -50,12 +50,12 @@ class TestEducationCore(unittest.TestCase):
             html_text = f.read()
         self.assertIn('学籍信息', html_text)
 
-    def test_education_core_class_table(self):
-        class_table_list = get_class_table(**user_dict, is_save=True)
-        with open(local_file_dict['class-table']) as f:
+    def test_education_core_course_table(self):
+        course_table_list = get_course_table(**user_dict, is_save=True)
+        with open(local_file_dict['course-table']) as f:
             html_text = f.read()
         self.assertIn('课表格式说明', html_text)
-        self.assertTrue(len(class_table_list) > 0)
+        self.assertTrue(len(course_table_list) > 0)
 
     def test_education_core_grade(self):
         grade_list = get_grade(**user_dict, is_save=True)

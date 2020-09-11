@@ -1,4 +1,5 @@
 import datetime
+from enum import Enum
 from typing import Union, List
 
 from pydantic import BaseModel
@@ -6,18 +7,11 @@ from pydantic import BaseModel
 from app.exceptions import StatusCodeEnum
 
 
+# Response Generic
 class ResponseT(BaseModel):
     code: StatusCodeEnum = StatusCodeEnum.SUCCESS
     message: str = "success"
     data: Union[list, dict] = []
-
-
-class User(BaseModel):
-    username: int
-    password: str
-
-    class Config:
-        orm_mode = True
 
 
 # Notice
@@ -52,27 +46,19 @@ class ClassRoom(BaseModel):
     type: str = None
     data: List[MiniIndex] = []
     # week: int = -1
-    # updated_at = models.DateTimeField(auto_now=True)
+    # updatedAt = models.DateTimeField(auto_now=True)
 
 
-class ClassTableCourseSchedule(BaseModel):
-    room: str = None
-    weeks: Union[list, None] = []
-    weekday: int = None
-    index: int = None
+# User
+class User(BaseModel):
+    username: int
+    password: str
+
+    class Config:
+        orm_mode = True
 
 
-class ClassTableCourse(BaseModel):
-    code: str
-    name: str = None
-    teacher: str = None
-    credit: str = None
-    schedules: List[ClassTableCourseSchedule] = []
-
-    def self_dict(self):
-        return self.dict()
-
-
+# UserInfo
 class UserInfo(BaseModel):
     username: int
     name: str
@@ -101,6 +87,26 @@ class UserInfo(BaseModel):
     isWorking: str = None
 
 
+# CourseTable
+class CourseTableSchedule(BaseModel):
+    room: str = None
+    weeks: Union[list, None] = []
+    weekday: int = None
+    index: int = None
+
+
+class CourseTable(BaseModel):
+    code: str
+    name: str = None
+    teacher: str = None
+    credit: str = None
+    schedules: List[CourseTableSchedule] = []
+
+    def self_dict(self):
+        return self.dict()
+
+
+# Grade
 class Grade(BaseModel):
     code: str = None
     name: str = None
@@ -114,8 +120,8 @@ class Grade(BaseModel):
     score: str = None
 
 
+# GradeTable
 class GradeTable(BaseModel):
-    from enum import Enum
     class CourseStatusEnum(str, Enum):
         normal = "正常"
         makeUp = "补考"

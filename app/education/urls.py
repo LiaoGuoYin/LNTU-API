@@ -11,9 +11,9 @@ class URLEnum(Enum):
 
     # private urls
     LOGIN = URL_ROOT + '/loginExt.action'
-    STUDENT_INFO = URL_ROOT + '/stdDetail.action'
+    STUDENT_INFO = URL_ROOT + '/stdInfoApply!stdInfoCheck.action'
     COURSE_TABLE = URL_ROOT + '/courseTableForStd!courseTable.action'
-    COURSE_TABLE_OF_STD_IDS = URL_ROOT + '/courseTableForStd.action'
+    COURSE_TABLE_OF_STD_IDS = URL_ROOT + '/courseTableForStd!innerIndex.action'
     GRADE = URL_ROOT + '/teach/grade/course/person!search.action'
     GRADE_TABLE = URL_ROOT + '/teach/grade/course/person!report.action'
 

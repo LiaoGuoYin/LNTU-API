@@ -175,18 +175,21 @@ def calculate_gpa(grade_list) -> schemas.GPA:
                  "优秀": 95, "良": 85, "中": 75, "及格": 65, "不及格": 0}
     for grade in grade_list:
         # 分数等级置换
-        # print(F"{grade.name}：{grade.score} ", end='')
         grade.score = rule_dict.get(grade.score, grade.score)
         if grade.score:
             pass
-            # print(F" -> {grade.score}")
         else:
             # print(F" None -> {grade.score}(异常)")
             continue
 
         # 计算GPA
-        point = float(grade.score)
-        grade.credit = float(grade.credit)
+        try:
+            point = float(grade.score)
+            grade.credit = float(grade.credit)
+        except ValueError:
+            # 分数转换错误 TODO
+            continue
+
         gpa_result.courseCount += 1
         gpa_result.creditTotal += grade.credit
         gpa_result.scoreTotal += point * grade.credit

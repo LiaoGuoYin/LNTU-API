@@ -66,10 +66,9 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
 
 def get_course_table(username: int, password: str, semester_id: int = 627, session: Session = None,
                      is_save: bool = False) -> [schemas.CourseTable]:
-    # 默认学期 627
     def get_std_ids(tmp_session):
         # 课表查询之前，一定要访问，因此使用 session 模式
-        response_inner = tmp_session.get(URLEnum.COURSE_TABLE_OF_STD_IDS)
+        response_inner = tmp_session.get(URLEnum.COURSE_TABLE_OF_STD_IDS.value)
         if is_save:
             save_html_to_file(response_inner.text, "get_ids")
         stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[1]

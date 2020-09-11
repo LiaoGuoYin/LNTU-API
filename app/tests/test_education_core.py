@@ -56,6 +56,7 @@ class TestEducationCore(unittest.TestCase):
             html_text = f.read()
         self.assertIn('课表格式说明', html_text)
         self.assertTrue(len(course_table_list) > 0)
+        print(course_table_list)
 
     def test_education_core_grade(self):
         grade_list = get_grade(**user_dict, is_save=True)

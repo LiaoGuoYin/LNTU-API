@@ -1,4 +1,4 @@
-import re
+import parse
 
 from app import schemas
 from app.education.utils import GetWeek
@@ -56,35 +56,58 @@ def parse_course_table_bottom(html_doc) -> [schemas.CourseTable]:
 
 
 def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) -> [schemas.CourseTable]:
-    try:
-        course_table_pattern = r"""activity = new TaskActivity\(actTeacherId\.join\(','\),actTeacherName\.join\(','\),"(.*?)",null,null,assistantName,"","","(.*?)"\);\s+index =(\d)\*unitCount\+(\d+);"""
-        body_course_list = re.findall(course_table_pattern, html_text)
-        # function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
-        for each in body_course_list:
-            # each example: ('206427(H101730023056.01)","信息系统分析与设计(H101730023056.01)","4809","静远楼239","00111111111100000000000000000000000000000000000000000', '1570829', '4', '0')"""
-            course_data = each[0].replace('\"', '').split(',')
-            course_data.extend(each[-2:])
-            course_data_code = re.findall(r'\((.*?)\)', course_data[1])[0]
-            schedule = CourseTableSchedule()
-            # '静远楼313(JY313)' -> '静远楼313'
-            schedule.room = course_data[3] if course_data[3].find('(') == -1 else course_data[3].split('(')[0]
-            tmp_weeks = GetWeek().marshal(course_data[4], 2, 1, 50)
-            """"
+    def decrypt_week(week: str) -> schemas.CourseTableSchedule:
+        """"
             转换周为列表：
             单 1-9 -> [1,3,5,7,9]
             双 2-10 -> [2,4,6,8,10]
             2-15 -> [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-            """
-            if tmp_weeks.startswith('双') or tmp_weeks.startswith('单'):
-                start_week, end_week = map(int, tmp_weeks[1:].split('-'))
-                schedule.weeks = list(range(start_week, end_week + 1, 2))
-            else:
-                start_week, end_week = map(int, tmp_weeks.split('-'))
-                schedule.weeks = list(range(start_week, end_week + 1))
-            schedule.weekday = int(course_data[5]) + 1  # course_week
-            schedule.index = int(course_data[6]) + 1  # course_index
-            [course.schedules.append(schedule) for course in course_dict_list if
-             course_data_code == course.code]
+        week: 00001111111100000000000000000000000000000000000000000
+        """
+        schedule = CourseTableSchedule()
+        schedule.room = info_result.get('room')
+        tmp_weeks = GetWeek().marshal(week, 2, 1, 50)
+        if tmp_weeks.startswith('双') or tmp_weeks.startswith('单'):
+            start_week, end_week = map(int, tmp_weeks[1:].split('-'))
+            schedule.weeks = list(range(start_week, end_week + 1, 2))
+        elif '-' in tmp_weeks:
+            start_week, end_week = map(int, tmp_weeks.split('-'))
+            schedule.weeks = list(range(start_week, end_week + 1))
+        else:
+            schedule.weeks = [int(tmp_weeks)]
+        return schedule
+
+    try:
+        course_list_pattern_str = "activity = new TaskActivity({});{}var teacher"
+        body_course_list = parse.findall(course_list_pattern_str, html_text)
+        for course in body_course_list:
+            original_info, original_schedule = course  # 将课程基本信息和时间信息解包
+
+            # 解析基本信息
+            # js example: function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
+            info_pattern_str = 'actTeacherId.join(\',\'),actTeacherName.join(\',\'),"{}","{name}({code})","{}","{room}({})","{encrypted_week}",null,null,assistantName,"","","{}"'
+            info_all_result = parse.parse(info_pattern_str, original_info)
+            info_result = info_all_result.named
+
+            # 解析课程时间
+            schedule_pattern_str = 'index ={:d}*unitCount+{:d};'
+            schedule_all_result = parse.findall(schedule_pattern_str, original_schedule)
+            schedule_day_index_tuple_list = [tuple(map(lambda x: x + 1, each)) for each in schedule_all_result]
+            # schedule_day_index_tuple_list: [(2, 3),(2, 4)] 周二第三、四小节
+
+            schedule_list = []
+            for (day, index) in schedule_day_index_tuple_list:
+                schedule = decrypt_week(info_result.get('encrypted_week'))
+                if index % 2 == 0:  # 抛弃偶数节课方便转换为大节课，TODO 可能有单节偶数小课的 bug
+                    continue
+                odd_index = index
+                schedule.weekday = day
+                schedule.index = odd_index - (odd_index // 2)  # 小节课转大节课（十节课转五节课）
+                schedule_list.append(schedule)
+
+            for i in schedule_list:
+                [course.schedules.append(i) for course in course_dict_list if
+                 info_result.get('code') == course.code]
         return course_dict_list
     except IndexError:
         return "课表体数组越界"

@@ -106,20 +106,6 @@ class CourseTable(BaseModel):
         return self.dict()
 
 
-# Grade
-class Grade(BaseModel):
-    code: str = None
-    name: str = None
-    semester: str = None
-    courseType: str = None
-    grade: str = None
-    credit: str = None
-    usual: str = None
-    midterm: str = None
-    termEnd: str = None
-    score: str = None
-
-
 # GradeTable
 class GradeTable(BaseModel):
     class CourseStatusEnum(str, Enum):
@@ -132,6 +118,16 @@ class GradeTable(BaseModel):
     score: str = None
     semester: str = None
     status: CourseStatusEnum = CourseStatusEnum.normal
+
+
+# Grade
+class Grade(GradeTable):
+    code: str
+    courseType: str = None
+    grade: str = None
+    usual: str = None
+    midterm: str = None
+    termEnd: str = None
 
 
 # GPA

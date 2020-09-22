@@ -47,7 +47,6 @@ def parse_course_table_bottom(html_doc) -> [schemas.CourseTable]:
                 'teacher': row_data[3],
             }
             course_list.append(CourseTable(**single_course_dict))
-            # 另一种解析 row_data = ["".join (cell.text.split ()) for cell in cells]
         return course_list
     except IndexError:
         raise SpiderParserException("课表页，底部数组越界")
@@ -129,8 +128,7 @@ def parse_grade(html_doc) -> [schemas.Grade]:
             # cells: ['2017-2018 1', 'H271780001036', 'H271780001036.18', ' 军事理论 ', ' 专业必修 ', '1', '-- (正常)', '47 (正常)', '50 (正常)', '74 (正常)', '74', '1']
             if len(cells) == 0:
                 return []
-            course = schemas.Grade(code=cells[2])
-            course.name = cells[3]
+            course = schemas.Grade(name=cells[3], code=cells[2])
             course.credit = cells[5]
             course.grade = cells[-2]
             course.semester = cells[0]
@@ -139,6 +137,12 @@ def parse_grade(html_doc) -> [schemas.Grade]:
             course.midterm = cells[6]
             course.termEnd = cells[7]
             course.score = cells[9]
+            if '补考' in course.name:
+                course.status = schemas.GradeTable.CourseStatusEnum.makeUp.value
+            elif '重学' in course.name:
+                course.status = schemas.GradeTable.CourseStatusEnum.reStudy.value
+            else:
+                course.status = schemas.GradeTable.CourseStatusEnum.normal
             course_list.append(course)
         return course_list
     except IndexError as e:
@@ -164,7 +168,7 @@ def parse_grade_table(html_doc) -> [schemas.GradeTable]:
                 tmp_course_info.append(td.text)
             course_style = tr[2].xpath('./@style')
             # 重修、补考、正常 元素的样式不同:
-            # 斜体为补考成绩: ['font-style:italic; ']
+            # 斜线为补考成绩: ['font-style:italic; ']
             # 下划线为重新学习成绩: ['text-decoration:underline; ']
             if len(course_style) != 0:
                 course_style = course_style[0]
@@ -187,11 +191,11 @@ def parse_grade_table(html_doc) -> [schemas.GradeTable]:
         return e
 
 
-def calculate_gpa(grade_list) -> schemas.GPA:
-    # TODO bug，重修有学分折半
+def calculate_gpa(grade_list: [schemas.GradeTable]) -> schemas.GPA:
     """GPA计算规则:
         "二级制: 合格(85),不合格(0)"
         "五级制: 优秀(95),良(85),中(75),及格(65),不及格(0)"
+    补考和重修：同一门课程多次考核时，其绩点按平均值算。当至少一次绩点大于 1.0，且平均绩点低于 1.0 时，平均绩点按 1.0 计算。
     """
     gpa_result = schemas.GPA()
     rule_dict = {"合格": 85, "不合格": 0,
@@ -199,10 +203,7 @@ def calculate_gpa(grade_list) -> schemas.GPA:
     for grade in grade_list:
         # 分数等级置换
         grade.score = rule_dict.get(grade.score, grade.score)
-        if grade.score:
-            pass
-        else:
-            # print(F" None -> {grade.score}(异常)")
+        if not grade.score:
             continue
 
         # 计算GPA
@@ -219,23 +220,33 @@ def calculate_gpa(grade_list) -> schemas.GPA:
 
         # 计算学分绩
         if 95 <= point <= 100:
-            gpa_result.gradePointTotal += grade.credit * 4.5
+            tmp_grade_point_average = grade.credit * 4.5
         elif 90 <= point < 95:
-            gpa_result.gradePointTotal += grade.credit * 4.0
+            tmp_grade_point_average = grade.credit * 4.0
         elif 85 <= point < 90:
-            gpa_result.gradePointTotal += grade.credit * 3.5
+            tmp_grade_point_average = grade.credit * 3.5
         elif 80 <= point < 85:
-            gpa_result.gradePointTotal += grade.credit * 3.0
+            tmp_grade_point_average = grade.credit * 3.0
         elif 75 <= point < 80:
-            gpa_result.gradePointTotal += grade.credit * 2.5
+            tmp_grade_point_average = grade.credit * 2.5
         elif 70 <= point < 75:
-            gpa_result.gradePointTotal += grade.credit * 2.0
+            tmp_grade_point_average = grade.credit * 2.0
         elif 65 <= point < 70:
-            gpa_result.gradePointTotal += grade.credit * 1.5
+            tmp_grade_point_average = grade.credit * 1.5
         elif 60 <= point < 65:
-            gpa_result.gradePointTotal += grade.credit * 1.0
+            tmp_grade_point_average = grade.credit * 1.0
         else:
-            gpa_result.gradePointTotal += 0
+            tmp_grade_point_average = 0
+
+        if grade.status == schemas.GradeTable.CourseStatusEnum.makeUp:
+            tmp_grade_point_average /= 2
+        elif grade.status == schemas.GradeTable.CourseStatusEnum.reStudy:
+            tmp_grade_point_average /= 3
+        else:
+            pass
+
+        tmp_grade_point_average = 1 if (tmp_grade_point_average <= 1) else tmp_grade_point_average  # 重修多次导致单科 GPA < 1.0
+        gpa_result.gradePointTotal += tmp_grade_point_average
 
     if gpa_result.courseCount == 0:
         return gpa_result

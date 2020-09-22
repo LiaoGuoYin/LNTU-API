@@ -36,7 +36,7 @@ class UserInfo(Base):
     direction = Column(String(32))
     enrollDate = Column(Date)
     graduateDate = Column(Date)
-    chiefCollege = Column(String(32))  # TODO 转专业情况
+    chiefCollege = Column(String(32))
     studyType = Column(String(32))
     membership = Column(String(32))
     isInSchool = Column(String(32))
@@ -96,6 +96,7 @@ class Grade(Base):
     midterm = Column(String(16))
     termEnd = Column(String(16))
     score = Column(String(16))
+    status = Column(String(16))
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
     # Foreign key

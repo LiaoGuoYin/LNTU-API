@@ -4,7 +4,7 @@ import time
 
 import requests
 from lxml import etree
-from requests import Session, Timeout
+from requests import Session
 
 from app import schemas
 from app.education.parser import parse_course_table_bottom, parse_course_table_body, parse_grade, parse_stu_info, \
@@ -21,8 +21,8 @@ def check_education_online() -> bool:
             return True
         else:
             raise NetworkException("教务无响应，爆炸爆炸")
-    except ConnectionError:
-        raise NetworkException("连接过多，被拒绝")
+    except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectTimeout):
+        raise NetworkException("教务无响应，爆炸爆炸")
 
 
 def login(username: int, password: str) -> Session:

@@ -14,6 +14,20 @@ from appDB import crud
 router = APIRouter()
 
 
+@router.get("/gpa-all", response_model=ResponseT)
+async def refresh_education_gpa(username: int, password: str):
+    response = ResponseT()
+    try:
+        user_dict = {'username': username,
+                     'password': password}
+        grade_table = get_grade_table(**user_dict)
+        response.data = calculate_gpa(grade_table)
+        crud.update_gpa(schemas.User(**user_dict), response.data, db.session)
+    except CommonException as e:
+        response.code, response.message = e.code, e.msg
+    return response
+
+
 @router.get("/")
 async def home():
     return {"API-location": "/education/"}

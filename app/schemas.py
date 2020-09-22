@@ -136,7 +136,7 @@ class GradeTable(BaseModel):
 
 # GPA
 class GPA(BaseModel):
-    semester: str = "1999-1"
+    semester: str = "all"
     gradePointAverage: float = 0.0
     weightedAverage: float = 0.0
     gradePointTotal: float = 0.0

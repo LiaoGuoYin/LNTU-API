@@ -8,11 +8,6 @@ from app.schemas import ResponseT
 router = APIRouter()
 
 
-@router.get('/', )
-async def quality_home():
-    return {'API-location': '/quality/'}
-
-
 @router.post('/data', )
 async def quality_report(user: schemas.User):
     response = ResponseT()

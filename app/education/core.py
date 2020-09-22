@@ -20,9 +20,7 @@ def check_education_online() -> bool:
         if response.status_code == 200:
             return True
         else:
-            raise Timeout("教务无响应，爆炸爆炸")
-    except Timeout as e:
-        raise NetworkException(e)
+            raise NetworkException("教务无响应，爆炸爆炸")
     except ConnectionError:
         raise NetworkException("连接过多，被拒绝")
 

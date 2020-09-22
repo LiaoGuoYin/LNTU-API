@@ -31,6 +31,7 @@ async def refresh_education_gpa(username: int, password: str):
         crud.update_user(user, db.session)
         crud.update_gpa(schemas.User(**user_dict), response.data, db.session)
     except CommonException as e:
+        capture_exception(e)
         response.code, response.message = e.code, e.msg
     return response
 
@@ -63,11 +64,6 @@ async def refresh_education_grade(username: int, password: str, semester: str = 
         capture_exception(e)
         response.code, response.message = e.code, e.msg
     return response
-
-
-@router.get("/")
-async def home():
-    return {"API-location": "/education/"}
 
 
 @router.get("/classroom", )

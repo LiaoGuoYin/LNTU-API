@@ -34,7 +34,7 @@ app = FastAPI(
 )
 
 db_url_dict = get_db_url_dict()
-engine = create_engine(db_url_dict['production'], echo=True)
+engine = create_engine(db_url_dict['production'], pool_recycle=3600)
 Base.metadata.create_all(bind=engine)  # 创建数据库
 app.add_middleware(DBSessionMiddleware, db_url=db_url_dict['production'], custom_engine=engine)
 

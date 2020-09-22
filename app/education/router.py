@@ -28,6 +28,29 @@ async def refresh_education_gpa(username: int, password: str):
     return response
 
 
+@router.get("/grade", response_model=ResponseT)
+async def refresh_education_grade(username: int, password: str, semester: str = '2020-1'):
+    semester_id = choose_semester_id(semester)
+    response = ResponseT()
+    try:
+        user_dict = {'username': username,
+                     'password': password}
+        user = schemas.User(**user_dict)
+        semester_grade = get_grade(**user.dict(), semester_id=semester_id)
+        semester_gpa = calculate_gpa(semester_grade)
+        semester_gpa.semester = semester
+        response.data = {
+            'grade': semester_grade,
+            'gpa': semester_gpa
+        }
+        crud.update_grade_list(user, response.data['grade'], db.session)
+        crud.update_gpa(user, response.data['gpa'], db.session)
+    except CommonException as e:
+        capture_exception(e)
+        response.code, response.message = e.code, e.msg
+    return response
+
+
 @router.get("/")
 async def home():
     return {"API-location": "/education/"}
@@ -89,26 +112,6 @@ async def refresh_education_info(user: schemas.User):
     try:
         response.data = get_stu_info(**user.dict())
         crud.update_info(response.data, db.session)
-    except CommonException as e:
-        capture_exception(e)
-        response.code, response.message = e.code, e.msg
-    return response
-
-
-@router.post("/grade", response_model=ResponseT)
-async def refresh_education_grade(user: schemas.User, semester: str = '2020-1'):
-    semester_id = choose_semester_id(semester)
-    response = ResponseT()
-    try:
-        semester_grade = get_grade(**user.dict(), semester_id=semester_id)
-        semester_gpa = calculate_gpa(semester_grade)
-        semester_gpa.semester = semester
-        response.data = {
-            'grade': semester_grade,
-            'gpa': semester_gpa
-        }
-        crud.update_grade_list(user, response.data['grade'], db.session)
-        crud.update_gpa(user, response.data['gpa'], db.session)
     except CommonException as e:
         capture_exception(e)
         response.code, response.message = e.code, e.msg

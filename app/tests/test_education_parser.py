@@ -5,8 +5,7 @@ import unittest
 from lxml import etree
 
 from app import schemas
-from app.education.parser import parse_stu_info, parse_grade, parse_course_table_bottom, parse_course_table_body, \
-    parse_grade_table
+from app.education import parser
 
 APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 local_file_dict = {
@@ -24,7 +23,7 @@ class TestEducationParser(unittest.TestCase):
             html_text = f.read()
         self.assertIn('学籍信息', html_text)
 
-        data_dict = parse_stu_info(html_doc=etree.HTML(html_text))
+        data_dict = parser.parse_stu_info(html_doc=etree.HTML(html_text))
         self.assertIsInstance(data_dict, schemas.UserInfo)
         print(data_dict)
 
@@ -33,8 +32,8 @@ class TestEducationParser(unittest.TestCase):
             html_text = f.read()
         self.assertIn('课表格式说明', html_text)
 
-        part_course_dict_list = parse_course_table_bottom(html_doc=etree.HTML(html_text))
-        data_list = parse_course_table_body(html_text, part_course_dict_list)
+        part_course_dict_list = parser.parse_course_table_bottom(html_doc=etree.HTML(html_text))
+        data_list = parser.parse_course_table_body(html_text, part_course_dict_list)
         self.assertIsInstance(part_course_dict_list, list)
         self.assertIsInstance(data_list, list)
 
@@ -46,7 +45,7 @@ class TestEducationParser(unittest.TestCase):
             html_text = f.read()
         self.assertIn('学年学期', html_text)
 
-        grade_list = parse_grade(html_doc=etree.HTML(html_text))
+        grade_list = parser.parse_grade(html_doc=etree.HTML(html_text))
         self.assertIsInstance(grade_list, list)
         print(grade_list)
 
@@ -55,7 +54,7 @@ class TestEducationParser(unittest.TestCase):
             html_text = f.read()
         self.assertIn('个人成绩总表打印', html_text)
 
-        grade_table_list = parse_grade_table(html_doc=etree.HTML(html_text))
+        grade_table_list = parser.parse_grade_table(html_doc=etree.HTML(html_text))
         self.assertTrue(len(grade_table_list) != 0)
         self.assertIsInstance(grade_table_list[0], schemas.GradeTable)
         print(grade_table_list)

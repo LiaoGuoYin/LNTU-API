@@ -115,19 +115,20 @@ class GradeTable(BaseModel):
 
     name: str
     credit: str = None
-    score: str = None
     semester: str = None
     status: CourseStatusEnum = CourseStatusEnum.normal
+    result: str = None
 
 
 # Grade
 class Grade(GradeTable):
     code: str
     courseType: str = None
-    grade: str = None
     usual: str = None
-    midterm: str = None
-    termEnd: str = None
+    midTerm: str = None
+    endTerm: str = None
+    makeUpScore: str = None
+    makeUpScoreResult: str = None
 
 
 # GPA

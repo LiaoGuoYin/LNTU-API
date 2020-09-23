@@ -4,8 +4,8 @@ import os
 from lxml import etree
 from requests import Session
 
+from app.education import parser
 from app.education.core import login, get_stu_info, get_course_table, get_grade, check_education_online, get_grade_table
-from app.education.parser import parse_grade, parse_grade_table, calculate_gpa
 from app.exceptions import FormException
 
 APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -63,8 +63,8 @@ class TestEducationCore(unittest.TestCase):
         with open(local_file_dict['grade']) as f:
             html_text = f.read()
         self.assertIn('学年学期', html_text)
-        self.assertTrue(len(parse_grade(etree.HTML(html_text))) > 0)
-        print(parse_grade(etree.HTML(html_text)))
+        self.assertTrue(len(parser.parse_grade(etree.HTML(html_text))) > 0)
+        print(parser.parse_grade(etree.HTML(html_text)))
         self.assertTrue(len(grade_list) > 0)
 
     def test_education_core_grade_table(self):
@@ -77,15 +77,15 @@ class TestEducationCore(unittest.TestCase):
     def test_gpa_grade(self):
         with open(local_file_dict['grade']) as f:
             html_text = f.read()
-        grade_list = parse_grade(html_doc=etree.HTML(html_text))
-        gpa_result = calculate_gpa(grade_list)
+        grade_list = parser.parse_grade(html_doc=etree.HTML(html_text))
+        gpa_result = parser.calculate_gpa(grade_list)
         self.assertTrue(gpa_result.courseCount != 0)
         print(gpa_result)
 
     def test_gpa_grade_table(self):
         with open(local_file_dict['grade-table']) as f:
             html_text = f.read()
-        grade_list = parse_grade_table(html_doc=etree.HTML(html_text))
-        gpa_result = calculate_gpa(grade_list)
+        grade_list = parser.parse_grade_table(html_doc=etree.HTML(html_text))
+        gpa_result = parser.calculate_gpa(grade_list)
         self.assertTrue(gpa_result.courseCount != 0)
         print(gpa_result)

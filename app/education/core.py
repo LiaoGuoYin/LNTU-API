@@ -7,8 +7,7 @@ from lxml import etree
 from requests import Session
 
 from app import schemas
-from app.education.parser import parse_course_table_bottom, parse_course_table_body, parse_grade, parse_stu_info, \
-    parse_grade_table
+from app.education import parser
 from app.education.urls import URLEnum
 from app.education.utils import save_html_to_file
 from app.exceptions import NetworkException, AccessException, FormException, SpiderParserException
@@ -57,7 +56,7 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
         if is_save:
             save_html_to_file(response.text, "info")
         html_doc = etree.HTML(response.text)
-        return parse_stu_info(html_doc)
+        return parser.parse_stu_info(html_doc)
     else:
         raise SpiderParserException("个人信息页请求失败")
 
@@ -88,8 +87,8 @@ def get_course_table(username: int, password: str, semester_id: int = 627, sessi
     if is_save:
         save_html_to_file(html_text, "course-table")
     if '课表格式说明' in html_text:
-        part_course_list = parse_course_table_bottom(html_doc=etree.HTML(html_text))
-        return parse_course_table_body(html_text, course_dict_list=part_course_list)
+        part_course_list = parser.parse_course_table_bottom(html_doc=etree.HTML(html_text))
+        return parser.parse_course_table_body(html_text, course_dict_list=part_course_list)
     else:
         raise SpiderParserException("课表页请求失败")
 
@@ -102,7 +101,7 @@ def get_grade(username: int, password: str, session: Session = None, semester_id
     if is_save:
         save_html_to_file(response.text, "grade")
     if '学年学期' in response.text:
-        return parse_grade(html_doc=etree.HTML(response.text))
+        return parser.parse_grade(html_doc=etree.HTML(response.text))
     else:
         raise SpiderParserException("成绩查询页请求失败")
 
@@ -115,6 +114,6 @@ def get_grade_table(username: int, password: str, session: Session = None, is_sa
     if is_save:
         save_html_to_file(response.text, "grade-table")
     if '个人成绩总表打印' in response.text:
-        return parse_grade_table(html_doc=etree.HTML(response.text))
+        return parser.parse_grade_table(html_doc=etree.HTML(response.text))
     else:
         raise SpiderParserException("总成绩查询页请求失败")

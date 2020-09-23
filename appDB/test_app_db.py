@@ -1,8 +1,10 @@
 import unittest
 from fastapi import FastAPI
 from fastapi_sqlalchemy import db, DBSessionMiddleware
+from sqlalchemy import create_engine
 
 from appDB import models
+from appDB.models import Base
 from appDB.utils import get_db_url_dict
 from app import schemas
 
@@ -15,6 +17,8 @@ class TestAppDB(unittest.TestCase):
     def setUp(self) -> None:
         app = FastAPI()
         db_url_dict = get_db_url_dict()
+        engine = create_engine(db_url_dict['test'], echo=True)
+        Base.metadata.create_all(bind=engine)  # 创建数据库
         app.add_middleware(DBSessionMiddleware, db_url=db_url_dict['test'])
 
     def test_education_user(self):

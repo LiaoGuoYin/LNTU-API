@@ -1,4 +1,3 @@
-import datetime
 from enum import Enum
 from typing import Union, List
 
@@ -73,8 +72,8 @@ class UserInfo(BaseModel):
     college: str = None
     major: str = None
     direction: str = None
-    enrollDate: datetime.date = None
-    graduateDate: datetime.date = None
+    enrollDate: str = None
+    graduateDate: str = None
     chiefCollege: str = None
     studyType: str = None
     membership: str = None

@@ -47,7 +47,7 @@ class TestEducationParser(unittest.TestCase):
 
         grade_list = parser.parse_grade(html_doc=etree.HTML(html_text))
         self.assertIsInstance(grade_list, list)
-        print(grade_list)
+        [print(each) for each in grade_list]
 
     def test_education_parse_grade_table(self):
         with open(local_file_dict['grade-table']) as f:
@@ -57,4 +57,4 @@ class TestEducationParser(unittest.TestCase):
         grade_table_list = parser.parse_grade_table(html_doc=etree.HTML(html_text))
         self.assertTrue(len(grade_table_list) != 0)
         self.assertIsInstance(grade_table_list[0], schemas.GradeTable)
-        print(grade_table_list)
+        [print(each) for each in grade_table_list]

@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, Date, ForeignKey, Float, JSON
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -15,7 +15,7 @@ class User(Base):
     lastLogin = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
     info = relationship("UserInfo")
-    grade_table = relationship("GradeTableRow")
+    grade_table = relationship("GradeTable")
 
 
 class UserInfo(Base):
@@ -34,8 +34,8 @@ class UserInfo(Base):
     college = Column(String(32))
     major = Column(String(32))
     direction = Column(String(32))
-    enrollDate = Column(Date)
-    graduateDate = Column(Date)
+    enrollDate = Column(String(16))
+    graduateDate = Column(String(16))
     chiefCollege = Column(String(32))
     studyType = Column(String(32))
     membership = Column(String(32))
@@ -51,7 +51,7 @@ class UserInfo(Base):
     ownerUsername = Column(Integer, ForeignKey(User.username))
 
 
-class GradeTableRow(Base):
+class GradeTable(Base):
     __tablename__ = "grade_table"
 
     username = Column(Integer, primary_key=True, index=True)
@@ -95,7 +95,9 @@ class Grade(Base):
     usual = Column(String(16))
     midTerm = Column(String(16))
     endTerm = Column(String(16))
-    score = Column(String(16))
+    makeUpScore = Column(String(16))
+    makeUpScoreResult = Column(String(16))
+    result = Column(String(16))
     status = Column(String(16))
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 

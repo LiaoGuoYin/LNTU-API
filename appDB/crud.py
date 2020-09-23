@@ -23,9 +23,9 @@ def update_info(user_info: schemas.UserInfo, session: Session) -> models.UserInf
 
 
 def update_grade_table(user: schemas.User, grade_table_row_list: [schemas.GradeTable], session: Session) -> [
-    models.GradeTableRow]:
+    models.GradeTable]:
     for row in grade_table_row_list:
-        new_grade_table_row = models.GradeTableRow(username=user.username, **row.dict())
+        new_grade_table_row = models.GradeTable(username=user.username, **row.dict())
         new_grade_table_row.ownerUsername = user.username
         session.merge(new_grade_table_row)
     session.commit()

@@ -10,7 +10,7 @@ from app.exceptions import StatusCodeEnum
 class ResponseT(BaseModel):
     code: StatusCodeEnum = StatusCodeEnum.SUCCESS
     message: str = "success"
-    data: Union[list, dict] = []
+    data: Union[list, dict] = None
 
 
 # Notice
@@ -128,6 +128,7 @@ class Grade(GradeTable):
     endTerm: str = None
     makeUpScore: str = None
     makeUpScoreResult: str = None
+    point: str = None
 
 
 # GPA

@@ -5,8 +5,7 @@ from sentry_sdk import capture_exception
 from app import schemas
 from app.common import notice, room
 from app.const import choose_semester_id
-from app.education.core import get_stu_info, get_course_table, get_grade, get_grade_table, login
-from app.education.parser import calculate_gpa
+from app.education.core import get_stu_info, get_course_table, get_grade, get_grade_table, login, calculate_gpa
 from app.exceptions import CommonException
 from app.schemas import ResponseT
 from appDB import crud

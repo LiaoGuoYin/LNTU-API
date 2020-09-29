@@ -56,7 +56,7 @@ class TestAppDB(unittest.TestCase):
     def test_education_grade(self):
         grade = schemas.Grade(name='会计学', credit='2.5', semester='2019-20202', status='正常', result='99',
                               code='H101730004040.01', courseType='专业必修', usual='17', midTerm='', endTerm='99',
-                              makeUpScore=None, makeUpScoreResult=None)
+                              point='3.5', makeUpScore=None, makeUpScoreResult=None)
         with db():
             db.session.merge(models.Grade(username=1000, **grade.dict()))
             db.session.commit()

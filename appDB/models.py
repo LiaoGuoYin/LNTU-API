@@ -98,6 +98,7 @@ class Grade(Base):
     makeUpScore = Column(String(16))
     makeUpScoreResult = Column(String(16))
     result = Column(String(16))
+    point = Column(String(16))
     status = Column(String(16))
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 

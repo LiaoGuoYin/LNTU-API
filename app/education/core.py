@@ -54,7 +54,7 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
     response = session.get(URLEnum.STUDENT_INFO.value)
     if "学籍信息" in response.text:
         if is_save:
-            save_html_to_file(response.text, "info")
+            save_html_to_file(response.text, 'info')
         html_doc = etree.HTML(response.text)
         return parser.parse_stu_info(html_doc)
     else:
@@ -67,7 +67,7 @@ def get_course_table(username: int, password: str, semester_id: int = 627, sessi
         # 课表查询之前，一定要访问，因此使用 session 模式
         response_inner = tmp_session.get(URLEnum.COURSE_TABLE_OF_STD_IDS.value)
         if is_save:
-            save_html_to_file(response_inner.text, "get_ids")
+            save_html_to_file(response_inner.text, 'get_ids')
         stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[1]
         if stu_id is None:
             raise SpiderParserException("页面上没找到 ids")
@@ -85,7 +85,7 @@ def get_course_table(username: int, password: str, semester_id: int = 627, sessi
     })
     html_text = response.text
     if is_save:
-        save_html_to_file(html_text, "course-table")
+        save_html_to_file(html_text, 'course-table')
     if '课表格式说明' in html_text:
         part_course_list = parser.parse_course_table_bottom(html_doc=etree.HTML(html_text))
         return parser.parse_course_table_body(html_text, course_dict_list=part_course_list)
@@ -99,7 +99,7 @@ def get_grade(username: int, password: str, session: Session = None, semester_id
         session = login(username, password)
     response = session.get(URLEnum.GRADE.value, params={'semesterId': semester_id})
     if is_save:
-        save_html_to_file(response.text, "grade")
+        save_html_to_file(response.text, 'grade')
     if '学年学期' in response.text:
         return parser.parse_grade(html_doc=etree.HTML(response.text))
     else:
@@ -112,8 +112,76 @@ def get_grade_table(username: int, password: str, session: Session = None, is_sa
         session = login(username, password)
     response = session.post(URLEnum.GRADE_TABLE.value, params={'template': 'grade.origin'})
     if is_save:
-        save_html_to_file(response.text, "grade-table")
+        save_html_to_file(response.text, 'grade-table')
     if '个人成绩总表打印' in response.text:
+        # print(f'{username} 教务GPA: {parser.parse_grade_table_gpa(html_doc=etree.HTML(response.text))}')
         return parser.parse_grade_table(html_doc=etree.HTML(response.text))
     else:
         raise SpiderParserException("总成绩查询页请求失败")
+
+
+def calculate_gpa(course_list: [schemas.Grade]) -> schemas.GPA:
+    """GPA计算规则:
+        "二级制: 合格(85),不合格(0)"
+        "五级制: 优秀(95),良(85),中(75),及格(65),不及格(0)"
+    补考和重修：同一门课程多次考核时，其绩点按平均值算。当至少一次绩点大于 1.0，且平均绩点低于 1.0 时，平均绩点按 1.0 计算。
+    """
+    gpa_result = schemas.GPA()
+    rule_dict = {"合格": 85, "不合格": 0,
+                 "优秀": 95, "良": 85, "中": 75, "及格": 65, "不及格": 0}
+    for course in course_list:
+        # 分数等级置换
+        course.result = rule_dict.get(course.result, course.result)
+        if not course.result:
+            continue
+
+        # 计算GPA
+        try:
+            point = float(course.result)
+            course.credit = float(course.credit)
+        except ValueError:
+            # 分数转换错误 TODO
+            continue
+
+        gpa_result.courseCount += 1
+        gpa_result.creditTotal += course.credit
+        gpa_result.scoreTotal += point * course.credit
+
+        # 计算成绩绩点 GradePoint
+        if 95 <= point <= 100:
+            course_point = 4.5
+        elif 90 <= point < 95:
+            course_point = 4.0
+        elif 85 <= point < 90:
+            course_point = 3.5
+        elif 80 <= point < 85:
+            course_point = 3.0
+        elif 75 <= point < 80:
+            course_point = 2.5
+        elif 70 <= point < 75:
+            course_point = 2.0
+        elif 65 <= point < 70:
+            course_point = 1.5
+        elif 60 <= point < 65:
+            course_point = 1.0
+        else:
+            course_point = 0
+
+        if course.status == schemas.GradeTable.CourseStatusEnum.makeUp:
+            course_point /= 2
+        elif course.status == schemas.GradeTable.CourseStatusEnum.reStudy:
+            course_point /= 3
+        else:
+            pass
+
+        final_course_point = 1 if (course_point <= 1) else course_point  # 重修多次导致单科成绩绩点 GradePoint <= 1.0
+        # print(f'{course.name} \t {course.result}  \t {final_course_point}  \r {course.point}')
+        gpa_result.gradePointTotal += final_course_point * course.credit
+
+    if gpa_result.courseCount == 0:
+        return gpa_result
+    else:
+        # 计算平均学分绩 GPA
+        gpa_result.gradePointAverage = round(gpa_result.gradePointTotal / gpa_result.creditTotal, 4)  # 平均绩点
+        gpa_result.weightedAverage = round(gpa_result.scoreTotal / gpa_result.creditTotal, 4)  # 加权平均分
+        return gpa_result

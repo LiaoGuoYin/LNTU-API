@@ -58,21 +58,23 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
     def decrypt_week(week: str) -> schemas.CourseTableSchedule:
         """"
             转换周为列表：
-            单 1-9 -> [1,3,5,7,9]
-            双 2-10 -> [2,4,6,8,10]
+            单 1-9 -> [1, 3, 5, 7, 9]
+            双 2-10 -> [2, 4, 6, 8, 10]
             2-15 -> [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
         week: 00001111111100000000000000000000000000000000000000000
         """
         schedule = CourseTableSchedule()
         schedule.room = info_result.get('room')
         tmp_weeks = GetWeek().marshal(week, 2, 1, 50)
-        if tmp_weeks.startswith('双') or tmp_weeks.startswith('单'):
-            start_week, end_week = map(int, tmp_weeks[1:].split('-'))
-            schedule.weeks = list(range(start_week, end_week + 1, 2))
-        elif '-' in tmp_weeks:
-            start_week, end_week = map(int, tmp_weeks.split('-'))
-            schedule.weeks = list(range(start_week, end_week + 1))
-        else:
+        if tmp_weeks.startswith('双') or tmp_weeks.startswith('单'):  # '单1-9' or '双2-10'
+            for each in tmp_weeks.split(' '):  # '单1-9 双2-14'
+                start_week, end_week = map(int, each[1:].split('-'))
+                schedule.weeks.extend(list(range(start_week, end_week + 1, 2)))
+        elif '-' in tmp_weeks:  # '2-15' or '1-12 14-17'
+            for each in tmp_weeks.split(' '):  # '2-12 14-17'
+                start_week, end_week = map(int, each.split('-'))
+                schedule.weeks.extend(list(range(start_week, end_week + 1)))
+        else:  # '10'
             schedule.weeks = [int(tmp_weeks)]
         return schedule
 
@@ -154,7 +156,7 @@ def parse_grade_table(html_doc) -> [schemas.GradeTable]:
         return e
 
 
-def parse_grade_table_gpa(html_doc) -> str:# TODO
+def parse_grade_table_gpa(html_doc) -> str:  # TODO
     try:
         course_grade_table_tail_row_all_credit = html_doc.xpath('string(/html/body/table[3]/tr[1]/td[1])')
         course_grade_table_tail_row_gpa = html_doc.xpath('string(/html/body/table[3]/tr[1]/td[2])').strip()

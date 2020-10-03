@@ -83,18 +83,19 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
         body_course_list = parse.findall(course_list_pattern_str, html_text)
         for course in body_course_list:
             original_info, original_schedule = course  # 将课程基本信息和时间信息解包
-
             # 解析基本信息
             # js example: function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
-            info_pattern_str = 'actTeacherId.join(\',\'),actTeacherName.join(\',\'),"{}","{name}({code})","{}","{room}({})","{encrypted_week}",null,null,assistantName,"","","{}"'
+            info_pattern_str = '''actTeacherId.join(\',\'),actTeacherName.join(\',\'),"{}","{name}({code})","{room_id}","{room}","{encrypted_week}",null,null,assistantName,{course_content},"","{}"'''
             info_all_result = parse.parse(info_pattern_str, original_info)
+            if not info_all_result:
+                raise SpiderParserException("课表为空，解析失败")
             info_result = info_all_result.named
 
             # 解析课程时间
             schedule_pattern_str = 'index ={:d}*unitCount+{:d};'
             schedule_all_result = parse.findall(schedule_pattern_str, original_schedule)
             schedule_day_index_tuple_list = [tuple(map(lambda x: x + 1, each)) for each in schedule_all_result]
-            # schedule_day_index_tuple_list: [(2, 3),(2, 4)] 周二第三、四小节
+            # [(2, 3),(2, 4)] 周二第三、四小节
 
             schedule_list = []
             for (day, index) in schedule_day_index_tuple_list:

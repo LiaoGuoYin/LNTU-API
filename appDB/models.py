@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, JSON
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, JSON, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -114,5 +114,22 @@ class CourseTable(Base):
     teacher = Column(String(16))
     credit = Column(String(16))
     schedules = Column(JSON)
+
+    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+
+
+class AiPaoOrder(Base):
+    __tablename__ = "aipao_order"
+
+    code = Column(String(32), primary_key=True, index=True)
+    name = Column(String(32))
+    gender = Column(String(32))
+    schoolName = Column(String(32))
+    id = Column(Integer)
+    successCount = Column(Integer)
+    failureCount = Column(Integer)
+
+    isCodeValid = Column(Boolean)
+    isDoneToday = Column(Boolean)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

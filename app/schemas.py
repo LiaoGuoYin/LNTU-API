@@ -140,3 +140,17 @@ class GPA(BaseModel):
     scoreTotal: float = 0.0
     creditTotal: float = 0.0
     courseCount: int = 0
+
+
+class AiPaoUser(BaseModel):
+    code: str
+    token: str = ''
+    name: str = ''
+    gender: str = ''
+    schoolName: str = ''
+    id: int = -1
+    successCount: int = 0
+    failureCount: int = 0
+    isCodeValid: bool = False
+    isDoneToday: bool = False
+

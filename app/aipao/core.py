@@ -1,31 +1,50 @@
+import datetime
 from random import uniform, randint
 
 import requests
 
-from app import exceptions
+from app import exceptions, schemas
 from app.aipao.url import AIPAOURLEnum
 
 
-def check_imei_code(code: str) -> dict:
-    data_result = {}
+def check_imei_code(code: str) -> schemas.AiPaoUser:
     url = AIPAOURLEnum.CHECK_IMEI_CODE_URL.value
-    params = {
-        'IMEICode': code
-    }
-    response = requests.get(url, params=params)
+    response = requests.get(url, params={'IMEICode': code})
     if response.json()['Success']:
+        user = schemas.AiPaoUser(code=code, isCodeValid=True)
         # Invalid: {'Success': False, 'ErrCode': 7, 'ErrMsg': '验证码过期'}
         # Valid:{'Success': True, 'Data': {'Token': 'b1b884347188409ea273c02072f9d551', 'UserId': 699560, 'IMEICode': 'd584b33e9a3e484da5e13eb38e73fc24', 'AndroidVer': 2.4, 'AppleVer': 1.24, 'WinVer': 1.0}}
-        data_result = {
-            'token': response.json()['Data']['Token'],
-            'id': response.json()['Data']['UserId'],
-            'code': response.json()['Data']['IMEICode'],
-        }
-        data_result['validCount'] = get_record(data_result['id'], is_valid=True)['AllCount']
-        data_result['inValidCount'] = get_record(data_result['id'], is_valid=False)['AllCount']
-    if not len(data_result):
+        user.token = response.json()['Data']['Token']
+        user.id = response.json()['Data']['UserId']
+        user.successCount = get_record(user.id, is_valid=True)['AllCount']
+        user.failureCount = get_record(user.id, is_valid=False)['AllCount']
+        user.isDoneToday = check_is_done_today_with_id(user_id=user.id)
+        get_basic_info_with_token(user, user.token)
+        return user
+    else:
         raise exceptions.FormException("IMEICode 无效")
-    return data_result
+
+
+def get_basic_info_with_token(user: schemas.AiPaoUser, token: str):
+    url = AIPAOURLEnum.GET_STU_REGULATION_URL.value.replace('{token}', token)
+    response = requests.get(url)
+    if response.json()['Success']:
+        response_json = response.json()
+        user.name = response_json['Data']['User']['NickName']
+        user.gender = response_json['Data']['User']['Sex']
+        user.schoolName = response_json['Data']['SchoolRun']['SchoolName']
+
+
+def check_is_done_today_with_id(user_id: int) -> bool:
+    record_list = get_record(user_id=user_id, is_valid=True, offsets=1)['listValue']
+    if not record_list:
+        return False
+    latest_run_date = record_list[0].get('ResultDate')
+    today_date = datetime.date.today().strftime('%Y年%m月%d日')
+    if today_date != latest_run_date:
+        return False
+    else:
+        return True
 
 
 def get_record(user_id: int, page: int = 1, offsets: int = 10, is_valid: bool = True) -> dict:
@@ -47,17 +66,19 @@ def get_record(user_id: int, page: int = 1, offsets: int = 10, is_valid: bool = 
 
 
 def run_sunny(imei_code: str) -> dict:
-    data_dict = check_imei_code(code=imei_code)
-    if not len(data_dict):
+    # Checking the status of IMEICode
+    token = check_imei_code(code=imei_code).token
+    if token == '':
         raise exceptions.FormException("IMEICode 无效")
-    token = data_dict['token']
 
+    # Getting basic user info
     client = AiPaoClient(token=token)
     if not client.get_info():
         raise exceptions.SpiderParserException("获取个人跑步规则信息失败")
-    if not client.get_run_id():
+    if client.get_run_id() == '':
         raise exceptions.SpiderParserException("开始跑步失败")
 
+    # Uploading the final record
     run_response = client.upload_record()
     if not run_response:
         raise exceptions.SpiderParserException("结束跑步失败（上传成绩失败）")
@@ -75,6 +96,7 @@ class AiPaoClient(object):
         self.distance = 2400
         self.minSpeed = 2.0
         self.maxSpeed = 3.0
+        self.gender = ''
 
     def __str__(self):
         return str(self.__dict__).replace('\"', '\'')
@@ -88,6 +110,8 @@ class AiPaoClient(object):
             if response.json()['Success']:
                 response_json = response.json()
                 self.userName = response_json['Data']['User']['NickName']
+                self.userId = response_json['Data']['User']['UserID']
+                self.gender = response_json['Data']['User']['Sex']
                 self.schoolName = response_json['Data']['SchoolRun']['SchoolName']
                 self.minSpeed = response_json['Data']['SchoolRun']['MinSpeed']
                 self.maxSpeed = response_json['Data']['SchoolRun']['MaxSpeed']

@@ -52,3 +52,10 @@ def update_course_table(course_table_list: [schemas.CourseTable], session: Sessi
         new_course = models.CourseTable(**course.dict())
         session.merge(new_course)
     session.commit()
+
+
+def update_aipao_order(student: schemas.AiPaoUser, session: Session) -> models.AiPaoOrder:
+    new_user = models.AiPaoOrder(**student.dict(exclude={'token'}))
+    session.merge(new_user)
+    session.commit()
+    return new_user

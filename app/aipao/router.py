@@ -41,6 +41,7 @@ async def get_record_list(id: int, page: int = 1, offsets: int = 10, valid: bool
 async def sunny_run(code: str) -> schemas.ResponseT:
     response = schemas.ResponseT()
     try:
+        crud.update_aipao_order(core.check_imei_code(code), session=db.session)
         response.data = core.run_sunny(code)
     except CommonException as e:
         capture_exception(e)

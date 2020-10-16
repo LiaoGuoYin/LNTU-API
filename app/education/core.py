@@ -120,7 +120,7 @@ def get_grade_table(username: int, password: str, session: Session = None, is_sa
         raise SpiderParserException("总成绩查询页请求失败")
 
 
-def calculate_gpa(course_list: [schemas.Grade]) -> schemas.GPA:
+def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: int) -> schemas.GPA:
     """GPA计算规则:
         "二级制: 合格(85),不合格(0)"
         "五级制: 优秀(95),良(85),中(75),及格(65),不及格(0)"
@@ -130,6 +130,11 @@ def calculate_gpa(course_list: [schemas.Grade]) -> schemas.GPA:
     rule_dict = {"合格": 85, "不合格": 0,
                  "优秀": 95, "良": 85, "中": 75, "及格": 65, "不及格": 0}
     for course in course_list:
+
+        # 排除选修课
+        if (is_including_optional_course == '0') and ('校级公选课' in course.courseType):
+            continue
+
         # 分数等级置换
         course.result = rule_dict.get(course.result, course.result)
         if not course.result:
@@ -142,7 +147,6 @@ def calculate_gpa(course_list: [schemas.Grade]) -> schemas.GPA:
         except ValueError:
             # 分数转换错误 TODO
             continue
-
         gpa_result.courseCount += 1
         gpa_result.creditTotal += course.credit
         gpa_result.scoreTotal += point * course.credit
@@ -173,7 +177,6 @@ def calculate_gpa(course_list: [schemas.Grade]) -> schemas.GPA:
             course_point /= 3
         else:
             pass
-
         final_course_point = 1 if (course_point <= 1) else course_point  # 重修多次导致单科成绩绩点 GradePoint <= 1.0
         # print(f'{course.name} \t {course.result}  \t {final_course_point}  \r {course.point}')
         gpa_result.gradePointTotal += final_course_point * course.credit

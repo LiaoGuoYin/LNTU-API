@@ -45,8 +45,8 @@ async def sunny_run(code: str) -> schemas.ResponseT:
             raise exceptions.FormException("今天已有有效跑步记录")
         else:
             response.data = core.run_sunny(code)
-            crud.update_aipao_order(core.check_imei_code(code), session=db.session)
     except CommonException as e:
         capture_exception(e)
         response.code, response.message = e.code, e.msg
+    crud.update_aipao_order(core.check_imei_code(code), session=db.session)
     return response

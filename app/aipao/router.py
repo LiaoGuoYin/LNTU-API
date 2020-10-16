@@ -4,7 +4,7 @@ from sentry_sdk import capture_exception
 
 from appDB import crud
 from . import core
-from .. import schemas
+from .. import schemas, exceptions
 from ..exceptions import CommonException
 
 router = APIRouter()
@@ -41,8 +41,11 @@ async def get_record_list(id: int, page: int = 1, offsets: int = 10, valid: bool
 async def sunny_run(code: str) -> schemas.ResponseT:
     response = schemas.ResponseT()
     try:
-        crud.update_aipao_order(core.check_imei_code(code), session=db.session)
-        response.data = core.run_sunny(code)
+        if core.check_imei_code(code).isDoneToday:
+            raise exceptions.FormException("今天已有有效跑步记录")
+        else:
+            response.data = core.run_sunny(code)
+            crud.update_aipao_order(core.check_imei_code(code), session=db.session)
     except CommonException as e:
         capture_exception(e)
         response.code, response.message = e.code, e.msg

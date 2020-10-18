@@ -10,8 +10,9 @@ from app.aipao.url import AIPAOURLEnum
 def check_imei_code(code: str) -> schemas.AiPaoUser:
     url = AIPAOURLEnum.CHECK_IMEI_CODE_URL.value
     response = requests.get(url, params={'IMEICode': code})
+    user = schemas.AiPaoUser(id=-1, code=code)
     if response.json()['Success']:
-        user = schemas.AiPaoUser(code=code, isCodeValid=True)
+        user.isCodeValid = True
         # Invalid: {'Success': False, 'ErrCode': 7, 'ErrMsg': '验证码过期'}
         # Valid:{'Success': True, 'Data': {'Token': 'b1b884347188409ea273c02072f9d551', 'UserId': 699560, 'IMEICode': 'd584b33e9a3e484da5e13eb38e73fc24', 'AndroidVer': 2.4, 'AppleVer': 1.24, 'WinVer': 1.0}}
         user.token = response.json()['Data']['Token']
@@ -20,9 +21,9 @@ def check_imei_code(code: str) -> schemas.AiPaoUser:
         user.failureCount = get_record(user.id, is_valid=False)['AllCount']
         user.isDoneToday = check_is_done_today_with_id(user_id=user.id)
         get_basic_info_with_token(user, user.token)
-        return user
     else:
-        raise exceptions.FormException("IMEICode 无效")
+        pass
+    return user
 
 
 def get_basic_info_with_token(user: schemas.AiPaoUser, token: str):

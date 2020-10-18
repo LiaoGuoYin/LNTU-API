@@ -143,14 +143,14 @@ class GPA(BaseModel):
 
 
 class AiPaoUser(BaseModel):
+    id: int
     code: str
     token: str = ''
     name: str = ''
     gender: str = ''
     schoolName: str = ''
-    id: int = -1
-    successCount: int = 0
-    failureCount: int = 0
+    successCount: int = -1
+    failureCount: int = -1
     isCodeValid: bool = False
     isDoneToday: bool = False
 

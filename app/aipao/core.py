@@ -17,9 +17,10 @@ def check_imei_code(code: str) -> schemas.AiPaoUser:
         # Valid:{'Success': True, 'Data': {'Token': 'b1b884347188409ea273c02072f9d551', 'UserId': 699560, 'IMEICode': 'd584b33e9a3e484da5e13eb38e73fc24', 'AndroidVer': 2.4, 'AppleVer': 1.24, 'WinVer': 1.0}}
         user.token = response.json()['Data']['Token']
         user.id = response.json()['Data']['UserId']
-        user.successCount = get_record(user.id, is_valid=True)['AllCount']
+        success_response = get_record(user.id, is_valid=True)
+        user.successCount = success_response['AllCount']
         user.failureCount = get_record(user.id, is_valid=False)['AllCount']
-        user.isDoneToday = check_is_done_today_with_id(user_id=user.id)
+        user.isDoneToday = check_is_done_today_with_record_list(record_list=success_response['listValue'])
         get_basic_info_with_token(user, user.token)
     else:
         pass
@@ -36,8 +37,7 @@ def get_basic_info_with_token(user: schemas.AiPaoUser, token: str):
         user.schoolName = response_json['Data']['SchoolRun']['SchoolName']
 
 
-def check_is_done_today_with_id(user_id: int) -> bool:
-    record_list = get_record(user_id=user_id, is_valid=True, offsets=1)['listValue']
+def check_is_done_today_with_record_list(record_list: dict) -> bool:
     if not record_list:
         return False
     latest_run_date = record_list[0].get('ResultDate')
@@ -62,6 +62,7 @@ def get_record(user_id: int, page: int = 1, offsets: int = 10, is_valid: bool = 
     response = requests.get(url, params=params)
     response_data = response.json()
     if response_data['Success']:
+        response_data['isDoneToday'] = check_is_done_today_with_record_list(response_data['listValue'])
         record_result = response_data
     return record_result
 

@@ -122,10 +122,10 @@ class AiPaoOrder(Base):
     __tablename__ = "aipao_order"
 
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(String(32))
-    name = Column(String(32))
+    code = Column(String(64))
+    name = Column(String(64))
     gender = Column(String(32))
-    schoolName = Column(String(32))
+    schoolName = Column(String(64))
     successCount = Column(Integer)
     failureCount = Column(Integer)
 

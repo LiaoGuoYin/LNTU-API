@@ -153,4 +153,3 @@ class AiPaoUser(BaseModel):
     failureCount: int = -1
     isCodeValid: bool = False
     isDoneToday: bool = False
-

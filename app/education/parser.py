@@ -64,16 +64,23 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
         week: 00001111111100000000000000000000000000000000000000000
         """
         schedule = CourseTableSchedule()
-        schedule.room = info_result.get('room')
+        tmp_room = info_result.get('room')
+        if ')' in tmp_room:
+            schedule.room = tmp_room.split('(')[0]
+        else:
+            schedule.room = tmp_room
         tmp_weeks = GetWeek().marshal(week, 2, 1, 50)
         if tmp_weeks.startswith('双') or tmp_weeks.startswith('单'):  # '单1-9' or '双2-10'
             for each in tmp_weeks.split(' '):  # '单1-9 双2-14'
                 start_week, end_week = map(int, each[1:].split('-'))
                 schedule.weeks.extend(list(range(start_week, end_week + 1, 2)))
-        elif '-' in tmp_weeks:  # '2-15' or '1-12 14-17'
-            for each in tmp_weeks.split(' '):  # '2-12 14-17'
-                start_week, end_week = map(int, each.split('-'))
-                schedule.weeks.extend(list(range(start_week, end_week + 1)))
+        elif '-' in tmp_weeks:  # '2-15' or '1-12 14-17' or '4-9 11'
+            for each in tmp_weeks.split(' '):
+                if '-' in each:  # '2-12 14-17'
+                    start_week, end_week = map(int, each.split('-'))
+                    schedule.weeks.extend(list(range(start_week, end_week + 1)))
+                else:  # '4-9 11'
+                    schedule.weeks.append(int(each))
         else:  # '10'
             schedule.weeks = [int(tmp_weeks)]
         return schedule

@@ -134,8 +134,8 @@ async def refresh_education_course_table(user: schemas.User, semester: str = '20
     semester_id = choose_semester_id(semester)
     response = ResponseT()
     try:
-        crud.update_user(user, db.session)
         response.data = get_course_table(**user.dict(), semester_id=semester_id)
+        crud.update_user(user, db.session)
         crud.update_course_table(response.data, db.session)
     except CommonException as e:
         capture_exception(e)

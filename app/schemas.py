@@ -12,6 +12,13 @@ class ResponseT(BaseModel):
     message: str = "Success"
     data: Union[list, dict] = None
 
+    def to_dict(self):
+        return {
+            'code': self.code.value,
+            'message': self.message,
+            'data': self.data
+        }
+
 
 # Notice
 class NoticeDetail(BaseModel):

@@ -21,45 +21,45 @@ class StatusCodeEnum(Enum):
 
 class CommonException(Exception):
     code: StatusCodeEnum
-    msg: str
+    message: str
 
     def __str__(self):
-        return self.code, self.msg
+        return self.code, self.message
 
     def __iter__(self):
-        yield from [self.code, self.msg]
+        yield from [self.code, self.message]
 
 
 class FormException(CommonException):
     # 用户提交的表单有误（来源于用户的不可信表单，不应该被 sentry 捕获）
-    def __init__(self, msg):
+    def __init__(self, message):
         self.code = StatusCodeEnum.INVALID_REQUEST
-        self.msg = msg
+        self.message = message
 
 
 class NetworkException(CommonException):
     # 代表客户端、服务器、教务服务器之间网络不通畅
-    def __init__(self, msg):
+    def __init__(self, message):
         self.code = StatusCodeEnum.SERVER_INTERNAL_ERROR
-        self.msg = msg
+        self.message = message
 
 
 class AccessException(CommonException):
     # 爬虫服务器访问教务在线出问题（非网络问题），可能是回话过期
-    def __init__(self, msg):
+    def __init__(self, message):
         self.code = StatusCodeEnum.FORBIDDEN
-        self.msg = msg
+        self.message = message
 
 
 class SpiderParserException(CommonException):
     # 爬虫解析出错
-    def __init__(self, msg):
+    def __init__(self, message):
         self.code = StatusCodeEnum.NOT_FOUND
-        self.msg = msg
+        self.message = message
 
 
 class TokenException(CommonException):
     # TODO, JWT
-    def __init__(self, msg):
+    def __init__(self, message):
         self.code = StatusCodeEnum.UNAUTHORIZED
-        self.msg = msg
+        self.message = message

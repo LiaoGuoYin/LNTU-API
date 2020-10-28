@@ -13,7 +13,7 @@ def check_imei_code(code: str) -> schemas.AiPaoUser:
     user = schemas.AiPaoUser(id=-1, code=code)
     if response.json()['Success']:
         user.isCodeValid = True
-        # Invalid: {'Success': False, 'ErrCode': 7, 'ErrMsg': '验证码过期'}
+        # Invalid: {'Success': False, 'ErrCode': 7, 'Errmessage': '验证码过期'}
         # Valid:{'Success': True, 'Data': {'Token': 'b1b884347188409ea273c02072f9d551', 'UserId': 699560, 'IMEICode': 'd584b33e9a3e484da5e13eb38e73fc24', 'AndroidVer': 2.4, 'AppleVer': 1.24, 'WinVer': 1.0}}
         user.token = response.json()['Data']['Token']
         user.id = response.json()['Data']['UserId']

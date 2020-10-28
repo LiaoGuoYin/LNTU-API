@@ -30,9 +30,9 @@ class TestQuality(unittest.TestCase):
 
     def setUp(self) -> None:
         self.cookie = core.get_cookie(**user_dict)
-        # Download some html file to local
+        # Download some html files to local
         core.get_report(self.cookie, is_save=True)
-        core.get_single_activity(QualityExpansionURLEnum.MIND.value, self.cookie, is_save=True)
+        core.get_single_activity(QualityExpansionURLEnum.MIND.value, 'mind', self.cookie, is_save=True)
 
     def test_quality_get_cookie(self):
         self.assertTrue(self.cookie.startswith('ASP'))
@@ -47,7 +47,7 @@ class TestQuality(unittest.TestCase):
         with open(local_file_dict['quality-activity']) as fp:
             html_text = fp.read()
             html_doc = etree.HTML(html_text)
-        self.assertTrue(len(parse_activity(html_doc)) != 0)
+        self.assertTrue(parse_activity(html_doc, 'mind')[0].type == 'mind')
 
 
 if __name__ == '__main__':

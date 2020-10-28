@@ -1,20 +1,20 @@
 from fastapi import APIRouter
 
 from app import schemas
-from app.quality.core import get_report, get_cookie, get_all_activity
+from app.quality import core
 from app.schemas import ResponseT
 
 router = APIRouter()
 
 
 @router.post('/data', )
-async def quality_report(user: schemas.User):
+async def quality_report(user: schemas.User, year=2020):
     response = ResponseT()
-    cookie = get_cookie(**user.dict())
+    cookie = core.get_cookie(**user.dict())
     data_dict = {
-        'report': get_report(cookie),
-        'activity': get_all_activity(cookie),
-        # 'scholarship': get_scholarship(cookie)
+        # 'report': core.get_report(cookie),
+        'activity': core.get_all_activity(cookie),
+        'scholarship': core.get_scholarship(cookie, year)
     }
     response.data = data_dict
     return response
@@ -23,6 +23,6 @@ async def quality_report(user: schemas.User):
 @router.post('/report', )
 async def quality_report(user: schemas.User):
     response = ResponseT()
-    cookie = get_cookie(**user.dict())
-    response.data = get_report(cookie)
+    cookie = core.get_cookie(**user.dict())
+    response.data = core.get_report(cookie)
     return response

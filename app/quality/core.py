@@ -1,7 +1,7 @@
 import requests
 from lxml import etree
 
-from app import exceptions
+from app import exceptions, schemas
 from app.education.utils import save_html_to_file
 from app.quality.parser import parse_report, parse_activity, parse_scholarship
 from app.quality.urls import QualityExpansionURLEnum
@@ -26,7 +26,7 @@ def get_cookie(username: int, password: str) -> str:
         return response.request.headers.get('Cookie')
 
 
-def get_report(cookie: str, is_save=False) -> list:
+def get_report(cookie: str, is_save=False) -> [schemas.QualityActivity]:
     url = QualityExpansionURLEnum.REPORT.value
     response = requests.get(url, headers={'Cookie': cookie})
     html_text = response.text
@@ -39,7 +39,7 @@ def get_report(cookie: str, is_save=False) -> list:
         return parse_report(html_doc)
 
 
-def get_scholarship(cookie: str, year) -> list:
+def get_scholarship(cookie: str, year) -> [schemas.QualityScholarship]:
     url = QualityExpansionURLEnum.SCHOLARSHIP.value
 
     # 构造参数
@@ -65,7 +65,7 @@ def get_scholarship(cookie: str, year) -> list:
         return parse_scholarship(html_doc)
 
 
-def get_single_activity(url, cookie: str, is_save=False) -> list:
+def get_single_activity(url, activity_type: str, cookie: str, is_save=False) -> list:
     response = requests.get(url, headers={'Cookie': cookie})
     html_text = response.text
     html_doc = etree.HTML(html_text)
@@ -74,14 +74,14 @@ def get_single_activity(url, cookie: str, is_save=False) -> list:
     else:
         if is_save:
             save_html_to_file(html_text, 'quality-activity')
-        return parse_activity(html_doc=html_doc)
+        return parse_activity(html_doc=html_doc, activity_type=activity_type)
 
 
 def get_all_activity(cookie: str) -> dict:
     activity_dict = QualityExpansionURLEnum.get_activity()
     for item, url in activity_dict.items():
-        # 把字典值中的 url 换成内容
-        activity_dict[item] = get_single_activity(url.value, cookie=cookie)
+        # 把字典值中的 URL 换成爬虫结果
+        activity_dict[item] = get_single_activity(url.value, cookie=cookie, activity_type=item)
     return activity_dict
 
 

@@ -99,8 +99,7 @@ else:
 
 # Global Exception Handlers
 @app.exception_handler(StarletteHTTPException)
-async def validation_exception_handler(request: Request, exc: StarletteHTTPException):
-    capture_exception(exc)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     response = schemas.ResponseT(
         code=exc.status_code,
         message=exc.detail
@@ -112,7 +111,7 @@ async def validation_exception_handler(request: Request, exc: StarletteHTTPExcep
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
     capture_exception(exc)
     response = schemas.ResponseT(
         code=StatusCodeEnum.INVALID_REQUEST.value,
@@ -125,7 +124,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 @app.exception_handler(exceptions.CommonException)
-async def unicorn_exception_handler(request: Request, exc: exceptions.CommonException):
+async def common_exception_handler(request: Request, exc: exceptions.CommonException):
     capture_exception(exc)
     response = schemas.ResponseT(
         code=exc.code.value,

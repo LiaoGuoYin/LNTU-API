@@ -161,3 +161,26 @@ class AiPaoUser(BaseModel):
     failureCount: int = -1
     isCodeValid: bool = False
     isDoneToday: bool = False
+
+
+class QualityActivity(BaseModel):
+    type: str
+    id: int
+    name: str = ''
+    semester: str = ''
+    activityDate: str = ''
+    location: str = ''
+    responsibility: str = ''
+    loggingDateTime: str = ''
+    status: str = ''
+    comment: Union[str, None] = None
+
+
+class QualityScholarship(BaseModel):
+    id: int
+    semester: str = ''
+    activityType: str = ''
+    activityContent: str = ''
+    activityLevel: str = ''
+    creditType: str = ''
+    credit: str = ''

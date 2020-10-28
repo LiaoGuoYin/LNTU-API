@@ -65,8 +65,8 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
         """
         schedule = CourseTableSchedule()
         tmp_room = info_result.get('room')
-        if ')' in tmp_room:
-            schedule.room = tmp_room.split('(')[0]
+        if '(' in tmp_room:
+            schedule.room = tmp_room.rsplit('(', maxsplit=1)[0]
         else:
             schedule.room = tmp_room
         tmp_weeks = GetWeek().marshal(week, 2, 1, 50)

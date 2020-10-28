@@ -15,6 +15,9 @@ class StatusCodeEnum(Enum):
     NOT_FOUND = 404
     SERVER_INTERNAL_ERROR = 500
 
+    def __str__(self):
+        return self.value
+
 
 class CommonException(Exception):
     code: StatusCodeEnum

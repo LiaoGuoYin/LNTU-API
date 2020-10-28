@@ -8,7 +8,7 @@ class TestAiPao(unittest.TestCase):
         valid_imei_code = 'd584b33e9a3e484da5e13eb38e73fc25'
         # self.assertIsInstance(core.check_imei_code(valid_imei_code), dict) # 无法保证每次都有有效的 IMEICode 来测试
         invalid_imei_code = valid_imei_code + 'invalid'
-        self.assertRaises(Exception, core.check_imei_code, invalid_imei_code)
+        self.assertTrue(core.check_imei_code(invalid_imei_code).id == -1)
 
 
 if __name__ == '__main__':

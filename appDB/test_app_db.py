@@ -44,9 +44,11 @@ class TestAppDB(unittest.TestCase):
         course_table = schemas.CourseTable(code='H101750002032.01', name='信息系统安全', teacher='毛志勇', credit='2',
                                            schedules=[
                                                schemas.CourseTableSchedule(room='静远楼344',
+                                                                           weeksString='4-11',
                                                                            weeks=[4, 5, 6, 7, 8, 9, 10, 11],
                                                                            weekday=4, index=2),
                                                schemas.CourseTableSchedule(room='静远楼344',
+                                                                           weeksString='4-11',
                                                                            weeks=[4, 5, 6, 7, 8, 9, 10, 11],
                                                                            weekday=2, index=2)])
         with db():

@@ -6,10 +6,10 @@ from pydantic import BaseModel
 from app.exceptions import StatusCodeEnum
 
 
-# Response Generic
+# Generic Response
 class ResponseT(BaseModel):
     code: StatusCodeEnum = StatusCodeEnum.SUCCESS
-    message: str = "success"
+    message: str = "Success"
     data: Union[list, dict] = None
 
 
@@ -89,9 +89,10 @@ class UserInfo(BaseModel):
 # CourseTable
 class CourseTableSchedule(BaseModel):
     room: str = None
-    weeks: Union[list, None] = []
     weekday: int = None
     index: int = None
+    weeksString: str = None
+    weeks: Union[list, None] = []
 
 
 class CourseTable(BaseModel):

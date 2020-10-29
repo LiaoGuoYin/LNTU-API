@@ -3,21 +3,12 @@ from typing import Union, List
 
 from pydantic import BaseModel
 
-from app.exceptions import StatusCodeEnum
-
 
 # Generic Response
 class ResponseT(BaseModel):
-    code: StatusCodeEnum = StatusCodeEnum.SUCCESS
+    code: int
     message: str = "Success"
     data: Union[list, dict] = None
-
-    def to_dict(self):
-        return {
-            'code': self.code.value,
-            'message': self.message,
-            'data': self.data
-        }
 
 
 # Notice

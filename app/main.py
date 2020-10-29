@@ -2,6 +2,7 @@ import sentry_sdk
 import uvicorn
 from fastapi import FastAPI
 from sentry_sdk import capture_exception
+from starlette import status
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi_sqlalchemy import DBSessionMiddleware
@@ -10,7 +11,7 @@ from starlette.responses import JSONResponse
 from sqlalchemy import create_engine
 
 from app import education, quality, aipao, schemas, exceptions
-from app.exceptions import FormException, StatusCodeEnum
+from app.exceptions import FormException
 from appDB.models import Base
 from appDB.utils import get_db_url_dict
 
@@ -100,13 +101,14 @@ else:
 # Global Exception Handlers
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    capture_exception(exc)
     response = schemas.ResponseT(
         code=exc.status_code,
         message=exc.detail
     )
     return JSONResponse(
-        status_code=response.code.value,
-        content=response.to_dict()
+        status_code=response.code,
+        content=response.dict()
     )
 
 
@@ -114,12 +116,12 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
     capture_exception(exc)
     response = schemas.ResponseT(
-        code=StatusCodeEnum.INVALID_REQUEST.value,
+        code=status.HTTP_400_BAD_REQUEST,
         message=str(exc.errors())
     )
     return JSONResponse(
-        status_code=response.code.value,
-        content=response.to_dict()
+        status_code=response.code,
+        content=response.dict()
     )
 
 
@@ -127,12 +129,12 @@ async def request_validation_exception_handler(request: Request, exc: RequestVal
 async def common_exception_handler(request: Request, exc: exceptions.CommonException):
     capture_exception(exc)
     response = schemas.ResponseT(
-        code=exc.code.value,
+        code=exc.code,
         message=exc.message
     )
     return JSONResponse(
-        status_code=response.code.value,
-        content=response.to_dict()
+        status_code=response.code,
+        content=response.dict()
     )
 
 

@@ -2,11 +2,12 @@ from enum import Enum
 from typing import Union, List
 
 from pydantic import BaseModel
+from starlette import status
 
 
 # Generic Response
 class ResponseT(BaseModel):
-    code: int
+    code: int = status.HTTP_200_OK
     message: str = "Success"
     data: Union[list, dict] = None
 
@@ -50,9 +51,6 @@ class ClassRoom(BaseModel):
 class User(BaseModel):
     username: int
     password: str
-
-    class Config:
-        orm_mode = True
 
 
 # UserInfo

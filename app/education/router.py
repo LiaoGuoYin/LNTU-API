@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from fastapi import APIRouter
 from fastapi_sqlalchemy import db
 
@@ -40,11 +42,9 @@ async def refresh_education_grade(username: int, password: str, semester: str = 
     '''
     response = ResponseT()
     semester_id = choose_semester_id(semester)
-    user_dict = {'username': username,
-                 'password': password}
-    user = schemas.User(**user_dict)
+    user = schemas.User(username=username, password=password)
     semester_grade = get_grade(**user.dict(), semester_id=semester_id)
-    semester_gpa = calculate_gpa(semester_grade, is_including_optional_course=isIncludingOptionalCourse)
+    semester_gpa = calculate_gpa(deepcopy(semester_grade), is_including_optional_course=isIncludingOptionalCourse)
     semester_gpa.semester = semester
     response.data = {
         'grade': semester_grade,

@@ -1,4 +1,3 @@
-import json
 import os
 import unittest
 
@@ -38,7 +37,6 @@ class TestEducationParser(unittest.TestCase):
         self.assertIsInstance(data_list, list)
 
         [print(each) for each in part_course_dict_list]
-        [print(json.dumps(each.self_dict(), ensure_ascii=False)) for each in data_list]
 
     def test_education_parse_grade(self):
         with open(local_file_dict['grade']) as f:

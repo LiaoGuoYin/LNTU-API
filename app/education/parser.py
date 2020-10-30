@@ -87,23 +87,21 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
         return schedule
 
     try:
-        course_list_pattern_str = "activity = new TaskActivity({});{}var teacher"
-        body_course_list = parse.findall(course_list_pattern_str, html_text)
-        for course in body_course_list:
-            original_info, original_schedule = course  # 将课程基本信息和时间信息解包
-            # 解析基本信息
-            # js example: function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
-            info_pattern_str = '''actTeacherId.join(\',\'),actTeacherName.join(\',\'),"{}","{name}({code})","{room_id}","{room}","{encrypted_week}",null,null,assistantName,{course_content},"","{}"'''
-            info_all_result = parse.parse(info_pattern_str, original_info)
-            if not info_all_result:
-                raise SpiderParserException("课表为空，解析失败")
-            info_result = info_all_result.named
+        # 使最后一个课程的索引上下文符合 parse模式
+        cleaned_course_content_text = html_text.replace('table0.marshalTable', 'var teachers')
+        course_pattern = """activity = new TaskActivity(actTeacherId.join(\',\'),actTeacherName.join(\',\'),"{}","{name}({code})","{room_id}","{room}","{encrypted_week}",null,null,assistantName,{course_content},"","{}");{time}var teachers"""
+        course_result_list = parse.findall(course_pattern, cleaned_course_content_text)
+        for course in course_result_list:
+            # 解析基本信息: function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,
+            # taskId,remark,assistantName,experiItemName,schGroupNo){"""
+            info_result = course.named
 
             # 解析课程时间
+            original_schedule = course.named['time']
             schedule_pattern_str = 'index ={:d}*unitCount+{:d};'
             schedule_all_result = parse.findall(schedule_pattern_str, original_schedule)
-            schedule_day_index_tuple_list = [tuple(map(lambda x: x + 1, each)) for each in schedule_all_result]
-            # [(2, 3),(2, 4)] 周二第三、四小节
+            schedule_day_index_tuple_list = [tuple(map(lambda x: x + 1, each)) for each in
+                                             schedule_all_result]  # [(2, 3),(2, 4)] 周二第三、四小节
 
             schedule_list = []
             for (day, index) in schedule_day_index_tuple_list:

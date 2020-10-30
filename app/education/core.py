@@ -68,7 +68,7 @@ def get_course_table(username: int, password: str, semester_id: int = 627, sessi
         response_inner = tmp_session.get(URLEnum.COURSE_TABLE_OF_STD_IDS.value)
         if is_save:
             save_html_to_file(response_inner.text, 'get_ids')
-        stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[1]
+        stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[0]
         if stu_id is None:
             raise SpiderParserException("页面上没找到 ids")
         else:
@@ -79,7 +79,7 @@ def get_course_table(username: int, password: str, semester_id: int = 627, sessi
     ids = get_std_ids(session)
     response = session.get(URLEnum.COURSE_TABLE.value, params={
         'ignoreHead': 1,
-        'setting.kind': 'class',  # std/class
+        'setting.kind': 'std',  # std/class
         'ids': ids,
         'semester.id': semester_id,
     })

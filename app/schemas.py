@@ -43,7 +43,6 @@ class ClassRoom(BaseModel):
     num: int = -1
     type: str = None
     data: List[MiniIndex] = []
-    # week: int = -1
     # updatedAt = models.DateTimeField(auto_now=True)
 
 

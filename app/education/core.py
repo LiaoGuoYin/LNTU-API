@@ -93,11 +93,10 @@ def get_course_table(username: int, password: str, semester_id: int = 627, sessi
         raise SpiderParserException("课表页请求失败")
 
 
-def get_grade(username: int, password: str, session: Session = None, semester_id: int = 626,
-              is_save: bool = False) -> [schemas.Grade]:
+def get_grade(username: int, password: str, session: Session = None, is_save: bool = False) -> [schemas.Grade]:
     if not session:
         session = login(username, password)
-    response = session.get(URLEnum.GRADE.value, params={'semesterId': semester_id})
+    response = session.get(URLEnum.GRADE.value)
     if is_save:
         save_html_to_file(response.text, 'grade')
     if '学年学期' in response.text:
@@ -108,6 +107,7 @@ def get_grade(username: int, password: str, session: Session = None, semester_id
 
 def get_grade_table(username: int, password: str, session: Session = None, is_save: bool = False) -> [
     schemas.GradeTable]:
+    # 备用：获取成绩表格
     if not session:
         session = login(username, password)
     response = session.post(URLEnum.GRADE_TABLE.value, params={'template': 'grade.origin'})

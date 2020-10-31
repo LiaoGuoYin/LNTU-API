@@ -22,13 +22,13 @@ def update_info(user_info: schemas.UserInfo, session: Session) -> models.UserInf
     return new_user_info
 
 
-def update_grade_table(user: schemas.User, grade_table_row_list: [schemas.GradeTable], session: Session) -> [
-    models.GradeTable]:
-    for row in grade_table_row_list:
-        new_grade_table_row = models.GradeTable(username=user.username, **row.dict())
-        new_grade_table_row.ownerUsername = user.username
-        session.merge(new_grade_table_row)
-    session.commit()
+# def update_grade_table(user: schemas.User, grade_table_row_list: [schemas.GradeTable], session: Session) -> [
+#     models.GradeTable]:
+#     for row in grade_table_row_list:
+#         new_grade_table_row = models.GradeTable(username=user.username, **row.dict())
+#         new_grade_table_row.ownerUsername = user.username
+#         session.merge(new_grade_table_row)
+#     session.commit()
 
 
 def update_gpa(user: schemas.User, grade_gpa: schemas.GPA, session: Session) -> models.GPA:

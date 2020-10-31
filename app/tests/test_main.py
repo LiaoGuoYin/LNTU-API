@@ -28,11 +28,6 @@ class TestMainAPI(unittest.TestCase):
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
-    def test_education_data(self):
-        response = self.client.post('/education/data', json=user_dict)
-        print(response.text)
-        self.assertTrue(response.status_code == 200)
-
     def test_education_course_table(self):
         payload = {'semester': '2020-2'}
         response = self.client.post('/education/course-table', params=payload, json=user_dict)
@@ -41,16 +36,14 @@ class TestMainAPI(unittest.TestCase):
 
     def test_education_grade(self):
         payload = {
-            'semester': '2020-1',
             'isIncludingOptionalCourse': 1,
         }
-        payload.update(user_dict)
-        response = self.client.get('/education/grade', params=payload)
+        response = self.client.post('/education/grade', json=user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
-    def test_education_gpa_all(self):
-        response = self.client.get('/education/gpa-all', params=user_dict)
+    def test_education_data(self):
+        response = self.client.post('/education/data', json=user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 

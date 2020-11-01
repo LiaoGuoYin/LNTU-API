@@ -193,7 +193,7 @@ def parse_grade(html_doc) -> [schemas.CourseTable]:
             course.usual = cells[8]
             course.midTerm = cells[6]
             course.endTerm = cells[7]
-            course.result = str(cells[-3])  # 忽略总评成绩
+            course.result = cells[-3]  # 忽略总评成绩
             course.point = cells[-2]
             if '补考' in course.name:
                 course.status = schemas.GradeTable.CourseStatusEnum.makeUp.value

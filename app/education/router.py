@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from fastapi import APIRouter
 from fastapi_sqlalchemy import db
 
@@ -96,7 +94,7 @@ async def refresh_education_grade(user: schemas.User, isIncludingOptionalCourse=
     grade_list = get_grade(**user.dict())
     response.data = {
         'grade': grade_list,
-        'gpa': calculate_gpa(deepcopy(grade_list), is_including_optional_course=isIncludingOptionalCourse)
+        'gpa': calculate_gpa(grade_list, is_including_optional_course=isIncludingOptionalCourse)
     }
     crud.update_user(user, db.session)
     crud.update_grade_list(user, response.data['grade'], db.session)

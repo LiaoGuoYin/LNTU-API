@@ -1,6 +1,7 @@
 import hashlib
 import re
 import time
+from copy import deepcopy
 
 import requests
 from lxml import etree
@@ -126,6 +127,7 @@ def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: in
         "五级制: 优秀(95),良(85),中(75),及格(65),不及格(0)"
     补考和重修：同一门课程多次考核时，其绩点按平均值算。当至少一次绩点大于 1.0，且平均绩点低于 1.0 时，平均绩点按 1.0 计算。
     """
+    course_list = deepcopy(course_list)
     gpa_result = schemas.GPA()
     rule_dict = {"合格": 85, "不合格": 0,
                  "优秀": 95, "良": 85, "中": 75, "及格": 65, "不及格": 0}

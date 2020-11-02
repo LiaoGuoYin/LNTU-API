@@ -10,10 +10,9 @@ from app import schemas
 
 
 class TestAppDB(unittest.TestCase):
-    '''
-        主要用于检验 schemas 和 models 是否一致，避免改动引起的不匹配
-    '''
-
+    """
+            主要用于检验 schemas 和 models 是否一致，避免改动引起的不匹配
+    """
     def setUp(self) -> None:
         app = FastAPI()
         db_url_dict = get_db_url_dict()
@@ -60,14 +59,7 @@ class TestAppDB(unittest.TestCase):
                               code='H101730004040.01', courseType='专业必修', usual='17', midTerm='', endTerm='99',
                               point='3.5', makeUpScore=None, makeUpScoreResult=None)
         with db():
-            db.session.merge(models.Grade(username=1000, **grade.dict()))
-            db.session.commit()
-
-    def test_education_grade_table(self):
-        grade_table = schemas.GradeTable(name='微机原理（双语）', credit='2.5', semester='2019-2020(1)', status='正常',
-                                         result='98')
-        with db():
-            db.session.merge(models.GradeTable(username=1000, **grade_table.dict()))
+            db.session.merge(models.Grade(username='1000', **grade.dict()))
             db.session.commit()
 
 

@@ -77,7 +77,7 @@ class TestEducationCore(unittest.TestCase):
         with open(local_file_dict['grade']) as f:
             html_text = f.read()
         grade_list = parser.parse_grade(html_doc=etree.HTML(html_text))
-        gpa_result = core.calculate_gpa(grade_list, is_including_optional_course=1)
+        gpa_result = core.calculate_gpa(grade_list, is_including_optional_course='1')
         self.assertTrue(gpa_result.courseCount != 0)
         print(gpa_result)
 
@@ -85,6 +85,6 @@ class TestEducationCore(unittest.TestCase):
         with open(local_file_dict['grade-table']) as f:
             html_text = f.read()
         grade_list = parser.parse_grade_table(html_doc=etree.HTML(html_text))
-        gpa_result = core.calculate_gpa(grade_list, is_including_optional_course=1)
+        gpa_result = core.calculate_gpa(grade_list, is_including_optional_course='1')
         self.assertTrue(gpa_result.courseCount != 0)
         print(gpa_result)

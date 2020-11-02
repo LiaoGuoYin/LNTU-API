@@ -27,7 +27,13 @@ def check_education_online() -> bool:
 
 def login(username: int, password: str) -> Session:
     check_education_online()
-    session = Session()
+    requests.adapters.DEFAULT_RETRIES = 5
+    session = requests.Session()
+    session.headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/86.0.4240.111 Safari/537.36',
+        'Connection': 'close',
+    }
     session.keep_alive = False
     response = session.get(URLEnum.LOGIN.value)
     token = re.findall(r"SHA1\('(.*?)'", response.text)[0]
@@ -43,10 +49,9 @@ def login(username: int, password: str) -> Session:
     elif '账户不存在' in response.text:
         raise FormException(F"{username} 用户不存在")
     elif '您当前位置' in response.text:
-        print(F"{username} Login success!")
         return session
     else:
-        return session
+        raise AccessException("页面未知错误")
 
 
 def get_stu_info(username: int, password: str, session=None, is_save: bool = False) -> schemas.UserInfo:
@@ -115,13 +120,12 @@ def get_grade_table(username: int, password: str, session: Session = None, is_sa
     if is_save:
         save_html_to_file(response.text, 'grade-table')
     if '个人成绩总表打印' in response.text:
-        # print(f'{username} 教务GPA: {parser.parse_grade_table_gpa(html_doc=etree.HTML(response.text))}')
         return parser.parse_grade_table(html_doc=etree.HTML(response.text))
     else:
         raise SpiderParserException("总成绩查询页请求失败")
 
 
-def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: int) -> schemas.GPA:
+def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: str = '1') -> schemas.GPA:
     """GPA计算规则:
         "二级制: 合格(85),不合格(0)"
         "五级制: 优秀(95),良(85),中(75),及格(65),不及格(0)"

@@ -39,22 +39,22 @@ class ClassRoom(BaseModel):
         d: int = 0
         e: int = 0
 
-    address: str = None
     num: int = -1
     type: str = None
+    address: str = None
     data: List[MiniIndex] = []
     # updatedAt = models.DateTimeField(auto_now=True)
 
 
 # User
 class User(BaseModel):
-    username: int
+    username: str
     password: str
 
 
 # UserInfo
 class UserInfo(BaseModel):
-    username: int
+    username: str
     name: str
     photoUrl: str = None
     nickname: str = None
@@ -111,7 +111,7 @@ class GradeTable(BaseModel):
     name: str
     credit: str = None
     semester: str = None
-    status: CourseStatusEnum = CourseStatusEnum.normal
+    status: CourseStatusEnum = CourseStatusEnum.normal.value
     result: str = None
 
 
@@ -153,7 +153,7 @@ class AiPaoUser(BaseModel):
 
 class QualityActivity(BaseModel):
     type: str
-    id: int
+    id: str
     name: str = ''
     semester: str = ''
     activityDate: str = ''
@@ -165,7 +165,7 @@ class QualityActivity(BaseModel):
 
 
 class QualityScholarship(BaseModel):
-    id: int
+    id: str
     semester: str = ''
     activityType: str = ''
     activityContent: str = ''

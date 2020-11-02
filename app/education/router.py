@@ -23,8 +23,6 @@ async def refresh_notice():  # TODO, limit offsets
     return response
 
 
-# Online Operation Mode
-# data = info + course-table + grade + gpa
 @router.post("/data", response_model=ResponseT)
 async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
     """
@@ -41,7 +39,7 @@ async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
         'info': get_stu_info(**user.dict(), session=session),
         'courseTable': get_course_table(**user.dict(), session=session, semester_id=semester_id),
         'grade': grade_list,
-        'gpa': calculate_gpa(grade_list, is_including_optional_course=1),
+        'gpa': calculate_gpa(grade_list),
     }
     crud.update_user(user, db.session)
     crud.update_info(data['info'], db.session)
@@ -82,7 +80,7 @@ async def refresh_education_course_table(user: schemas.User, semester: str = '20
 
 
 @router.post("/grade", response_model=ResponseT)
-async def refresh_education_grade(user: schemas.User, isIncludingOptionalCourse=1):
+async def refresh_education_grade(user: schemas.User, isIncludingOptionalCourse='1'):
     """
         计算学期成绩及 GPA
     - **username**: 用户名

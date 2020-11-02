@@ -54,7 +54,7 @@ class User(BaseModel):
 
 # UserInfo
 class UserInfo(BaseModel):
-    username: str
+    username: int
     name: str
     photoUrl: str = None
     nickname: str = None
@@ -119,11 +119,12 @@ class GradeTable(BaseModel):
 class Grade(GradeTable):
     code: str
     courseType: str = None
-    usual: str = None
     midTerm: str = None
     endTerm: str = None
+    usual: str = None
     makeUpScore: str = None
     makeUpScoreResult: str = None
+    totalScore: str = None
     point: str = None
 
 

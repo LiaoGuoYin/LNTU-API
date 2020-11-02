@@ -1,14 +1,15 @@
 import datetime
+from functools import wraps
 
 from sqlalchemy.orm import Session
 
-from app import schemas
+from app import schemas, exceptions
 from appDB import models
 
 
 def update_user(user: schemas.User, session: Session) -> models.User:
     new_user = models.User(**user.dict())
-    new_user.lastLogin = datetime.datetime.now()
+    new_user.lastUpdatedAt = datetime.datetime.now()
     session.merge(new_user)
     session.commit()
     return new_user
@@ -47,3 +48,42 @@ def update_aipao_order(student: schemas.AiPaoUser, session: Session) -> models.A
     session.merge(new_user)
     session.commit()
     return new_user
+
+
+# Login Decorator Function
+def server_user_valid_required(function_to_wrap):
+    @wraps(function_to_wrap)
+    def wrap(request_user: schemas.User, session: Session, *args, **kwargs):
+        server_user = session.query(models.User).filter_by(username=request_user.username).first()
+        if not server_user:
+            # Check user server account validation
+            raise exceptions.FormException(F"离线模式: {request_user.username} 用户无效，请稍后再试，可能是未曾登录过 LNTUHelper")
+        else:
+            if request_user.password != server_user.password:
+                raise exceptions.FormException(F"离线模式: {request_user.username} 用户名或密码错误")
+            else:
+                # Authenticated successfully
+                return function_to_wrap(request_user, session, *args, **kwargs)
+
+    return wrap
+
+
+@server_user_valid_required
+def retrieve_user_info(request_user: schemas.User, session: Session) -> dict:
+    return dict(session.query(models.UserInfo).filter_by(username=request_user.username).first().__dict__)
+
+
+@server_user_valid_required
+def retrieve_user_grade(request_user: schemas.User, session: Session) -> list:
+    grade_list = session.query(models.Grade).filter_by(username=request_user.username).all()
+    return list(grade_list)
+
+
+@server_user_valid_required
+def retrieve_user_gpa(request_user: schemas.User, session: Session) -> dict:
+    return dict(session.query(models.GPA).filter_by(username=request_user.username).first().__dict__)
+
+# TODO
+# @server_user_valid_required
+# def retrieve_user_course_table(request_user: schemas.User, session: Session) -> dict:
+#     return dict(session.query(models.CourseTable).filter_by(username=request_user.username).first().__dict__)

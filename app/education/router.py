@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from fastapi_sqlalchemy import db
+from starlette import status
 
-from app import schemas
+from app import schemas, exceptions
 from app.common import notice, room
 from app.const import choose_semester_id
 from app.education.core import get_stu_info, get_course_table, get_grade, login, calculate_gpa
@@ -33,20 +34,30 @@ async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
     """
     response = ResponseT()
     semester_id = choose_semester_id(semester)
-    session = login(**user.dict())
-    grade_list = get_grade(**user.dict(), session=session)
-    data = {
-        'info': get_stu_info(**user.dict(), session=session),
-        'courseTable': get_course_table(**user.dict(), session=session, semester_id=semester_id),
-        'grade': grade_list,
-        'gpa': calculate_gpa(grade_list),
-    }
-    crud.update_user(user, db.session)
-    crud.update_info(data['info'], db.session)
-    crud.update_grade_list(user, data['grade'], db.session)
-    crud.update_gpa(user, data['gpa'], db.session)
-    crud.update_course_table(data['courseTable'], db.session)
-    response.data = data
+    try:
+        session = login(**user.dict())
+        grade_list = get_grade(**user.dict(), session=session)
+        data = {
+            'info': get_stu_info(**user.dict(), session=session),
+            'courseTable': get_course_table(**user.dict(), session=session, semester_id=semester_id),
+            'grade': grade_list,
+            'gpa': calculate_gpa(grade_list),
+        }
+        crud.update_user(user, db.session)
+        crud.update_info(data['info'], db.session)
+        crud.update_grade_list(user, data['grade'], db.session)
+        crud.update_gpa(user, data['gpa'], db.session)
+        crud.update_course_table(data['courseTable'], db.session)
+        response.data = data
+    except exceptions.NetworkException:
+        response.code = status.HTTP_200_OK
+        response.message = "离线模式: " + response.message
+        response.data = {
+            'info': crud.retrieve_user_info(user, db.session),
+            'courseTable': [],
+            'grade': crud.retrieve_user_grade(user, db.session),
+            'gpa': crud.retrieve_user_gpa(user, db.session)
+        }
     return response
 
 
@@ -58,9 +69,14 @@ async def refresh_education_info(user: schemas.User):
     - **password**: 密码
     """
     response = ResponseT()
-    response.data = get_stu_info(**user.dict())
-    crud.update_user(user, db.session)
-    crud.update_info(response.data, db.session)
+    try:
+        response.data = get_stu_info(**user.dict())
+        crud.update_user(user, db.session)
+        crud.update_info(response.data, db.session)
+    except exceptions.NetworkException:
+        response.code = status.HTTP_200_OK
+        response.message = "离线模式: " + response.message
+        response.data = crud.retrieve_user_info(user, db.session)
     return response
 
 
@@ -73,9 +89,15 @@ async def refresh_education_course_table(user: schemas.User, semester: str = '20
     - **semester**: 学期; 例: 2020-1 表示 2020 年的第一个学期, 2020-2 表示 2020 年的第二个学期
     """
     semester_id = choose_semester_id(semester)
-    response = ResponseT(data=get_course_table(**user.dict(), semester_id=semester_id))
-    crud.update_user(user, db.session)
-    crud.update_course_table(response.data, db.session)
+    response = ResponseT()
+    try:
+        response.data = get_course_table(**user.dict(), semester_id=semester_id)
+        crud.update_user(user, db.session)
+        crud.update_course_table(response.data, db.session)
+    except exceptions.NetworkException:
+        response.code = status.HTTP_200_OK
+        response.message = "离线模式: " + response.message
+        response.data = crud.retrieve_user_info(user, db.session)
     return response
 
 
@@ -89,12 +111,17 @@ async def refresh_education_grade(user: schemas.User, isIncludingOptionalCourse=
     """
     response = ResponseT()
     user = schemas.User(**user.dict())
-    grade_list = get_grade(**user.dict())
-    response.data = {
-        'grade': grade_list,
-        'gpa': calculate_gpa(grade_list, is_including_optional_course=isIncludingOptionalCourse)
-    }
-    crud.update_user(user, db.session)
-    crud.update_grade_list(user, response.data['grade'], db.session)
-    crud.update_gpa(user, response.data['gpa'], db.session)
+    try:
+        grade_list = get_grade(**user.dict())
+        response.data = {
+            'grade': grade_list,
+            'gpa': calculate_gpa(grade_list, is_including_optional_course=isIncludingOptionalCourse)
+        }
+        crud.update_user(user, db.session)
+        crud.update_grade_list(user, response.data['grade'], db.session)
+        crud.update_gpa(user, response.data['gpa'], db.session)
+    except exceptions.NetworkException:
+        response.code = status.HTTP_200_OK
+        response.message = "离线模式: " + response.message
+        response.data = crud.retrieve_user_grade(user, db.session)
     return response

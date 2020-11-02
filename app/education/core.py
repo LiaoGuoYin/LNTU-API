@@ -48,6 +48,8 @@ def login(username: int, password: str) -> Session:
         raise AccessException("页面请求过快")
     elif '账户不存在' in response.text:
         raise FormException(F"{username} 用户不存在")
+    elif '超过人数上限' in response.text:
+        raise FormException("超过人数上限，请稍后再试")
     elif '您当前位置' in response.text:
         return session
     else:

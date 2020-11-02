@@ -187,15 +187,17 @@ def parse_grade(html_doc) -> [schemas.CourseTable]:
             if len(cells) == 0:
                 return []
             course = schemas.Grade(name=cells[3], code=cells[2])
-            course.credit = cells[5]
             course.semester = cells[0]
             course.courseType = cells[4]
-            course.usual = cells[8]
+            course.credit = cells[5]
             course.midTerm = cells[6]
             course.endTerm = cells[7]
-            course.result = cells[-3]  # 忽略总评成绩
+            course.usual = cells[8]
+            # 有无 [补考记录] 导致总评成绩(totalScore)和最终成绩(result)不一样
+            course.totalScore = cells[-4]
+            course.result = cells[-3]
             course.point = cells[-2]
-            if '补考' in course.name:
+            if '补考' in course.name:  # 有无 [补考记录] 导致页面结构不一样
                 course.status = schemas.GradeTable.CourseStatusEnum.makeUp.value
                 course.makeUpScore = cells[-6]
                 course.makeUpScoreResult = cells[-5]

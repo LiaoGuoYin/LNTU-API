@@ -12,7 +12,7 @@ class User(Base):
     username = Column(String(32), primary_key=True, index=True)
     password = Column(String(32))
 
-    lastLogin = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
 
 class UserInfo(Base):
@@ -44,7 +44,7 @@ class UserInfo(Base):
     studentStatus = Column(String(32))
     isWorking = Column(String(32))
 
-    lastCalculateTime = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
 
 class CourseTable(Base):
@@ -67,13 +67,13 @@ class Grade(Base):
     name = Column(String(128))
     semester = Column(String(32))
     courseType = Column(String(32))
-    grade = Column(String(32))
     credit = Column(String(32))
     usual = Column(String(32))
     midTerm = Column(String(32))
     endTerm = Column(String(32))
     makeUpScore = Column(String(32))
     makeUpScoreResult = Column(String(32))
+    totalScore = Column(String(32))
     result = Column(String(32))
     point = Column(String(32))
     status = Column(String(32))
@@ -93,7 +93,7 @@ class GPA(Base):
     creditTotal = Column(Float)
     courseCount = Column(Integer)
 
-    lastCalculateTime = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
 
 class AiPaoOrder(Base):

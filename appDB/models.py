@@ -59,6 +59,24 @@ class CourseTable(Base):
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
 
+class Exam(Base):
+    __tablename__ = "exam"
+
+    username = Column(String(32), primary_key=True, index=True)
+    code = Column(String(32), primary_key=True, index=True)
+    name = Column(String(128))
+    type = Column(String(32))
+    date = Column(String(32))
+    time = Column(String(32))
+    location = Column(String(32))
+    seatNumber = Column(String(32))
+    status = Column(String(32))
+    comment = Column(String(32))
+    semester = Column(String(32))
+
+    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+
+
 class Grade(Base):
     __tablename__ = "grade"
 

@@ -3,9 +3,9 @@ from fastapi_sqlalchemy import db
 from starlette import status
 
 from app import schemas, exceptions
+from app.education import core
 from app.common import notice, room
 from app.const import choose_semester_id
-from app.education.core import get_stu_info, get_course_table, get_grade, login, calculate_gpa
 from app.schemas import ResponseT
 from appDB import crud
 
@@ -35,13 +35,13 @@ async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
     response = ResponseT()
     semester_id = choose_semester_id(semester)
     try:
-        session = login(**user.dict())
-        grade_list = get_grade(**user.dict(), session=session)
+        session = core.login(**user.dict())
+        grade_list = core.get_grade(**user.dict(), session=session)
         data = {
-            'info': get_stu_info(**user.dict(), session=session),
-            'courseTable': get_course_table(**user.dict(), session=session, semester_id=semester_id),
+            'info': core.get_stu_info(**user.dict(), session=session),
+            'courseTable': core.get_course_table(**user.dict(), session=session, semester_id=semester_id),
             'grade': grade_list,
-            'gpa': calculate_gpa(grade_list),
+            'gpa': core.calculate_gpa(grade_list),
         }
         crud.update_user(user, db.session)
         crud.update_info(data['info'], db.session)
@@ -70,7 +70,7 @@ async def refresh_education_info(user: schemas.User):
     """
     response = ResponseT()
     try:
-        response.data = get_stu_info(**user.dict())
+        response.data = core.get_stu_info(**user.dict())
         crud.update_user(user, db.session)
         crud.update_info(response.data, db.session)
     except exceptions.NetworkException:
@@ -91,7 +91,7 @@ async def refresh_education_course_table(user: schemas.User, semester: str = '20
     semester_id = choose_semester_id(semester)
     response = ResponseT()
     try:
-        response.data = get_course_table(**user.dict(), semester_id=semester_id)
+        response.data = core.get_course_table(**user.dict(), semester_id=semester_id)
         crud.update_user(user, db.session)
         crud.update_course_table(response.data, db.session)
     except exceptions.NetworkException:
@@ -112,10 +112,10 @@ async def refresh_education_grade(user: schemas.User, isIncludingOptionalCourse=
     response = ResponseT()
     user = schemas.User(**user.dict())
     try:
-        grade_list = get_grade(**user.dict())
+        grade_list = core.get_grade(**user.dict())
         response.data = {
             'grade': grade_list,
-            'gpa': calculate_gpa(grade_list, is_including_optional_course=isIncludingOptionalCourse)
+            'gpa': core.calculate_gpa(grade_list, is_including_optional_course=isIncludingOptionalCourse)
         }
         crud.update_user(user, db.session)
         crud.update_grade_list(user, response.data['grade'], db.session)
@@ -124,4 +124,27 @@ async def refresh_education_grade(user: schemas.User, isIncludingOptionalCourse=
         response.code = status.HTTP_200_OK
         response.message = "离线模式: " + response.message
         response.data = crud.retrieve_user_grade(user, db.session)
+    return response
+
+
+@router.post("/exam", response_model=ResponseT)
+async def refresh_education_exam(user: schemas.User, semester: str = '2020-2'):
+    """
+        考试安排查询
+    - **username**: 用户名
+    - **password**: 密码
+    - **semester**: 学期; 例: 2020-1 表示 2020 年的第一个学期, 2020-2 表示 2020 年的第二个学期
+    """
+    response = ResponseT()
+    semester_id = choose_semester_id(semester)
+    user = schemas.User(**user.dict())
+    try:
+        exam_list = core.get_exam(**user.dict(), semester_id=str(semester_id))
+        response.data = exam_list
+        crud.update_user(user, db.session)
+        crud.update_exam_list(user, exam_list, semester, db.session)
+    except exceptions.NetworkException:
+        response.code = status.HTTP_200_OK
+        response.message = "离线模式: " + response.message
+        response.data = crud.retrieve_user_exam(user, db.session)
     return response

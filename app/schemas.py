@@ -173,3 +173,15 @@ class QualityScholarship(BaseModel):
     activityLevel: str = ''
     creditType: str = ''
     credit: str = ''
+
+
+class Exam(BaseModel):
+    code: str
+    name: str = ''
+    type: str = ''
+    date: str = ''
+    time: str = ''
+    location: str = ''
+    seatNumber: str = ''
+    status: str = ''
+    comment: str = ''

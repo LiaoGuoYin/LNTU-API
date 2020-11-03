@@ -3,6 +3,7 @@ import re
 import time
 from copy import deepcopy
 
+import parse
 import requests
 from lxml import etree
 from requests import Session
@@ -124,7 +125,32 @@ def get_grade_table(username: int, password: str, session: Session = None, is_sa
     if '个人成绩总表打印' in response.text:
         return parser.parse_grade_table(html_doc=etree.HTML(response.text))
     else:
-        raise SpiderParserException("总成绩查询页请求失败")
+        raise SpiderParserException("解析总成绩查询页失败")
+
+
+def get_exam(username: int, password: str, semester_id: str, session: Session = None, is_save: bool = False) -> [
+    schemas.Exam]:
+    def get_exam_id(tmp_session, semester_id, is_save):
+        # 课表查询之前，一定要访问，因此使用 session 模式
+        response_inner = tmp_session.get(URLEnum.EXAM_OF_BATCH_ID.value, params={'semester.id': semester_id})
+        if is_save:
+            save_html_to_file(response_inner.text, 'exam-batch-id')
+        exam_batch_id = parse.search('examBatch.id={id:d}', response_inner.text)
+        if exam_batch_id is None:
+            raise SpiderParserException("获取考试学期id失败")
+        else:
+            return exam_batch_id.named['id']
+
+    if not session:
+        session = login(username, password)
+    exam_batch_id = get_exam_id(session, semester_id, is_save)
+    response = session.get(URLEnum.EXAM.value, params={'examBatch.id': exam_batch_id})
+    if is_save:
+        save_html_to_file(response.text, 'exam')
+    if '课程序号' in response.text:
+        return parser.parse_exam(html_doc=etree.HTML(response.text))
+    else:
+        raise SpiderParserException("解析考试安排页失败")
 
 
 def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: str = '1') -> schemas.GPA:

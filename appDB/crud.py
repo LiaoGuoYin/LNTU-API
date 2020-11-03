@@ -29,6 +29,13 @@ def update_course_table(course_table_list: [schemas.CourseTable], session: Sessi
     session.commit()
 
 
+def update_exam_list(user: schemas.User, exam_list: [schemas.Exam], semester: str, session: Session):
+    for exam in exam_list:
+        new_exam = models.Exam(username=user.username, semester=semester, **exam.dict())
+        session.merge(new_exam)
+    session.commit()
+
+
 def update_grade_list(user: schemas.User, grade_list: [schemas.Grade], session: Session):
     for grade in grade_list:
         new_grade = models.Grade(username=user.username, **grade.dict())
@@ -82,6 +89,12 @@ def retrieve_user_grade(request_user: schemas.User, session: Session) -> list:
 @server_user_valid_required
 def retrieve_user_gpa(request_user: schemas.User, session: Session) -> dict:
     return dict(session.query(models.GPA).filter_by(username=request_user.username).first().__dict__)
+
+
+@server_user_valid_required
+def retrieve_user_exam(request_user: schemas.User, session: Session) -> list:
+    exam_list = session.query(models.Exam).filter_by(username=request_user.username).all()
+    return list(exam_list)
 
 # TODO
 # @server_user_valid_required

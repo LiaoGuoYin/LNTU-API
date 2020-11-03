@@ -211,3 +211,29 @@ def parse_grade(html_doc) -> [schemas.CourseTable]:
         raise SpiderParserException(f"成绩详情页，数组越界: {e}")
     except AttributeError as e:
         raise SpiderParserException(f"成绩详情页，结构解析失败: {e}")
+
+
+def parse_exam(html_doc) -> [schemas.Exam]:
+    exam_list: [schemas.Exam] = []
+    exam_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
+    try:
+        for row in exam_table_rows:  # 处理每一行
+            data_row = []
+            for td in row:
+                cell = td.text.strip() if td.text is not None else ''.join(td.xpath('string(.)').split())
+                data_row.append(cell)
+            if len(data_row) == 0:
+                continue
+            exam = schemas.Exam(code=data_row[0])
+            exam.name = data_row[1]
+            exam.type = data_row[2]
+            exam.date = data_row[3]
+            exam.time = data_row[4]
+            exam.location = data_row[5]
+            exam.seatNumber = data_row[6]
+            exam.status = data_row[7]
+            exam.comment = data_row[8]
+            exam_list.append(exam)
+        return exam_list
+    except IndexError as e:
+        raise SpiderParserException(f"考试安排页，数组越界: {e}")

@@ -56,6 +56,7 @@ async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
             'info': user_info,
             'courseTable': [],
             'grade': crud.retrieve_user_grade(user, db.session)[0],
+            # 'exam': # TODO
             'gpa': crud.retrieve_user_gpa(user, db.session)[0]
         }
         response.message = f"离线模式: {response.message}, 最后更新于: {last_updated_at}"

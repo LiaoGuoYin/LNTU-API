@@ -30,21 +30,20 @@ def parse_stu_info(html_doc) -> schemas.UserInfo:
 
 
 def parse_course_table_bottom(html_doc) -> [schemas.CourseTable]:
-    rows = html_doc.xpath('//*[@id="tasklesson"]/div/table/tbody/tr')
     course_list = []
+    rows = html_doc.xpath('//*[@id="tasklesson"]/div/table/tbody/tr')
     try:
         for row in rows:
             cells = row.xpath('./td')
-            if not len(cells):
-                # 处理课表为空的情况（可能是学期字段错误）
-                return []
-            row_data = ["".join(cell.xpath('string(.)').split()) for cell in cells[2:-2]]
+            if not len(cells):  # 处理课表为空的情况（可能是学期字段错误）
+                continue
+            data_row = ["".join(cell.xpath('string(.)').split()) for cell in cells[2:-2]]
             """['大数据开发技术', '3', 'H101750042048.01', '杨韬']"""
             single_course_dict = {
-                'code': row_data[2],
-                'name': row_data[0],
-                'credit': row_data[1],
-                'teacher': row_data[3],
+                'code': data_row[2],
+                'name': data_row[0],
+                'credit': data_row[1],
+                'teacher': data_row[3],
             }
             course_list.append(CourseTable(**single_course_dict))
         return course_list
@@ -71,19 +70,16 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
             schedule.room = tmp_room
         tmp_weeks = GetWeek().marshal(week, 2, 1, 50)
         schedule.weeksString = tmp_weeks
-        if ('单' in tmp_weeks) or ('双' in tmp_weeks):  # '单1-9' or '双2-10'
-            for each in tmp_weeks.split(' '):  # '单1-9 双2-14'
+        tmp_week_list = tmp_weeks.split(' ')
+        for each in tmp_week_list:
+            if ('单' in each) or ('双' in each):  # '单1-9' or '双2-10'
                 start_week, end_week = map(int, each[1:].split('-'))
                 schedule.weeks.extend(list(range(start_week, end_week + 1, 2)))
-        elif '-' in tmp_weeks:  # '2-15' or '1-12 14-17' or '4-9 11'
-            for each in tmp_weeks.split(' '):
-                if '-' in each:  # '2-12 14-17'
-                    start_week, end_week = map(int, each.split('-'))
-                    schedule.weeks.extend(list(range(start_week, end_week + 1)))
-                else:  # '4-9 11'
-                    schedule.weeks.append(int(each))
-        else:  # '10'
-            schedule.weeks = [int(tmp_weeks)]
+            elif '-' in each:  # '2-15'
+                start_week, end_week = map(int, each.split('-'))
+                schedule.weeks.extend(list(range(start_week, end_week + 1)))
+            else:  # '11'
+                schedule.weeks = [int(each)]
         return schedule
 
     try:
@@ -125,11 +121,11 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
 
 def parse_grade_table(html_doc) -> [schemas.GradeTable]:
     course_grade_list: [schemas.GradeTable] = []
-    course_grade_table_rows = html_doc.xpath('/html/body/table[2]/tr')
+    rows = html_doc.xpath('/html/body/table[2]/tr')
     try:
         cells_element = []
         cells = []
-        for row in course_grade_table_rows[1:]:
+        for row in rows[1:]:
             cells_element.append(row[:4])
             if row[-1].text != '\xa0':
                 # 处理一行多个成绩的情况
@@ -163,15 +159,6 @@ def parse_grade_table(html_doc) -> [schemas.GradeTable]:
         return e
 
 
-def parse_grade_table_gpa(html_doc) -> str:  # TODO
-    try:
-        course_grade_table_tail_row_all_credit = html_doc.xpath('string(/html/body/table[3]/tr[1]/td[1])')
-        course_grade_table_tail_row_gpa = html_doc.xpath('string(/html/body/table[3]/tr[1]/td[2])').strip()
-        return course_grade_table_tail_row_gpa.split(":")[1]
-    except Exception as e:
-        return e
-
-
 def parse_grade(html_doc) -> [schemas.CourseTable]:
     course_list: [schemas.CourseTable] = []
     score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
@@ -179,13 +166,11 @@ def parse_grade(html_doc) -> [schemas.CourseTable]:
         for row in score_table_rows:
             cells = []
             for td in row:
-                if td.text is not None:
-                    cells.append(''.join(td.xpath('string(.)').split()))
-                else:
-                    cells.append('')
-            # cells: ['2019-20202', 'H101730023056', 'H101730023056.01', '信息系统分析与设计', '专业必修', '3.5', '95', '94', '89', '93.3', '93.3', '4', '查卷申请']
+                cell = td.text.strip() if td.text is not None else ''.join(td.xpath('string(.)').split())
+                cells.append(cell)
             if len(cells) == 0:
-                return []
+                continue
+            # cells: ['2019-20202', 'H101730023056', 'H101730023056.01', '信息系统分析与设计', '专业必修', '3.5', '95', '94', '89', '93.3', '93.3', '4', '查卷申请']
             course = schemas.Grade(name=cells[3], code=cells[2])
             course.semester = cells[0]
             course.courseType = cells[4]
@@ -215,9 +200,9 @@ def parse_grade(html_doc) -> [schemas.CourseTable]:
 
 def parse_exam(html_doc) -> [schemas.Exam]:
     exam_list: [schemas.Exam] = []
-    exam_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
+    rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
     try:
-        for row in exam_table_rows:  # 处理每一行
+        for row in rows:  # 处理每一行
             data_row = []
             for td in row:
                 cell = td.text.strip() if td.text is not None else ''.join(td.xpath('string(.)').split())

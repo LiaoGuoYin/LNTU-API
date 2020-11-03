@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import schemas, exceptions
 from appDB import models
+from appDB.utils import Serializer
 
 
 def update_user(user: schemas.User, session: Session) -> models.User:
@@ -76,31 +77,39 @@ def server_user_valid_required(function_to_wrap):
 
 
 @server_user_valid_required
-def retrieve_user_info(request_user: schemas.User, session: Session) -> dict:
+def retrieve_user_info(request_user: schemas.User, session: Session) -> (dict, str):
     user_info_result = session.query(models.UserInfo).filter_by(username=request_user.username).all()
     if len(user_info_result) == 0:  # TODO
-        return {}
+        return {}, ''
     else:
         user_info_result[0].username = int(user_info_result[0].username)
-        return user_info_result
+        last_updated_at = '' if len(user_info_result) == 0 else user_info_result[0].lastUpdatedAt
+        serializer = Serializer(user_info_result, exclude=['lastUpdatedAt'], many=True)
+        return serializer.data[0], last_updated_at
 
 
 @server_user_valid_required
-def retrieve_user_grade(request_user: schemas.User, session: Session) -> list:
+def retrieve_user_grade(request_user: schemas.User, session: Session) -> (list, str):
     grade_list = session.query(models.Grade).filter_by(username=request_user.username).all()
-    return list(grade_list)
+    last_updated_at = '' if len(grade_list) == 0 else grade_list[0].lastUpdatedAt
+    serializer = Serializer(grade_list, exclude=['username', 'lastUpdatedAt'], many=True)
+    return serializer.data, last_updated_at
 
 
 @server_user_valid_required
-def retrieve_user_gpa(request_user: schemas.User, session: Session) -> dict:
+def retrieve_user_gpa(request_user: schemas.User, session: Session) -> (dict, str):
     user_gpa_result = session.query(models.GPA).filter_by(username=request_user.username).all()
-    return {} if len(user_gpa_result) == 0 else user_gpa_result[0]
+    serializer = Serializer(user_gpa_result, exclude=['username', 'lastUpdatedAt'], many=True)
+    last_updated_at = '' if len(user_gpa_result) == 0 else user_gpa_result[0].lastUpdatedAt
+    return ({}, '') if len(serializer.data) == 0 else (serializer.data[0], last_updated_at)
 
 
 @server_user_valid_required
-def retrieve_user_exam(request_user: schemas.User, session: Session) -> list:
+def retrieve_user_exam(request_user: schemas.User, session: Session) -> (list, str):
     exam_list = session.query(models.Exam).filter_by(username=request_user.username).all()
-    return list(exam_list)
+    serializer = Serializer(exam_list, exclude=['username', 'lastUpdatedAt'], many=True)
+    last_updated_at = '' if len(exam_list) == 0 else exam_list[0].lastUpdatedAt
+    return serializer.data, last_updated_at
 
 # TODO
 # @server_user_valid_required

@@ -42,6 +42,12 @@ class TestMainAPI(unittest.TestCase):
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
+    def test_education_exam(self):
+        payload = {'semester': '2020-2'}
+        response = self.client.post('/education/exam', params=payload, json=user_dict)
+        print(response.text)
+        self.assertTrue(response.status_code == 200)
+
     def test_education_data(self):
         response = self.client.post('/education/data', json=user_dict)
         print(response.text)

@@ -22,7 +22,7 @@ def is_education_online() -> bool:
             return True
         else:
             raise NetworkException("教务无响应，爆炸爆炸")
-    except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectTimeout, exceptions.NetworkException):
+    except (requests.exceptions.RequestException, requests.exceptions.RequestException, exceptions.NetworkException):
         return False
 
 

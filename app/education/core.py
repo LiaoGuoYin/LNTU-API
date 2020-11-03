@@ -8,26 +8,27 @@ import requests
 from lxml import etree
 from requests import Session
 
-from app import schemas
+from app import schemas, exceptions
 from app.education import parser
 from app.education.urls import URLEnum
 from app.education.utils import save_html_to_file
 from app.exceptions import NetworkException, AccessException, FormException, SpiderParserException
 
 
-def check_education_online() -> bool:
+def is_education_online() -> bool:
     try:
         response = requests.head(URLEnum.LOGIN.value, timeout=(1, 3))
         if response.status_code == 200:
             return True
         else:
             raise NetworkException("教务无响应，爆炸爆炸")
-    except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectTimeout):
-        raise NetworkException("教务无响应，爆炸爆炸")
+    except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectTimeout, exceptions.NetworkException):
+        return False
 
 
 def login(username: int, password: str) -> Session:
-    check_education_online()
+    if not is_education_online():
+        raise NetworkException("教务无响应，爆炸爆炸")
     requests.adapters.DEFAULT_RETRIES = 5
     session = requests.Session()
     session.headers = {

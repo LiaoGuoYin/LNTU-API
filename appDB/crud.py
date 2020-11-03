@@ -77,7 +77,12 @@ def server_user_valid_required(function_to_wrap):
 
 @server_user_valid_required
 def retrieve_user_info(request_user: schemas.User, session: Session) -> dict:
-    return dict(session.query(models.UserInfo).filter_by(username=request_user.username).first().__dict__)
+    user_info_result = session.query(models.UserInfo).filter_by(username=request_user.username).all()
+    if len(user_info_result) == 0:  # TODO
+        return {}
+    else:
+        user_info_result[0].username = int(user_info_result[0].username)
+        return user_info_result
 
 
 @server_user_valid_required
@@ -88,7 +93,8 @@ def retrieve_user_grade(request_user: schemas.User, session: Session) -> list:
 
 @server_user_valid_required
 def retrieve_user_gpa(request_user: schemas.User, session: Session) -> dict:
-    return dict(session.query(models.GPA).filter_by(username=request_user.username).first().__dict__)
+    user_gpa_result = session.query(models.GPA).filter_by(username=request_user.username).all()
+    return {} if len(user_gpa_result) == 0 else user_gpa_result[0]
 
 
 @server_user_valid_required

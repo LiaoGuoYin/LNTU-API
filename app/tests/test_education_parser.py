@@ -13,6 +13,7 @@ local_file_dict = {
     'course-table': f'{APP_ABSOLUTE_PATH}/tests/static/course-table.html',
     'grade': f'{APP_ABSOLUTE_PATH}/tests/static/grade.html',
     'grade-table': f'{APP_ABSOLUTE_PATH}/tests/static/grade-table.html',
+    'exam': f'{APP_ABSOLUTE_PATH}/tests/static/exam.html',
 }
 
 
@@ -56,3 +57,11 @@ class TestEducationParser(unittest.TestCase):
         self.assertTrue(len(grade_table_list) != 0)
         self.assertIsInstance(grade_table_list[0], schemas.GradeTable)
         [print(each) for each in grade_table_list]
+
+    def test_education_core_exam(self):
+        with open(local_file_dict['exam']) as f:
+            html_text = f.read()
+
+        exam_list = parser.parse_exam(html_doc=etree.HTML(html_text))
+        self.assertIsInstance(exam_list, list)
+        print(exam_list)

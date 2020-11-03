@@ -71,7 +71,7 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
             schedule.room = tmp_room
         tmp_weeks = GetWeek().marshal(week, 2, 1, 50)
         schedule.weeksString = tmp_weeks
-        if tmp_weeks.startswith('双') or tmp_weeks.startswith('单'):  # '单1-9' or '双2-10'
+        if ('单' in tmp_weeks) or ('双' in tmp_weeks):  # '单1-9' or '双2-10'
             for each in tmp_weeks.split(' '):  # '单1-9 双2-14'
                 start_week, end_week = map(int, each[1:].split('-'))
                 schedule.weeks.extend(list(range(start_week, end_week + 1, 2)))

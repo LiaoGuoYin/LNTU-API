@@ -31,7 +31,7 @@ user_dict = get_test_users()
 class TestEducationCore(unittest.TestCase):
     # 只检测作为一个正常 User 的操作情况，不检验解析
     def test_education_core_is_education_online(self):
-        self.assertEqual(core.check_education_online(), True)
+        self.assertEqual(core.is_education_online(), True)
 
     def test_education_core_login_valid_user(self):
         response = core.login(**user_dict)
@@ -91,8 +91,8 @@ class TestEducationCore(unittest.TestCase):
         print(gpa_result)
 
     def test_education_core_exam(self):
+        exam_list = core.get_exam(**user_dict, semester_id=str(627), is_save=True)
         with open(local_file_dict['exam']) as f:
             html_text = f.read()
-        exam_list = parser.parse_exam(html_doc=etree.HTML(html_text))
         self.assertIsInstance(exam_list, list)
-        print(exam_list)
+        self.assertIn('课程序号', html_text)

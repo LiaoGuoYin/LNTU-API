@@ -15,6 +15,7 @@ local_file_dict = {
     'grade': f'{APP_ABSOLUTE_PATH}/tests/static/grade.html',
     'grade-table': f'{APP_ABSOLUTE_PATH}/tests/static/grade-table.html',
     'exam': f'{APP_ABSOLUTE_PATH}/tests/static/exam.html',
+    'other-exam': f'{APP_ABSOLUTE_PATH}/tests/static/other-exam.html',
     'plan': f'{APP_ABSOLUTE_PATH}/tests/static/plan.html',
 }
 
@@ -97,6 +98,13 @@ class TestEducationCore(unittest.TestCase):
             html_text = f.read()
         self.assertIsInstance(exam_list, list)
         self.assertIn('课程序号', html_text)
+
+    def test_education_core_other_exam(self):
+        other_exam_list = core.get_other_exam(**user_dict, is_save=True)
+        with open(local_file_dict['other-exam']) as f:
+            html_text = f.read()
+        self.assertIsInstance(other_exam_list, list)
+        self.assertIn('资格考试', html_text)
 
     def test_education_core_plan(self):
         exam_list = core.get_plan(**user_dict, is_save=True)

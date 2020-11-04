@@ -258,3 +258,24 @@ def parse_plan(html_doc) -> [schemas.PlanGroup]:
         return plan_group_list
     except IndexError as e:
         raise SpiderParserException(f"培养计划完成页，数组越界: {e}")
+
+
+def parse_other_exam(html_doc) -> [schemas.OtherExam]:
+    # TODO 资格考试报名记录
+    other_exam_list: [schemas.OtherExam] = []
+    rows = html_doc.xpath('/html/body/form/div[@class="grid"]/table/tbody/tr')
+    try:
+        for row in rows:  # 处理每一行
+            data_row = []
+            for td in row:
+                data_row.append(''.join(td.xpath('string(.)').split()))
+            if len(data_row) == 0:
+                continue
+            exam = schemas.OtherExam(name=data_row[0])
+            exam.result = data_row[1]
+            exam.status = data_row[2]
+            exam.semester = data_row[3]
+            other_exam_list.append(exam)
+        return other_exam_list
+    except IndexError as e:
+        raise SpiderParserException(f"考试安排页，数组越界: {e}")

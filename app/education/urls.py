@@ -19,6 +19,7 @@ class URLEnum(Enum):
 
     EXAM_OF_BATCH_ID = URL_ROOT + '/stdExamTable.action'
     EXAM = URL_ROOT + '/stdExamTable!examTable.action'
+    OTHER_EXAM = URL_ROOT + '/stdOtherExamSignUp.action'
     PLAN = URL_ROOT + '/myPlanCompl.action'
 
     # CLASSROOMS = URL_ROOT + '/classroom/apply/free!search.action'

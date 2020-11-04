@@ -152,6 +152,20 @@ async def refresh_education_exam(user: schemas.User, semester: str = '2020-2'):
     return response
 
 
+@router.post("/other-exam", response_model=ResponseT)
+async def refresh_education_other_exam(user: schemas.User):
+    """
+        其他外校考试(无离线模式)
+    - **username**: 用户名
+    - **password**: 密码
+    """
+    response = ResponseT()
+    user = schemas.User(**user.dict())
+    response.data = core.get_other_exam(**user.dict())
+    crud.update_user(user, db.session)
+    return response
+
+
 @router.post("/plan", response_model=ResponseT)
 async def refresh_education_plan(user: schemas.User):
     """

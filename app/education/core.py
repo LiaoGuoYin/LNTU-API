@@ -68,7 +68,7 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
         html_doc = etree.HTML(response.text)
         return parser.parse_stu_info(html_doc)
     else:
-        raise SpiderParserException("个人信息页请求失败")
+        raise SpiderParserException("[个人信息页]获取失败")
 
 
 def get_plan(username: int, password: str, session: Session = None, is_save: bool = False) -> [schemas.PlanGroup]:
@@ -80,7 +80,7 @@ def get_plan(username: int, password: str, session: Session = None, is_save: boo
     if '计划完成情况' in response.text:
         return parser.parse_plan(html_doc=etree.HTML(response.text))
     else:
-        raise SpiderParserException("解析个人培养方案完成情况页失败")
+        raise SpiderParserException("[个人培养方案完成情况页]获取失败")
 
 
 def get_course_table(username: int, password: str, semester_id: int = 627, session: Session = None,
@@ -112,7 +112,7 @@ def get_course_table(username: int, password: str, semester_id: int = 627, sessi
         part_course_list = parser.parse_course_table_bottom(html_doc=etree.HTML(html_text))
         return parser.parse_course_table_body(html_text, course_dict_list=part_course_list)
     else:
-        raise SpiderParserException("课表页请求失败")
+        raise SpiderParserException("[课表页]获取失败")
 
 
 def get_grade(username: int, password: str, session: Session = None, is_save: bool = False) -> [schemas.Grade]:
@@ -124,7 +124,7 @@ def get_grade(username: int, password: str, session: Session = None, is_save: bo
     if '学年学期' in response.text:
         return parser.parse_grade(html_doc=etree.HTML(response.text))
     else:
-        raise SpiderParserException("成绩查询页请求失败")
+        raise SpiderParserException("[成绩查询页]请求失败")
 
 
 def get_grade_table(username: int, password: str, session: Session = None, is_save: bool = False) -> [
@@ -138,7 +138,7 @@ def get_grade_table(username: int, password: str, session: Session = None, is_sa
     if '个人成绩总表打印' in response.text:
         return parser.parse_grade_table(html_doc=etree.HTML(response.text))
     else:
-        raise SpiderParserException("解析总成绩查询页失败")
+        raise SpiderParserException("[总成绩查询页]获取失败")
 
 
 def get_exam(username: int, password: str, semester_id: str, session: Session = None, is_save: bool = False) -> [
@@ -150,7 +150,7 @@ def get_exam(username: int, password: str, semester_id: str, session: Session = 
             save_html_to_file(response_inner.text, 'exam-batch-id')
         exam_batch_id = parse.search('examBatch.id={id:d}', response_inner.text)
         if exam_batch_id is None:
-            raise SpiderParserException("获取考试学期id失败")
+            raise SpiderParserException("考试学期ID获取失败")
         else:
             return exam_batch_id.named['id']
 
@@ -163,7 +163,20 @@ def get_exam(username: int, password: str, semester_id: str, session: Session = 
     if '课程序号' in response.text:
         return parser.parse_exam(html_doc=etree.HTML(response.text))
     else:
-        raise SpiderParserException("解析考试安排页失败")
+        raise SpiderParserException("[考试安排页]获取失败")
+
+
+def get_other_exam(username: int, password: str,session: Session = None, is_save: bool = False) -> [schemas.OtherExam]:
+    if not session:
+        session = login(username, password)
+    response = session.get(URLEnum.OTHER_EXAM.value)
+    if is_save:
+        save_html_to_file(response.text, 'other-exam')
+    if '资格考试' in response.text:
+        return parser.parse_other_exam(html_doc=etree.HTML(response.text))
+    else:
+        raise SpiderParserException("[资格考试页]获取失败")
+
 
 
 def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: str = '1') -> schemas.GPA:

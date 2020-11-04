@@ -204,3 +204,10 @@ class Plan(PlanCommon):
 
 class PlanGroup(PlanCommon):
     courseList: List[Plan] = []
+
+
+class OtherExam(BaseModel):
+    name: str
+    result: str = ''
+    status: str = ''
+    semester: str = ''

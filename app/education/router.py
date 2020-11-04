@@ -85,7 +85,7 @@ async def refresh_education_info(user: schemas.User):
 @router.post("/course-table", response_model=ResponseT)
 async def refresh_education_course_table(user: schemas.User, semester: str = '2020-2'):
     """
-        获取指定学期课表
+        获取指定学期课表(无离线模式)
     - **username**: 用户名
     - **password**: 密码
     - **semester**: 学期; 例: 2020-1 表示 2020 年的第一个学期, 2020-2 表示 2020 年的第二个学期
@@ -149,4 +149,18 @@ async def refresh_education_exam(user: schemas.User, semester: str = '2020-2'):
         response.code = status.HTTP_200_OK
         response.data, last_updated_at = crud.retrieve_user_exam(user, db.session)
         response.message = f"离线模式: {response.message}, 最后更新于: {last_updated_at}"
+    return response
+
+
+@router.post("/plan", response_model=ResponseT)
+async def refresh_education_plan(user: schemas.User):
+    """
+        教学计划(无离线模式)
+    - **username**: 用户名
+    - **password**: 密码
+    """
+    response = ResponseT()
+    user = schemas.User(**user.dict())
+    response.data = core.get_plan(**user.dict())
+    crud.update_user(user, db.session)
     return response

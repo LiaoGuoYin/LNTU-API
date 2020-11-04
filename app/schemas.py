@@ -185,3 +185,22 @@ class Exam(BaseModel):
     seatNumber: str = ''
     status: str = ''
     comment: str = ''
+
+
+class PlanCommon(BaseModel):
+    type: str = ''
+    creditRequired: str = ''
+    creditGained: str = ''
+    result: str = ''
+    status: str = ''
+    comment: str = ''
+
+
+class Plan(PlanCommon):
+    code: str
+    id: str = ''
+    name: str = ''
+
+
+class PlanGroup(PlanCommon):
+    courseList: List[Plan] = []

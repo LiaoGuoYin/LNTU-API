@@ -71,6 +71,18 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
         raise SpiderParserException("个人信息页请求失败")
 
 
+def get_plan(username: int, password: str, session: Session = None, is_save: bool = False) -> [schemas.PlanGroup]:
+    if not session:
+        session = login(username, password)
+    response = session.get(URLEnum.PLAN.value)
+    if is_save:
+        save_html_to_file(response.text, 'plan')
+    if '计划完成情况' in response.text:
+        return parser.parse_plan(html_doc=etree.HTML(response.text))
+    else:
+        raise SpiderParserException("解析个人培养方案完成情况页失败")
+
+
 def get_course_table(username: int, password: str, semester_id: int = 627, session: Session = None,
                      is_save: bool = False) -> [schemas.CourseTable]:
     def get_std_ids(tmp_session):

@@ -14,6 +14,7 @@ local_file_dict = {
     'grade': f'{APP_ABSOLUTE_PATH}/tests/static/grade.html',
     'grade-table': f'{APP_ABSOLUTE_PATH}/tests/static/grade-table.html',
     'exam': f'{APP_ABSOLUTE_PATH}/tests/static/exam.html',
+    'plan': f'{APP_ABSOLUTE_PATH}/tests/static/plan.html',
 }
 
 
@@ -65,3 +66,11 @@ class TestEducationParser(unittest.TestCase):
         exam_list = parser.parse_exam(html_doc=etree.HTML(html_text))
         self.assertIsInstance(exam_list, list)
         print(exam_list)
+
+    def test_education_parse_plan(self):
+        with open(local_file_dict['plan']) as f:
+            html_text = f.read()
+
+        plan_result = parser.parse_plan(html_doc=etree.HTML(html_text))
+        self.assertIsInstance(plan_result, list)
+        print(plan_result)

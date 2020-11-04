@@ -166,8 +166,7 @@ def parse_grade(html_doc) -> [schemas.CourseTable]:
         for row in score_table_rows:
             cells = []
             for td in row:
-                cell = td.text.strip() if td.text is not None else ''.join(td.xpath('string(.)').split())
-                cells.append(cell)
+                cells.append(''.join(td.xpath('string(.)').split()))
             if len(cells) == 0:
                 continue
             # cells: ['2019-20202', 'H101730023056', 'H101730023056.01', '信息系统分析与设计', '专业必修', '3.5', '95', '94', '89', '93.3', '93.3', '4', '查卷申请']
@@ -205,8 +204,7 @@ def parse_exam(html_doc) -> [schemas.Exam]:
         for row in rows:  # 处理每一行
             data_row = []
             for td in row:
-                cell = td.text.strip() if td.text is not None else ''.join(td.xpath('string(.)').split())
-                data_row.append(cell)
+                data_row.append(''.join(td.xpath('string(.)').split()))
             if len(data_row) == 0:
                 continue
             exam = schemas.Exam(code=data_row[0])
@@ -222,3 +220,41 @@ def parse_exam(html_doc) -> [schemas.Exam]:
         return exam_list
     except IndexError as e:
         raise SpiderParserException(f"考试安排页，数组越界: {e}")
+
+
+def parse_plan(html_doc) -> [schemas.PlanGroup]:
+    plan_group_list: [schemas.PlanGroup] = []
+    rows = html_doc.xpath('/html/body/div/table/tr')
+    try:
+        plan_group = schemas.PlanGroup()
+        for row in rows[1:]:  # 跳过表头，处理每一行
+            data_row = []
+            for td in row:
+                data_row.append(''.join(td.xpath('string(.)').split()))
+            if len(data_row) == 0:  # 当前行数据为空
+                continue
+            elif len(data_row) == 6:  # 当前行数据是培养方案组
+                plan_group = schemas.PlanGroup()
+                for i in list('一二三四五六七八九十'):
+                    data_row[0] = data_row[0].replace(i, '')
+                plan_group.type = data_row[0]
+                plan_group.creditRequired = data_row[1]
+                plan_group.creditGained = data_row[2]
+                plan_group.result = data_row[3]
+                plan_group.status = data_row[4]
+                plan_group.comment = data_row[5]
+                plan_group_list.append(plan_group)
+            else:  # 当前行数据是培养方案组中的单个课程
+                plan = schemas.Plan(code=data_row[1])
+                plan.id = data_row[0]
+                plan.name = data_row[-6]
+                plan.creditRequired = data_row[-5]
+                plan.creditGained = data_row[-4]
+                plan.result = data_row[-3]
+                plan.status = data_row[-2]
+                plan.comment = data_row[-1]
+                plan.type = plan_group.type
+                plan_group.courseList.append(plan)
+        return plan_group_list
+    except IndexError as e:
+        raise SpiderParserException(f"培养计划完成页，数组越界: {e}")

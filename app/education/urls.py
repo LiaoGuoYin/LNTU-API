@@ -19,9 +19,9 @@ class URLEnum(Enum):
 
     EXAM_OF_BATCH_ID = URL_ROOT + '/stdExamTable.action'
     EXAM = URL_ROOT + '/stdExamTable!examTable.action'
+    PLAN = URL_ROOT + '/myPlanCompl.action'
 
     # CLASSROOMS = URL_ROOT + '/classroom/apply/free!search.action'
-    # 学期成绩：http://202.199.224.119:8080/eams/teach/grade/course/person!search.action?semesterId = 学期 ID
     # 资格考试：http://202.199.224.119:8080/eams/stdOtherExamSignUp.action
     # 公开课:http://202.199.224.119:8080/eams/stdSyllabus!search.action?lesson.project.id=1&lesson.semester.id=620
     # 校历:http://202.199.224.119:8080/eams/schoolCalendar!search.action?semester.id=620

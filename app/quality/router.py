@@ -7,7 +7,7 @@ from app.schemas import ResponseT
 router = APIRouter()
 
 
-@router.post('/data', )
+@router.post('/data', summary='获取素拓网活动记录，及指定学年奖学金加分表')
 async def quality_report(user: schemas.User, year=2020):
     response = ResponseT()
     cookie = core.get_cookie(**user.dict())
@@ -20,7 +20,7 @@ async def quality_report(user: schemas.User, year=2020):
     return response
 
 
-@router.post('/report', )
+@router.post('/report', summary='获取素拓网报告')
 async def quality_report(user: schemas.User):
     response = ResponseT()
     cookie = core.get_cookie(**user.dict())

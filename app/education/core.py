@@ -9,7 +9,7 @@ from lxml import etree
 from requests import Session
 
 from app import schemas, exceptions
-from app.education import parser
+from app.education import parser, utils
 from app.education.urls import URLEnum
 from app.education.utils import save_html_to_file
 from app.exceptions import NetworkException, AccessException, FormException, SpiderParserException
@@ -29,7 +29,6 @@ def is_education_online() -> bool:
 def login(username: int, password: str) -> Session:
     if not is_education_online():
         raise NetworkException("教务无响应，爆炸爆炸")
-    requests.adapters.DEFAULT_RETRIES = 5
     session = requests.Session()
     session.headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -166,7 +165,7 @@ def get_exam(username: int, password: str, semester_id: str, session: Session = 
         raise SpiderParserException("[考试安排页]获取失败")
 
 
-def get_other_exam(username: int, password: str,session: Session = None, is_save: bool = False) -> [schemas.OtherExam]:
+def get_other_exam(username: int, password: str, session: Session = None, is_save: bool = False) -> [schemas.OtherExam]:
     if not session:
         session = login(username, password)
     response = session.get(URLEnum.OTHER_EXAM.value)
@@ -176,7 +175,6 @@ def get_other_exam(username: int, password: str,session: Session = None, is_save
         return parser.parse_other_exam(html_doc=etree.HTML(response.text))
     else:
         raise SpiderParserException("[资格考试页]获取失败")
-
 
 
 def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: str = '1') -> schemas.GPA:
@@ -248,3 +246,14 @@ def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: st
         gpa_result.gradePointAverage = round(gpa_result.gradePointTotal / gpa_result.creditTotal, 4)  # 平均绩点
         gpa_result.weightedAverage = round(gpa_result.scoreTotal / gpa_result.creditTotal, 4)  # 加权平均分
         return gpa_result
+
+
+def refresh_helper_data(semester_start_date) -> schemas.HelperData:
+    helper_data = schemas.HelperData()
+    helper_data.notice = 'LNTUHelper 公测开始啦，小伙伴们欢呼跃雀吧'
+    helper_data.educationServerStatus = '正常' if is_education_online() else '未知'
+    helper_data.helperServerStatus = '正常'
+    helper_data.qualityServerStatus = '未知'
+    helper_data.semester = '2020-2021 1'
+    helper_data.week = utils.calculate_week(semester_start_date)
+    return helper_data

@@ -211,3 +211,12 @@ class OtherExam(BaseModel):
     result: str = ''
     status: str = ''
     semester: str = ''
+
+
+class HelperData(BaseModel):
+    notice: str = ''
+    educationServerStatus: str = '未知'
+    helperServerStatus: str = '未知'
+    qualityServerStatus: str = '未知'
+    week: str = ''
+    semester: str = ''

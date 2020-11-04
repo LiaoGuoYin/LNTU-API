@@ -117,3 +117,11 @@ def save_html_to_file(html_text, module_name):
     with open(F"{APP_ABSOLUTE_PATH}/tests/static/{module_name}.html", "w+") as fp:
         fp.write(html_text)
     print(F"{module_name}.html: output to tests/static successfully!")
+
+
+def calculate_week(semester_start_date) -> str:
+    from datetime import datetime
+    start = datetime.strptime(semester_start_date, '%Y-%m-%d')
+    now = datetime.today()
+    delta = now - start
+    return str((delta.days // 7) + 1)

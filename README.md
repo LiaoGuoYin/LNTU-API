@@ -1,38 +1,38 @@
 # LNTU-API
-Online Demo: [https://lntu.me](https://lntu.me)
+Online Demo: [https://api.liaoguoyin.com](https://api.liaoguoyin.com)
 
 An elegant backend API of [LNTU Course Management Information System](http://202.199.224.119:8080/eams/loginExt.action) and [LNTU Students Quality Expansion Activity Management System.](http://202.199.224.19:8080/)
 
 
-## How to Deploy
+## How to deploy it
 
-1. Clone the repo to local: `git clone https://github.com/LiaoGuoYin/LNTUME`
+1. Clone this repo to the local workspace: `git clone https://github.com/LiaoGuoYin/LNTUME`
 
-2. Change to the root directory of the project, then installing requirements: `pip3 install -r requirements.txt`
+2. Change to its root directory, then installing requirements: `pip3 install -r requirements.txt`
 
 3. Copy `config-template.yaml` to `config.yaml`, then filling your own db and account config in.
 
 4. (Optional) Run pytest: `python3 -m pytest`
 
-5. Run Server: `python3 -m uvicorn app.main:app`
+5. Run Server: `python3 -m uvicorn app.main:app --reload`
 
-6. Then you can inspect the swagger docs of local API in your browser: http://localhost:8000/docs
+6. Then you can inspect the swagger docs of local API in your browser: http://localhost:8000/
 
    
 
 
-## Scheduling
+## TODO
 - With Python crawling student's info:
     - [x] login
     - [x] exam score
     - [x] personal information
-    - [ ] teaching plannings
+    - [x] teaching plannings
     - [x] course table
     - [x] class room
-    - [ ] exam plannings
-    - [ ] school calendar
-    - [ ] CET scores
+    - [x] exam plannings
+    - [x] CET scores
     - [x] public notice
+    - [ ] school calendar
 
 - Others:
     - [x] SunnyRunning(AiPao app)

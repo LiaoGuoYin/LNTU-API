@@ -140,3 +140,4 @@ dmypy.json
 # config
 /config.yaml
 /app/tests/static/*.html
+log

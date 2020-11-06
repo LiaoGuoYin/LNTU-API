@@ -38,8 +38,10 @@ async def refresh_education_refresh_helper_message():
     """
         初始化, 获取助手所需的基本信息
     """
+    from quality import core as quality_core
     helper_message = get_default_config_helper_message()
-    helper_message.educationServerStatus = '正常' if core.is_education_online() else '未知'
+    helper_message.educationServerStatus = '正常' if core.is_education_online() else '离线'
+    helper_message.qualityServerStatus = '正常' if quality_core.is_quality_online() else '离线'
     helper_message.helperServerStatus = '正常'
     response = ResponseT(data=helper_message)
     return response

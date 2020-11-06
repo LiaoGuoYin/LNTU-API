@@ -54,7 +54,7 @@ class User(BaseModel):
 
 # UserInfo
 class UserInfo(BaseModel):
-    username: int
+    username: str
     name: str
     photoUrl: str = None
     nickname: str = None

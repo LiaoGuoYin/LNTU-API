@@ -82,7 +82,6 @@ def retrieve_user_info(request_user: schemas.User, session: Session) -> (dict, s
     if len(user_info_result) == 0:  # TODO
         return {}, ''
     else:
-        user_info_result[0].username = int(user_info_result[0].username)
         last_updated_at = '' if len(user_info_result) == 0 else user_info_result[0].lastUpdatedAt
         serializer = Serializer(user_info_result, exclude=['lastUpdatedAt'], many=True)
         return serializer.data[0], last_updated_at

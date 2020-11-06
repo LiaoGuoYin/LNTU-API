@@ -26,7 +26,7 @@ def is_education_online() -> bool:
         return False
 
 
-def login(username: int, password: str) -> Session:
+def login(username: str, password: str) -> Session:
     if not is_education_online():
         raise NetworkException("教务无响应，爆炸爆炸")
     session = requests.Session()
@@ -57,7 +57,7 @@ def login(username: int, password: str) -> Session:
         raise AccessException("页面未知错误")
 
 
-def get_stu_info(username: int, password: str, session=None, is_save: bool = False) -> schemas.UserInfo:
+def get_stu_info(username: str, password: str, session=None, is_save: bool = False) -> schemas.UserInfo:
     if not session:
         session = login(username, password)
     response = session.get(URLEnum.STUDENT_INFO.value)
@@ -70,7 +70,7 @@ def get_stu_info(username: int, password: str, session=None, is_save: bool = Fal
         raise SpiderParserException("[个人信息页]获取失败")
 
 
-def get_plan(username: int, password: str, session: Session = None, is_save: bool = False) -> [schemas.PlanGroup]:
+def get_plan(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.PlanGroup]:
     if not session:
         session = login(username, password)
     response = session.get(URLEnum.PLAN.value)
@@ -82,7 +82,7 @@ def get_plan(username: int, password: str, session: Session = None, is_save: boo
         raise SpiderParserException("[个人培养方案完成情况页]获取失败")
 
 
-def get_course_table(username: int, password: str, semester_id: int = 627, session: Session = None,
+def get_course_table(username: str, password: str, semester_id: int = 627, session: Session = None,
                      is_save: bool = False) -> [schemas.CourseTable]:
     def get_std_ids(tmp_session):
         # 课表查询之前，一定要访问，因此使用 session 模式
@@ -114,7 +114,7 @@ def get_course_table(username: int, password: str, semester_id: int = 627, sessi
         raise SpiderParserException("[课表页]获取失败")
 
 
-def get_grade(username: int, password: str, session: Session = None, is_save: bool = False) -> [schemas.Grade]:
+def get_grade(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.Grade]:
     if not session:
         session = login(username, password)
     response = session.get(URLEnum.GRADE.value)
@@ -126,7 +126,7 @@ def get_grade(username: int, password: str, session: Session = None, is_save: bo
         raise SpiderParserException("[成绩查询页]请求失败")
 
 
-def get_grade_table(username: int, password: str, session: Session = None, is_save: bool = False) -> [
+def get_grade_table(username: str, password: str, session: Session = None, is_save: bool = False) -> [
     schemas.GradeTable]:
     # 备用：获取成绩表格
     if not session:
@@ -140,7 +140,7 @@ def get_grade_table(username: int, password: str, session: Session = None, is_sa
         raise SpiderParserException("[总成绩查询页]获取失败")
 
 
-def get_exam(username: int, password: str, semester_id: int, session: Session = None, is_save: bool = False) -> [
+def get_exam(username: str, password: str, semester_id: int, session: Session = None, is_save: bool = False) -> [
     schemas.Exam]:
     def get_exam_id(tmp_session, semester_id, is_save):
         # 课表查询之前，一定要访问，因此使用 session 模式
@@ -165,7 +165,7 @@ def get_exam(username: int, password: str, semester_id: int, session: Session = 
         raise SpiderParserException("[考试安排页]获取失败")
 
 
-def get_other_exam(username: int, password: str, session: Session = None, is_save: bool = False) -> [schemas.OtherExam]:
+def get_other_exam(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.OtherExam]:
     if not session:
         session = login(username, password)
     response = session.get(URLEnum.OTHER_EXAM.value)

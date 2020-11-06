@@ -7,7 +7,20 @@ from app.quality.parser import parse_report, parse_activity, parse_scholarship
 from app.quality.urls import QualityExpansionURLEnum
 
 
-def get_cookie(username: int, password: str) -> str:
+def is_quality_online() -> bool:
+    try:
+        response = requests.head(QualityExpansionURLEnum.LOGIN.value, timeout=(1, 3))
+        if response.status_code == 200:
+            return True
+        else:
+            raise exceptions.NetworkException("素拓网无响应，爆炸爆炸")
+    except (requests.exceptions.RequestException, requests.exceptions.RequestException, exceptions.NetworkException):
+        return False
+
+
+def get_cookie(username: str, password: str) -> str:
+    if not is_quality_online():
+        raise exceptions.NetworkException("素拓网无响应，爆炸爆炸")
     url = QualityExpansionURLEnum.LOGIN.value
     response = requests.get(url)
     html_doc = etree.HTML(response.text)

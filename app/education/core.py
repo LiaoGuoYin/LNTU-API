@@ -9,7 +9,7 @@ from lxml import etree
 from requests import Session
 
 from app import schemas, exceptions
-from app.education import parser, utils
+from app.education import parser
 from app.education.urls import URLEnum
 from app.education.utils import save_html_to_file
 from app.exceptions import NetworkException, AccessException, FormException, SpiderParserException
@@ -140,7 +140,7 @@ def get_grade_table(username: int, password: str, session: Session = None, is_sa
         raise SpiderParserException("[总成绩查询页]获取失败")
 
 
-def get_exam(username: int, password: str, semester_id: str, session: Session = None, is_save: bool = False) -> [
+def get_exam(username: int, password: str, semester_id: int, session: Session = None, is_save: bool = False) -> [
     schemas.Exam]:
     def get_exam_id(tmp_session, semester_id, is_save):
         # 课表查询之前，一定要访问，因此使用 session 模式
@@ -246,14 +246,3 @@ def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: st
         gpa_result.gradePointAverage = round(gpa_result.gradePointTotal / gpa_result.creditTotal, 4)  # 平均绩点
         gpa_result.weightedAverage = round(gpa_result.scoreTotal / gpa_result.creditTotal, 4)  # 加权平均分
         return gpa_result
-
-
-def refresh_helper_data(semester_start_date) -> schemas.HelperData:
-    helper_data = schemas.HelperData()
-    helper_data.notice = 'LNTUHelper 公测开始啦，小伙伴们欢呼跃雀吧'
-    helper_data.educationServerStatus = '正常' if is_education_online() else '未知'
-    helper_data.helperServerStatus = '正常'
-    helper_data.qualityServerStatus = '未知'
-    helper_data.semester = '2020-2021 1'
-    helper_data.week = utils.calculate_week(semester_start_date)
-    return helper_data

@@ -3,7 +3,7 @@ from fastapi_sqlalchemy import db
 from starlette import status
 
 from app import schemas, exceptions
-from app.education import core
+from app.education import core, utils
 from app.common import notice, room
 from app.const import choose_semester_id
 from app.schemas import ResponseT
@@ -12,12 +12,36 @@ from appDB import crud
 router = APIRouter()
 
 
+# Default Configuration for init helper message
+def get_default_config_helper_message() -> schemas.HelperMessage:
+    import yaml
+    import os
+    try:
+        APP_ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
+        print(os.path.join(APP_ABSOLUTE_PATH, 'config.yaml'))
+        with open(os.path.join(APP_ABSOLUTE_PATH, '../../config.yaml')) as f:
+            config = yaml.load(f, Loader=yaml.BaseLoader)
+        helper_message = schemas.HelperMessage()
+        helper_message.notice = config['default']['message']
+        helper_message.semester = config['default']['semester']
+        helper_message.week = utils.calculate_week(config['default']['semester_start_date'])
+        return helper_message
+    except FileNotFoundError as e:
+        print(e)
+        print("初始化失败，请检查项目根目录下是否有 config.yaml 配置文件")
+    except Exception:
+        print("初始化失败，请检查 config.yaml 配置文件是否正确")
+
+
 @router.get("/init", response_model=ResponseT, summary='获取助手初始化所需的基本信息')
-async def refresh_education_refresh_helper_data():
+async def refresh_education_refresh_helper_message():
     """
         初始化, 获取助手所需的基本信息
     """
-    response = ResponseT(data=core.refresh_helper_data(semester_start_date='2020-08-31'))
+    helper_message = get_default_config_helper_message()
+    helper_message.educationServerStatus = '正常' if core.is_education_online() else '未知'
+    helper_message.helperServerStatus = '正常'
+    response = ResponseT(data=helper_message)
     return response
 
 
@@ -29,6 +53,12 @@ async def refresh_notice():  # TODO, limit offsets
 
 @router.get("/classroom", response_model=ResponseT, summary='获取空教室')
 async def refresh_classroom(week, name):
+    """
+        查询空教室
+    - **week**: 教学周(1-26)
+    - **name**: 教学楼: 例: yhl、eyl、jyl、hldwlsys 等..
+        - 注: 耘慧楼、尔雅楼、静远楼、葫芦岛物理实验室、葫芦岛机房、博文楼、博雅楼、新华楼、中和楼、致远楼、知行楼、物理实验室、主楼机房 **简拼**
+    """
     response = ResponseT(data=room.run(week=week, building_name=name))
     return response
 
@@ -53,12 +83,12 @@ async def refresh_education_info(user: schemas.User):
 
 
 @router.post("/course-table", response_model=ResponseT, summary='获取指定学期课表')
-async def refresh_education_course_table(user: schemas.User, semester: str = '2020-2'):
+async def refresh_education_course_table(user: schemas.User, semester: str = '2020-秋'):
     """
         获取指定学期课表(无离线模式)
     - **username**: 用户名
     - **password**: 密码
-    - **semester**: 学期; 例: 2020-1 表示 2020 年的第一个学期, 2020-2 表示 2020 年的第二个学期
+    - **semester**: 学期; 例: 2020-秋
     """
     semester_id = choose_semester_id(semester)
     response = ResponseT()
@@ -100,18 +130,18 @@ async def refresh_education_grade(user: schemas.User, isIncludingOptionalCourse=
 
 
 @router.post("/exam", response_model=ResponseT, summary='获取考试安排')
-async def refresh_education_exam(user: schemas.User, semester: str = '2020-2'):
+async def refresh_education_exam(user: schemas.User, semester: str = '2020-秋'):
     """
         考试安排查询
     - **username**: 用户名
     - **password**: 密码
-    - **semester**: 学期; 例: 2020-1 表示 2020 年的第一个学期, 2020-2 表示 2020 年的第二个学期
+    - **semester**: 学期; 例: 2020-秋
     """
     response = ResponseT()
     semester_id = choose_semester_id(semester)
     user = schemas.User(**user.dict())
     try:
-        exam_list = core.get_exam(**user.dict(), semester_id=str(semester_id))
+        exam_list = core.get_exam(**user.dict(), semester_id=semester_id)
         response.data = exam_list
         crud.update_user(user, db.session)
         crud.update_exam_list(user, exam_list, semester, db.session)
@@ -151,12 +181,12 @@ async def refresh_education_plan(user: schemas.User):
 
 
 @router.post("/data", response_model=ResponseT, summary='获取数据集合：基本信息、当前学期课表、所有成绩、加权平均成绩(GPA)')
-async def refresh_education_data(user: schemas.User, semester: str = '2020-2'):
+async def refresh_education_data(user: schemas.User, semester: str = '2020-秋'):
     """
         登录、获取基本信息、指定学期课表、所有成绩、加权平均成绩(GPA)
     - **username**: 用户名
     - **password**: 密码
-    - **semester**: 学期; 例: 2020-1 表示 2020 年的第一个学期, 2020-2 表示 2020 年的第二个学期
+    - **semester**: 学期; 例: 2020-秋
     """
     response = ResponseT()
     semester_id = choose_semester_id(semester)

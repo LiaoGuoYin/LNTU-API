@@ -29,7 +29,7 @@ class TestMainAPI(unittest.TestCase):
         self.assertTrue(response.status_code == 200)
 
     def test_education_course_table(self):
-        payload = {'semester': '2020-2'}
+        payload = {'semester': '2020-秋'}
         response = self.client.post('/education/course-table', params=payload, json=user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
@@ -43,7 +43,7 @@ class TestMainAPI(unittest.TestCase):
         self.assertTrue(response.status_code == 200)
 
     def test_education_exam(self):
-        payload = {'semester': '2020-2'}
+        payload = {'semester': '2020-秋'}
         response = self.client.post('/education/exam', params=payload, json=user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)

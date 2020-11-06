@@ -171,7 +171,12 @@ def parse_grade(html_doc) -> [schemas.CourseTable]:
                 continue
             # cells: ['2019-20202', 'H101730023056', 'H101730023056.01', '信息系统分析与设计', '专业必修', '3.5', '95', '94', '89', '93.3', '93.3', '4', '查卷申请']
             course = schemas.Grade(name=cells[3], code=cells[2])
-            course.semester = cells[0]
+            # 转换学期：2019-20202 -> 2020-春
+            semester_start_year = int(cells[0].split('-')[0])
+            if cells[0][-1] == '1':
+                course.semester = f'{semester_start_year}-秋'
+            else:
+                course.semester = f'{semester_start_year + 1}-春'
             course.courseType = cells[4]
             course.credit = cells[5]
             course.midTerm = cells[6]

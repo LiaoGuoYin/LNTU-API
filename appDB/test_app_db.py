@@ -55,7 +55,7 @@ class TestAppDB(unittest.TestCase):
             db.session.commit()
 
     def test_education_grade(self):
-        grade = schemas.Grade(name='会计学', credit='2.5', semester='2019-20202', status='正常', result='99',
+        grade = schemas.Grade(name='会计学', credit='2.5', semester='2020-秋', status='正常', result='99',
                               code='H101730004040.01', courseType='专业必修', usual='17', midTerm='', endTerm='99',
                               point='3.5', makeUpScore=None, makeUpScoreResult=None)
         with db():

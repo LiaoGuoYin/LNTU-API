@@ -1,6 +1,8 @@
-# 默认学期等
+# 默认学期
 default:
-  semester: 2020-2
+  message: LNTUHelper iOS App 公测开始啦，小伙伴们欢呼雀跃吧
+  semester_start_date: 2020-08-31
+  semester: 2020-秋
 
 # sentry-sdk-key
 sentry:

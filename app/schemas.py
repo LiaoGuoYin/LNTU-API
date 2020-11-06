@@ -213,7 +213,7 @@ class OtherExam(BaseModel):
     semester: str = ''
 
 
-class HelperData(BaseModel):
+class HelperMessage(BaseModel):
     notice: str = ''
     educationServerStatus: str = '未知'
     helperServerStatus: str = '未知'

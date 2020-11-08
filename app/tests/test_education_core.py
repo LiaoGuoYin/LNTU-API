@@ -64,7 +64,7 @@ class TestEducationCore(unittest.TestCase):
         grade_list = core.get_grade(**user_dict, is_save=True)
         with open(local_file_dict['grade']) as f:
             html_text = f.read()
-        self.assertIn('学年学期', html_text)
+        self.assertTrue('学年学期' or '所有成绩尚未发布' in html_text)
         self.assertTrue(len(parser.parse_grade(etree.HTML(html_text))) > 0)
         print(parser.parse_grade(etree.HTML(html_text)))
         self.assertTrue(len(grade_list) > 0)
@@ -81,7 +81,7 @@ class TestEducationCore(unittest.TestCase):
             html_text = f.read()
         grade_list = parser.parse_grade(html_doc=etree.HTML(html_text))
         gpa_result = core.calculate_gpa(grade_list, is_including_optional_course='1')
-        self.assertTrue(gpa_result.courseCount != 0)
+        self.assertIsInstance(gpa_result.courseCount, int)
         print(gpa_result)
 
     def test_gpa_grade_table(self):
@@ -89,11 +89,11 @@ class TestEducationCore(unittest.TestCase):
             html_text = f.read()
         grade_list = parser.parse_grade_table(html_doc=etree.HTML(html_text))
         gpa_result = core.calculate_gpa(grade_list, is_including_optional_course='1')
-        self.assertTrue(gpa_result.courseCount != 0)
+        self.assertIsInstance(gpa_result.courseCount, int)
         print(gpa_result)
 
     def test_education_core_exam(self):
-        exam_list = core.get_exam(**user_dict, semester_id=str(627), is_save=True)
+        exam_list = core.get_exam(**user_dict, semester_id=627, is_save=True)
         with open(local_file_dict['exam']) as f:
             html_text = f.read()
         self.assertIsInstance(exam_list, list)

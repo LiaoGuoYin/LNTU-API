@@ -44,7 +44,7 @@ class TestEducationParser(unittest.TestCase):
     def test_education_parse_grade(self):
         with open(local_file_dict['grade']) as f:
             html_text = f.read()
-        self.assertIn('学年学期', html_text)
+        self.assertTrue('学年学期' or '所有成绩尚未发布' in html_text)
 
         grade_list = parser.parse_grade(html_doc=etree.HTML(html_text))
         self.assertIsInstance(grade_list, list)

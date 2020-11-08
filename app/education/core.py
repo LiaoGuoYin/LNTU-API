@@ -12,7 +12,6 @@ from app import schemas, exceptions
 from app.education import parser
 from app.education.urls import URLEnum
 from app.education.utils import save_html_to_file
-from app.exceptions import NetworkException, AccessException, FormException, SpiderParserException
 
 
 def is_education_online() -> bool:
@@ -21,14 +20,14 @@ def is_education_online() -> bool:
         if response.status_code == 200:
             return True
         else:
-            raise NetworkException("教务无响应，爆炸爆炸")
+            raise exceptions.NetworkException("教务无响应，爆炸爆炸")
     except (requests.exceptions.RequestException, requests.exceptions.RequestException, exceptions.NetworkException):
         return False
 
 
 def login(username: str, password: str) -> Session:
     if not is_education_online():
-        raise NetworkException("教务无响应，爆炸爆炸")
+        raise exceptions.NetworkException("教务无响应，爆炸爆炸")
     session = requests.Session()
     session.headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -39,22 +38,22 @@ def login(username: str, password: str) -> Session:
     response = session.get(URLEnum.LOGIN.value)
     token = re.findall(r"SHA1\('(.*?)'", response.text)[0]
     if token is None:
-        raise SpiderParserException("页面上没找到 SHA1token")
+        raise exceptions.SpiderParserException("页面上没找到 SHA1token")
     key = hashlib.sha1((token + password).encode('utf-8')).hexdigest()
     time.sleep(0.5)  # 延迟 0.5 秒防止被 ban
     response = session.post(URLEnum.LOGIN.value, data={'username': username, 'password': key})
     if '密码错误' in response.text:
-        raise FormException(F"{username} 用户名或密码错误")
+        raise exceptions.FormException(F"{username} 用户名或密码错误")
     elif '请不要过快点击' in response.text:
-        raise AccessException("页面请求过快")
+        raise exceptions.AccessException("页面请求过快")
     elif '账户不存在' in response.text:
-        raise FormException(F"{username} 用户不存在")
+        raise exceptions.FormException(F"{username} 用户不存在")
     elif '超过人数上限' in response.text:
-        raise FormException("超过人数上限，请稍后再试")
+        raise exceptions.FormException("超过人数上限，请稍后再试")
     elif '您当前位置' in response.text:
         return session
     else:
-        raise AccessException("页面未知错误")
+        raise exceptions.AccessException("页面未知错误")
 
 
 def get_stu_info(username: str, password: str, session=None, is_save: bool = False) -> schemas.UserInfo:
@@ -67,7 +66,7 @@ def get_stu_info(username: str, password: str, session=None, is_save: bool = Fal
         html_doc = etree.HTML(response.text)
         return parser.parse_stu_info(html_doc)
     else:
-        raise SpiderParserException("[个人信息页]获取失败")
+        raise exceptions.SpiderParserException("[个人信息页]获取失败")
 
 
 def get_plan(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.PlanGroup]:
@@ -79,7 +78,7 @@ def get_plan(username: str, password: str, session: Session = None, is_save: boo
     if '计划完成情况' in response.text:
         return parser.parse_plan(html_doc=etree.HTML(response.text))
     else:
-        raise SpiderParserException("[个人培养方案完成情况页]获取失败")
+        raise exceptions.SpiderParserException("[个人培养方案完成情况页]获取失败")
 
 
 def get_course_table(username: str, password: str, semester_id: int = 627, session: Session = None,
@@ -91,7 +90,7 @@ def get_course_table(username: str, password: str, semester_id: int = 627, sessi
             save_html_to_file(response_inner.text, 'get_ids')
         stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[0]
         if stu_id is None:
-            raise SpiderParserException("页面上没找到 ids")
+            raise exceptions.SpiderParserException("页面上没找到 ids")
         else:
             return stu_id
 
@@ -111,7 +110,7 @@ def get_course_table(username: str, password: str, semester_id: int = 627, sessi
         part_course_list = parser.parse_course_table_bottom(html_doc=etree.HTML(html_text))
         return parser.parse_course_table_body(html_text, course_dict_list=part_course_list)
     else:
-        raise SpiderParserException("[课表页]获取失败")
+        raise exceptions.SpiderParserException("[课表页]获取失败")
 
 
 def get_grade(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.Grade]:
@@ -122,8 +121,10 @@ def get_grade(username: str, password: str, session: Session = None, is_save: bo
         save_html_to_file(response.text, 'grade')
     if '学年学期' in response.text:
         return parser.parse_grade(html_doc=etree.HTML(response.text))
+    elif '所有成绩尚未发布' in response.text:
+        return '用户暂无有效成绩'
     else:
-        raise SpiderParserException("[成绩查询页]请求失败")
+        raise exceptions.SpiderParserException("[成绩查询页]请求失败")
 
 
 def get_grade_table(username: str, password: str, session: Session = None, is_save: bool = False) -> [
@@ -137,7 +138,7 @@ def get_grade_table(username: str, password: str, session: Session = None, is_sa
     if '个人成绩总表打印' in response.text:
         return parser.parse_grade_table(html_doc=etree.HTML(response.text))
     else:
-        raise SpiderParserException("[总成绩查询页]获取失败")
+        raise exceptions.SpiderParserException("[总成绩查询页]获取失败")
 
 
 def get_exam(username: str, password: str, semester_id: int, session: Session = None, is_save: bool = False) -> [
@@ -149,7 +150,7 @@ def get_exam(username: str, password: str, semester_id: int, session: Session = 
             save_html_to_file(response_inner.text, 'exam-batch-id')
         exam_batch_id = parse.search('examBatch.id={id:d}', response_inner.text)
         if exam_batch_id is None:
-            raise SpiderParserException("考试学期ID获取失败")
+            raise exceptions.SpiderParserException("考试学期ID获取失败")
         else:
             return exam_batch_id.named['id']
 
@@ -162,7 +163,7 @@ def get_exam(username: str, password: str, semester_id: int, session: Session = 
     if '课程序号' in response.text:
         return parser.parse_exam(html_doc=etree.HTML(response.text))
     else:
-        raise SpiderParserException("[考试安排页]获取失败")
+        raise exceptions.SpiderParserException("[考试安排页]获取失败")
 
 
 def get_other_exam(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.OtherExam]:
@@ -174,7 +175,7 @@ def get_other_exam(username: str, password: str, session: Session = None, is_sav
     if '资格考试' in response.text:
         return parser.parse_other_exam(html_doc=etree.HTML(response.text))
     else:
-        raise SpiderParserException("[资格考试页]获取失败")
+        raise exceptions.SpiderParserException("[资格考试页]获取失败")
 
 
 def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: str = '1') -> schemas.GPA:
@@ -188,7 +189,8 @@ def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: st
     rule_dict = {"合格": 85, "不合格": 0,
                  "优秀": 95, "良": 85, "中": 75, "及格": 65, "不及格": 0}
     for course in course_list:
-
+        if not isinstance(course, schemas.Grade):
+            continue
         # 排除选修课
         if (is_including_optional_course == '0') and ('校级公选课' in course.courseType):
             continue

@@ -9,8 +9,8 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "user"
 
-    username = Column(String(32), primary_key=True, index=True)
-    password = Column(String(32))
+    username = Column(String(64), primary_key=True, index=True)
+    password = Column(String(64))
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -18,31 +18,31 @@ class User(Base):
 class UserInfo(Base):
     __tablename__ = "user_info"
 
-    username = Column(String(32), primary_key=True, index=True)
-    name = Column(String(32))
+    username = Column(String(64), primary_key=True, index=True)
+    name = Column(String(64))
     photoUrl = Column(String(128))
-    nickname = Column(String(32))
-    gender = Column(String(32))
-    grade = Column(String(32))
-    educationLast = Column(String(32))
-    project = Column(String(32))
-    education = Column(String(32))
-    studentType = Column(String(32))
-    college = Column(String(32))
-    major = Column(String(32))
-    direction = Column(String(32))
-    enrollDate = Column(String(32))
-    graduateDate = Column(String(32))
-    chiefCollege = Column(String(32))
-    studyType = Column(String(32))
-    membership = Column(String(32))
-    isInSchool = Column(String(32))
-    campus = Column(String(32))
-    majorClass = Column(String(32))
-    effectAt = Column(String(32))
-    isInRecord = Column(String(32))
-    studentStatus = Column(String(32))
-    isWorking = Column(String(32))
+    nickname = Column(String(64))
+    gender = Column(String(64))
+    grade = Column(String(64))
+    educationLast = Column(String(64))
+    project = Column(String(64))
+    education = Column(String(64))
+    studentType = Column(String(64))
+    college = Column(String(64))
+    major = Column(String(64))
+    direction = Column(String(64))
+    enrollDate = Column(String(64))
+    graduateDate = Column(String(64))
+    chiefCollege = Column(String(64))
+    studyType = Column(String(64))
+    membership = Column(String(64))
+    isInSchool = Column(String(64))
+    campus = Column(String(64))
+    majorClass = Column(String(64))
+    effectAt = Column(String(64))
+    isInRecord = Column(String(64))
+    studentStatus = Column(String(64))
+    isWorking = Column(String(64))
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -50,10 +50,10 @@ class UserInfo(Base):
 class CourseTable(Base):
     __tablename__ = "course_table"
 
-    code = Column(String(32), primary_key=True, index=True)
+    code = Column(String(64), primary_key=True, index=True)
     name = Column(String(128))
-    teacher = Column(String(16))
-    credit = Column(String(16))
+    teacher = Column(String(64))
+    credit = Column(String(64))
     schedules = Column(JSON)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
@@ -62,17 +62,17 @@ class CourseTable(Base):
 class Exam(Base):
     __tablename__ = "exam"
 
-    username = Column(String(32), primary_key=True, index=True)
-    code = Column(String(32), primary_key=True, index=True)
+    username = Column(String(64), primary_key=True, index=True)
+    code = Column(String(64), primary_key=True, index=True)
     name = Column(String(128))
-    type = Column(String(32))
-    date = Column(String(32))
-    time = Column(String(32))
-    location = Column(String(32))
-    seatNumber = Column(String(32))
-    status = Column(String(32))
-    comment = Column(String(32))
-    semester = Column(String(32))
+    type = Column(String(64))
+    date = Column(String(64))
+    time = Column(String(64))
+    location = Column(String(64))
+    seatNumber = Column(String(64))
+    status = Column(String(64))
+    comment = Column(String(64))
+    semester = Column(String(64))
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -80,21 +80,21 @@ class Exam(Base):
 class Grade(Base):
     __tablename__ = "grade"
 
-    username = Column(String(32), primary_key=True, index=True)
-    code = Column(String(32), primary_key=True, index=True)
+    username = Column(String(64), primary_key=True, index=True)
+    code = Column(String(64), primary_key=True, index=True)
     name = Column(String(128))
-    semester = Column(String(32))
-    courseType = Column(String(32))
-    credit = Column(String(32))
-    usual = Column(String(32))
-    midTerm = Column(String(32))
-    endTerm = Column(String(32))
-    makeUpScore = Column(String(32))
-    makeUpScoreResult = Column(String(32))
-    totalScore = Column(String(32))
-    result = Column(String(32))
-    point = Column(String(32))
-    status = Column(String(32))
+    semester = Column(String(64))
+    courseType = Column(String(64))
+    credit = Column(String(64))
+    usual = Column(String(64))
+    midTerm = Column(String(64))
+    endTerm = Column(String(64))
+    makeUpScore = Column(String(64))
+    makeUpScoreResult = Column(String(64))
+    totalScore = Column(String(64))
+    result = Column(String(64))
+    point = Column(String(64))
+    status = Column(String(64))
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -102,8 +102,8 @@ class Grade(Base):
 class GPA(Base):
     __tablename__ = "gpa"
 
-    username = Column(String(32), primary_key=True, index=True)
-    semester = Column(String(32), primary_key=True, index=True)
+    username = Column(String(64), primary_key=True, index=True)
+    semester = Column(String(64), primary_key=True, index=True)
     gradePointAverage = Column(Float(precision=8, decimal_return_scale=2))
     weightedAverage = Column(Float(precision=8, decimal_return_scale=2))
     gradePointTotal = Column(Float)
@@ -120,7 +120,7 @@ class AiPaoOrder(Base):
     id = Column(Integer, primary_key=True, index=True)
     code = Column(String(64))
     name = Column(String(64))
-    gender = Column(String(32))
+    gender = Column(String(64))
     schoolName = Column(String(64))
     successCount = Column(Integer)
     failureCount = Column(Integer)

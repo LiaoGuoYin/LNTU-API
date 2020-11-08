@@ -39,6 +39,8 @@ def update_exam_list(user: schemas.User, exam_list: [schemas.Exam], semester: st
 
 def update_grade_list(user: schemas.User, grade_list: [schemas.Grade], session: Session):
     for grade in grade_list:
+        if not isinstance(grade, schemas.Grade):
+            continue
         new_grade = models.Grade(username=user.username, **grade.dict())
         session.merge(new_grade)
     session.commit()

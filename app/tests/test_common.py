@@ -4,6 +4,7 @@ import unittest
 from app import schemas
 from app.common.notice import get_notice_url_list, get_notice_detail
 from app.common.room import get_building_html, process_building_html, get_class_room_html, parse_class_room_html
+from app.common import helper
 
 APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 local_file_dict = {
@@ -47,3 +48,6 @@ class TestCommon(unittest.TestCase):
         notice = get_notice_detail(notice)
         self.assertTrue(len(notice.title) > 0)
         self.assertTrue(len(notice.content) > 0)
+
+    def test_helper_message(self):
+        self.assertIsInstance(helper.refresh_helper_message().__class__, schemas.HelperMessage.__class__)

@@ -4,7 +4,7 @@ from random import uniform, randint
 import requests
 
 from app import exceptions, schemas
-from app.aipao.url import AIPAOURLEnum
+from app.aipao.urls import AIPAOURLEnum
 
 
 def check_imei_code(code: str) -> schemas.AiPaoUser:

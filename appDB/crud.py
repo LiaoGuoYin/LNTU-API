@@ -25,6 +25,8 @@ def update_info(user_info: schemas.UserInfo, session: Session) -> models.UserInf
 
 def update_course_table(course_table_list: [schemas.CourseTable], session: Session):
     for course in course_table_list:
+        if not isinstance(course, schemas.CourseTable):
+            continue
         new_course = models.CourseTable(**course.dict())
         session.merge(new_course)
     session.commit()
@@ -32,6 +34,8 @@ def update_course_table(course_table_list: [schemas.CourseTable], session: Sessi
 
 def update_exam_list(user: schemas.User, exam_list: [schemas.Exam], semester: str, session: Session):
     for exam in exam_list:
+        if not isinstance(exam, schemas.Exam):
+            continue
         new_exam = models.Exam(username=user.username, semester=semester, **exam.dict())
         session.merge(new_exam)
     session.commit()

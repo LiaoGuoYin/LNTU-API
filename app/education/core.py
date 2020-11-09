@@ -30,7 +30,7 @@ def login(username: str, password: str) -> Session:
         raise exceptions.NetworkException("教务无响应，爆炸爆炸")
     session = requests.Session()
     session.headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) '
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (HTML, like Gecko) '
                       'Chrome/86.0.4240.111 Safari/537.36',
         'Connection': 'close',
     }
@@ -127,8 +127,7 @@ def get_grade(username: str, password: str, session: Session = None, is_save: bo
         raise exceptions.SpiderParserException("[成绩查询页]请求失败")
 
 
-def get_grade_table(username: str, password: str, session: Session = None, is_save: bool = False) -> [
-    schemas.GradeTable]:
+def get_grade_table(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.GradeTable]:
     # 备用：获取成绩表格
     if not session:
         session = login(username, password)
@@ -141,18 +140,17 @@ def get_grade_table(username: str, password: str, session: Session = None, is_sa
         raise exceptions.SpiderParserException("[总成绩查询页]获取失败")
 
 
-def get_exam(username: str, password: str, semester_id: int, session: Session = None, is_save: bool = False) -> [
-    schemas.Exam]:
-    def get_exam_id(tmp_session, semester_id, is_save):
+def get_exam(username: str, password: str, semester_id: int = 627, session: Session = None, is_save: bool = False) -> [schemas.Exam]:
+    def get_exam_id(tmp_session, inner_semester_id, inner_is_save):
         # 课表查询之前，一定要访问，因此使用 session 模式
-        response_inner = tmp_session.get(URLEnum.EXAM_OF_BATCH_ID.value, params={'semester.id': semester_id})
-        if is_save:
+        response_inner = tmp_session.get(URLEnum.EXAM_OF_BATCH_ID.value, params={'semester.id': inner_semester_id})
+        if inner_is_save:
             save_html_to_file(response_inner.text, 'exam-batch-id')
-        exam_batch_id = parse.search('examBatch.id={id:d}', response_inner.text)
-        if exam_batch_id is None:
+        batch_id = parse.search('examBatch.id={id:d}', response_inner.text)
+        if batch_id is None:
             raise exceptions.SpiderParserException("考试学期ID获取失败")
         else:
-            return exam_batch_id.named['id']
+            return batch_id.named['id']
 
     if not session:
         session = login(username, password)
@@ -191,8 +189,10 @@ def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: st
     for course in course_list:
         if not isinstance(course, schemas.Grade):
             continue
+
         # 排除选修课
         if (is_including_optional_course == '0') and ('校级公选课' in course.courseType):
+            # TODO is_including_optional_course
             continue
 
         # 分数等级置换

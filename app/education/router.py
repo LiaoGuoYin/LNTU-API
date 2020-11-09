@@ -79,13 +79,12 @@ async def refresh_education_course_table(user: schemas.User, semester: str = '20
     return response
 
 
-@router.post("/grade", response_model=ResponseT, summary='获取所有成绩')
-async def refresh_education_grade(user: schemas.User, isIncludingOptionalCourse='1'):
+@router.post("/grade", response_model=ResponseT, summary='获取成绩')
+async def refresh_education_grade(user: schemas.User):
     """
         计算学期成绩及 GPA
     - **username**: 用户名
     - **password**: 密码
-    - (Optional) **isIncludingOptionalCourse**: 是否包括 [校级公选课]，默认包括选修课; 0 或 1
     """
     response = ResponseT()
     user = schemas.User(**user.dict())
@@ -93,7 +92,7 @@ async def refresh_education_grade(user: schemas.User, isIncludingOptionalCourse=
         grade_list = core.get_grade(**user.dict())
         response.data = {
             'grade': grade_list,
-            'gpa': core.calculate_gpa(grade_list, is_including_optional_course=isIncludingOptionalCourse)
+            'gpa': core.calculate_gpa(grade_list)
         }
         crud.update_user(user, db.session)
         crud.update_grade_list(user, response.data['grade'], db.session)
@@ -156,27 +155,27 @@ async def refresh_education_plan(user: schemas.User):
     return response
 
 
-@router.post("/data", response_model=ResponseT, summary='获取数据集合：基本信息、当前学期课表、所有成绩、加权平均成绩(GPA)')
-async def refresh_education_data(user: schemas.User, semester: str = '2020-秋'):
+@router.post("/data", response_model=ResponseT, summary='获取数据集合：基本信息、本学期课表、考试安排、所有成绩、GPA')
+async def refresh_education_data(user: schemas.User):
     """
-        登录、获取基本信息、指定学期课表、所有成绩、加权平均成绩(GPA)
+        登录: 获取基本信息、本学期课表、考试安排、所有成绩、GPA
     - **username**: 用户名
     - **password**: 密码
-    - **semester**: 学期; 例: 2020-秋
     """
     response = ResponseT()
-    semester_id = choose_semester_id(semester)
     try:
         session = core.login(**user.dict())
         grade_list = core.get_grade(**user.dict(), session=session)
         data = {
             'info': core.get_stu_info(**user.dict(), session=session),
-            'courseTable': core.get_course_table(**user.dict(), session=session, semester_id=semester_id),
+            'courseTable': core.get_course_table(**user.dict(), session=session),
+            'exam': core.get_exam(**user.dict(), session=session),
             'grade': [] if isinstance(grade_list, str) else grade_list,
             'gpa': core.calculate_gpa(grade_list),
         }
         crud.update_user(user, db.session)
         crud.update_info(data['info'], db.session)
+        crud.update_exam_list(user, data['exam'], '2020-秋', db.session)  # TODO global semester
         crud.update_grade_list(user, data['grade'], db.session)
         crud.update_gpa(user, data['gpa'], db.session)
         crud.update_course_table(data['courseTable'], db.session)
@@ -187,9 +186,9 @@ async def refresh_education_data(user: schemas.User, semester: str = '2020-秋')
         response.data = {
             'info': user_info,
             'courseTable': [],
+            'exam': crud.retrieve_user_exam(user, db.session)[0],
             'grade': crud.retrieve_user_grade(user, db.session)[0],
-            # 'exam': # TODO
-            'gpa': crud.retrieve_user_gpa(user, db.session)[0]
+            'gpa': crud.retrieve_user_gpa(user, db.session)[0],
         }
         response.message = f"离线模式: {response.message}, 最后更新于: {last_updated_at}"
     return response

@@ -8,11 +8,10 @@ from app.schemas import CourseTableSchedule, CourseTable
 
 def parse_stu_info(html_doc) -> schemas.UserInfo:
     rows = html_doc.xpath('/html/body/div/div[2]/div[1]/table/tr')[1:-1]
-    data_keys = ['username', 'name', 'photoUrl', 'nickname', 'gender', 'grade', 'educationLast', 'project',
-                 'education',
-                 'studentType', 'college', 'major', 'direction', 'enrollDate', 'graduateDate', 'chiefCollege',
-                 'studyType', 'membership', 'isInSchool', 'campus', 'majorClass', 'effectAt', 'isInRecord',
-                 'studentStatus', 'isWorking']
+    data_keys = ['username', 'name', 'photoURL', 'nickname', 'gender', 'grade', 'educationLast', 'project',
+                 'education', 'studentType', 'college', 'major', 'direction', 'enrollDate', 'graduateDate',
+                 'chiefCollege', 'studyType', 'membership', 'isInSchool', 'campus', 'majorClass', 'effectAt',
+                 'isInRecord', 'studentStatus', 'isWorking']
     try:
         data_values = [cell.text
                        for row in rows
@@ -20,8 +19,7 @@ def parse_stu_info(html_doc) -> schemas.UserInfo:
         if len(data_keys) != len(data_values):
             raise SpiderParserException("个人信息页，数据解析缺失")
         data = dict(zip(data_keys, data_values))
-        data[
-            'photoUrl'] = F"http://202.199.224.119:8080/eams/showSelfAvatar.action?user.name={data.get('username', 'None')}"
+        data['photoURL'] = f"/eams/showSelfAvatar.action?user.name={data.get('username', 'None')}"
         return schemas.UserInfo(**data)
     except IndexError:
         raise SpiderParserException("个人信息页，数组越界")
@@ -109,7 +107,7 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
                 schedule_list.append(schedule)
 
             for i in schedule_list:
-                [course.schedules.append(i) for course in course_dict_list if
+                [course.scheduleList.append(i) for course in course_dict_list if
                  info_result.get('code') == course.code]
         return course_dict_list
     except IndexError:

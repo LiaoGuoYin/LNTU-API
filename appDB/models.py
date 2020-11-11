@@ -20,7 +20,7 @@ class UserInfo(Base):
 
     username = Column(String(64), primary_key=True, index=True)
     name = Column(String(64))
-    photoUrl = Column(String(128))
+    photoURL = Column(String(128))
     nickname = Column(String(64))
     gender = Column(String(64))
     grade = Column(String(64))
@@ -50,11 +50,13 @@ class UserInfo(Base):
 class CourseTable(Base):
     __tablename__ = "course_table"
 
+    username = Column(String(64), primary_key=True, index=True)
+    semester = Column(String(64), primary_key=True, index=True)
     code = Column(String(64), primary_key=True, index=True)
     name = Column(String(128))
     teacher = Column(String(64))
     credit = Column(String(64))
-    schedules = Column(JSON)
+    scheduleList = Column(JSON)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -129,3 +131,33 @@ class AiPaoOrder(Base):
     isDoneToday = Column(Boolean)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+
+
+class ClassRoom(Base):
+    __tablename__ = "public_classroom"
+
+    buildingName = Column(String(64))
+    week = Column(String(64), primary_key=True, index=True)
+    room = Column(String(64), primary_key=True, index=True)
+    type = Column(String(64))
+    capacity = Column(String(64))
+    scheduleList = Column(JSON)
+
+    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+#
+#
+# class Notice(Base):
+#     __tablename__ = "public_notice"
+#
+#     id = Column(Integer, primary_key=True, index=True)
+#     code = Column(String(64))
+#     name = Column(String(64))
+#     gender = Column(String(64))
+#     schoolName = Column(String(64))
+#     successCount = Column(Integer)
+#     failureCount = Column(Integer)
+#
+#     isCodeValid = Column(Boolean)
+#     isDoneToday = Column(Boolean)
+#
+#     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

@@ -1,3 +1,5 @@
+from app import exceptions
+
 semester_dict = {'2008-秋': 636, '2009-春': 637,
                  '2009-秋': 643, '2010-春': 635,
                  '2010-秋': 639, '2011-春': 632,
@@ -15,6 +17,11 @@ semester_dict = {'2008-秋': 636, '2009-春': 637,
                  '2022-秋': 665, '2023-春': 666,
                  '2023-秋': 667, '2024-春': 668}
 
+# building_dict = {'fuxin': {'博文楼': 7, '博雅楼': 13, '新华楼': 19, '中和楼': 17, '致远楼': 18, '知行楼': 8, '物理实验室': 15, '主楼机房': 9},
+#                  'huludao': {'尔雅楼': 20, '静远楼': 11, '葫芦岛物理实验室': 16, '葫芦岛机房': 21, '耘慧楼': 14}}
+building_dict = {'eyl': 20, 'jyl': 11, 'hldwlsys': 16, 'hldjf': 21, 'yhl': 14, 'bwl': 7, 'byl': 13, 'xhl': 19,
+                 'zhl': 17, 'zyl': 18, 'zxl': 8, 'wlsys': 15, 'zljf': 9}
+
 
 def choose_semester_id(semester: str) -> int:
     import yaml
@@ -26,5 +33,5 @@ def choose_semester_id(semester: str) -> int:
         default_semester = config['default']['semester']
         default_semester_id = semester_dict[default_semester]
     if semester not in semester_dict:
-        return semester_dict['2024-秋']
+        raise exceptions.FormException('请检查学期参数是否正确')
     return semester_dict.get(semester, default_semester_id)

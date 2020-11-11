@@ -30,20 +30,16 @@ class Notice(NoticeDetail):
 
 # ClassRoom
 class ClassRoom(BaseModel):
-    class MiniIndex(BaseModel):
-        # a, b, c, d, e 代表每一天的大节课数：
-        # 0 -> 没课，1 -> 有课
-        a: int = 0
-        b: int = 0
-        c: int = 0
-        d: int = 0
-        e: int = 0
+    room: str = ''
+    type: str = ''
+    capacity: str = ''
+    scheduleList: List[str] = []  # 周一到周天的每天五大节课的列表: '00100' 0 -> 没课，1 -> 有课
 
-    num: int = -1
-    type: str = None
-    address: str = None
-    data: List[MiniIndex] = []
-    # updatedAt = models.DateTimeField(auto_now=True)
+
+class ClassRoomResponse(BaseModel):
+    week: str
+    buildingName: str
+    classRoomList: List[ClassRoom] = []
 
 
 # User
@@ -56,7 +52,7 @@ class User(BaseModel):
 class UserInfo(BaseModel):
     username: str
     name: str
-    photoUrl: str = None
+    photoURL: str = None
     nickname: str = None
     gender: str = None
     grade: str = None
@@ -95,10 +91,7 @@ class CourseTable(BaseModel):
     name: str = None
     teacher: str = None
     credit: str = None
-    schedules: List[CourseTableSchedule] = []
-
-    def self_dict(self):
-        return self.dict()
+    scheduleList: List[CourseTableSchedule] = []
 
 
 # GradeTable

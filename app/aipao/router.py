@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from fastapi_sqlalchemy import db
 
 from appDB import crud
-from . import core
-from .. import schemas, exceptions
+from app.aipao import core
+from app import schemas, exceptions
 
 router = APIRouter()
 

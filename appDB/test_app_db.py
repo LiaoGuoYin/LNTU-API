@@ -13,6 +13,7 @@ class TestAppDB(unittest.TestCase):
     """
             主要用于检验 schemas 和 models 是否一致，避免改动引起的不匹配
     """
+
     def setUp(self) -> None:
         app = FastAPI()
         db_url_dict = get_db_url_dict()
@@ -28,7 +29,7 @@ class TestAppDB(unittest.TestCase):
 
     def test_education_info(self):
         info = schemas.UserInfo(username=10000, name='LiaoGuoYin',
-                                photoUrl='http://202.199.224.119:8080/eams/showSelfAvatar.action?user.name=xxxx',
+                                photoURL='http://202.199.224.119:8080/eams/showSelfAvatar.action?user.name=xxxx',
                                 nickname='abc', gender='男', grade='2017', educationLast='4', project='主修',
                                 education='本科', studentType='本科4年', college='xxxx学院', major='xxxx', direction=None,
                                 enrollDate='2022-09-01', graduateDate='2024-07-01', chiefCollege='xxxx学院',
@@ -41,7 +42,7 @@ class TestAppDB(unittest.TestCase):
 
     def test_education_course_table(self):
         course_table = schemas.CourseTable(code='H101750002032.01', name='信息系统安全', teacher='毛志勇', credit='2',
-                                           schedules=[
+                                           scheduleList=[
                                                schemas.CourseTableSchedule(room='静远楼344',
                                                                            weeksString='4-11',
                                                                            weeks=[4, 5, 6, 7, 8, 9, 10, 11],
@@ -51,7 +52,7 @@ class TestAppDB(unittest.TestCase):
                                                                            weeks=[4, 5, 6, 7, 8, 9, 10, 11],
                                                                            weekday=2, index=2)])
         with db():
-            db.session.merge(models.CourseTable(**course_table.dict()))
+            db.session.merge(models.CourseTable(username='1710030215', semester='2020-秋', **course_table.dict()))
             db.session.commit()
 
     def test_education_grade(self):

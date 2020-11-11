@@ -2,10 +2,10 @@ from fastapi import APIRouter
 from fastapi_sqlalchemy import db
 from starlette import status
 
+from app import const
 from app import schemas, exceptions
 from app.education import core
-from app.common import notice, room, helper
-from app.const import choose_semester_id
+from app.public import notice, room, helper
 from app.schemas import ResponseT
 from appDB import crud
 
@@ -32,10 +32,22 @@ async def refresh_classroom(week, name):
     """
         查询空教室
     - **week**: 教学周(1-26)
-    - **name**: 教学楼: 例: yhl、eyl、jyl、hldwlsys 等..
+    - **name**: 教学楼全名简拼: 例: yhl、eyl、jyl、hldwlsys 等..
         - 注: 耘慧楼、尔雅楼、静远楼、葫芦岛物理实验室、葫芦岛机房、博文楼、博雅楼、新华楼、中和楼、致远楼、知行楼、物理实验室、主楼机房 **简拼**
     """
-    response = ResponseT(data=room.run(week=week, building_name=name))
+    response = ResponseT()
+    try:
+        building_id = const.building_dict.get(name)
+        if not building_id:
+            raise exceptions.FormException("参数错误：请输入正确的教学楼")
+        classroom_data = schemas.ClassRoomResponse(week=week, buildingName=name,
+                                                   classRoomList=room.run(week=week, building_id=building_id))
+        crud.update_classroom(classroom_data, db.session)
+        response.data = classroom_data
+    except exceptions.NetworkException:
+        response.code = status.HTTP_200_OK
+        response.data, last_updated_at = crud.retrieve_classroom(week, name, db.session)
+        response.message = f"离线模式: {response.message}, 最后更新于: {last_updated_at}"
     return response
 
 
@@ -61,20 +73,21 @@ async def refresh_education_info(user: schemas.User):
 @router.post("/course-table", response_model=ResponseT, summary='获取指定学期课表')
 async def refresh_education_course_table(user: schemas.User, semester: str = '2020-秋'):
     """
-        获取指定学期课表(无离线模式)
+        获取指定学期课表
     - **username**: 用户名
     - **password**: 密码
-    - **semester**: 学期; 例: 2020-秋
+    - **semester**: 学期; 例: 2020-秋、2020-春
     """
-    semester_id = choose_semester_id(semester)
     response = ResponseT()
     try:
-        response.data = core.get_course_table(**user.dict(), semester_id=semester_id)
+        semester_id = const.choose_semester_id(semester)
+        data = core.get_course_table(**user.dict(), semester_id=semester_id)
         crud.update_user(user, db.session)
-        crud.update_course_table(response.data, db.session)
+        crud.update_course_table(user, semester, data, db.session)
+        response.data = data
     except exceptions.NetworkException:
         response.code = status.HTTP_200_OK
-        response.data, last_updated_at = crud.retrieve_user_info(user, db.session)
+        response.data, last_updated_at = crud.retrieve_user_course_table(user, semester, db.session)
         response.message = f"离线模式: {response.message}, 最后更新于: {last_updated_at}"
     return response
 
@@ -113,9 +126,9 @@ async def refresh_education_exam(user: schemas.User, semester: str = '2020-秋')
     - **semester**: 学期; 例: 2020-秋
     """
     response = ResponseT()
-    semester_id = choose_semester_id(semester)
     user = schemas.User(**user.dict())
     try:
+        semester_id = const.choose_semester_id(semester)
         exam_list = core.get_exam(**user.dict(), semester_id=semester_id)
         response.data = exam_list
         crud.update_user(user, db.session)
@@ -166,9 +179,10 @@ async def refresh_education_data(user: schemas.User):
     try:
         session = core.login(**user.dict())
         grade_list = core.get_grade(**user.dict(), session=session)
+        course_table_data = core.get_course_table(**user.dict(), session=session)
         data = {
             'info': core.get_stu_info(**user.dict(), session=session),
-            'courseTable': core.get_course_table(**user.dict(), session=session),
+            'courseTable': course_table_data,
             'exam': core.get_exam(**user.dict(), session=session),
             'grade': [] if isinstance(grade_list, str) else grade_list,
             'gpa': core.calculate_gpa(grade_list),
@@ -178,14 +192,14 @@ async def refresh_education_data(user: schemas.User):
         crud.update_exam_list(user, data['exam'], '2020-秋', db.session)  # TODO global semester
         crud.update_grade_list(user, data['grade'], db.session)
         crud.update_gpa(user, data['gpa'], db.session)
-        crud.update_course_table(data['courseTable'], db.session)
+        crud.update_course_table(user, '2020-秋', course_table_data, db.session)
         response.data = data
     except exceptions.NetworkException:
         response.code = status.HTTP_200_OK
         user_info, last_updated_at = crud.retrieve_user_info(user, db.session)
         response.data = {
             'info': user_info,
-            'courseTable': [],
+            'courseTable': crud.retrieve_user_course_table(user, '2020-秋', db.session),
             'exam': crud.retrieve_user_exam(user, db.session)[0],
             'grade': crud.retrieve_user_grade(user, db.session)[0],
             'gpa': crud.retrieve_user_gpa(user, db.session)[0],

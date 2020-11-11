@@ -23,11 +23,11 @@ def update_info(user_info: schemas.UserInfo, session: Session) -> models.UserInf
     return new_user_info
 
 
-def update_course_table(course_table_list: [schemas.CourseTable], session: Session):
+def update_course_table(user: schemas.User, semester: str, course_table_list: [schemas.CourseTable], session: Session):
     for course in course_table_list:
         if not isinstance(course, schemas.CourseTable):
             continue
-        new_course = models.CourseTable(**course.dict())
+        new_course = models.CourseTable(username=user.username, semester=semester, **course.dict())
         session.merge(new_course)
     session.commit()
 
@@ -64,6 +64,15 @@ def update_aipao_order(student: schemas.AiPaoUser, session: Session) -> models.A
     return new_user
 
 
+def update_classroom(classroom_data: schemas.ClassRoomResponse, session: Session):
+    for room in classroom_data.classRoomList:
+        new_room = models.ClassRoom(**room.dict())
+        new_room.week = classroom_data.week
+        new_room.buildingName = classroom_data.buildingName
+        session.merge(new_room)
+    session.commit()
+
+
 # Login Decorator Function
 def server_user_valid_required(function_to_wrap):
     @wraps(function_to_wrap)
@@ -80,6 +89,13 @@ def server_user_valid_required(function_to_wrap):
                 return function_to_wrap(request_user, session, *args, **kwargs)
 
     return wrap
+
+
+def retrieve_classroom(week: str, building_name: str, session: Session) -> ([schemas.ClassRoomResponse], str):
+    classroom_list = session.query(models.ClassRoom).filter_by(week=week, buildingName=building_name).all()
+    serializer = Serializer(classroom_list, exclude=['lastUpdatedAt'], many=True)
+    last_updated_at = '' if len(classroom_list) == 0 else classroom_list[0].lastUpdatedAt
+    return serializer.data, last_updated_at
 
 
 @server_user_valid_required
@@ -116,7 +132,12 @@ def retrieve_user_exam(request_user: schemas.User, session: Session) -> (list, s
     last_updated_at = '' if len(exam_list) == 0 else exam_list[0].lastUpdatedAt
     return serializer.data, last_updated_at
 
-# TODO
-# @server_user_valid_required
-# def retrieve_user_course_table(request_user: schemas.User, session: Session) -> dict:
-#     return dict(session.query(models.CourseTable).filter_by(username=request_user.username).first().__dict__)
+
+@server_user_valid_required
+def retrieve_user_course_table(request_user: schemas.User, semester: str, session: Session) -> (
+        [schemas.CourseTable], str):
+    course_table_list = session.query(models.CourseTable).filter_by(username=request_user.username,
+                                                                    semester=semester).all()
+    serializer = Serializer(course_table_list, exclude=['lastUpdatedAt'], many=True)
+    last_updated_at = '' if len(course_table_list) == 0 else course_table_list[0].lastUpdatedAt
+    return serializer.data, last_updated_at

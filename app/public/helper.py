@@ -1,4 +1,4 @@
-from app import  schemas
+from app import schemas
 from app.education import utils, core
 from app.quality import core as quality_core
 

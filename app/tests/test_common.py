@@ -2,9 +2,9 @@ import os
 import unittest
 
 from app import schemas
-from app.common.notice import get_notice_url_list, get_notice_detail
-from app.common.room import get_building_html, process_building_html, get_class_room_html, parse_class_room_html
-from app.common import helper
+from app.public.notice import get_notice_url_list, get_notice_detail
+from app.public.room import initialize_to_get_building_id_html, process_building_html, get_class_room_html, parse_class_room_html
+from app.public import helper
 
 APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 local_file_dict = {
@@ -14,12 +14,12 @@ local_file_dict = {
 
 
 class TestCommon(unittest.TestCase):
-    def test_room_get_building_html(self):
-        html_text = get_building_html(is_save=True)
+    def test_room_initialize_to_get_building_id_html(self):
+        html_text = initialize_to_get_building_id_html(is_save=True)
         self.assertIn('教室占用查询-辽宁工程技术大学教务处', html_text)
 
     def test_room_process_building_html(self):
-        with open(local_file_dict['class-room-building'], 'r') as fp:
+        with open(local_file_dict['class-room-building']) as fp:
             html_text = fp.read()
         building_dict = process_building_html(html_text)
         self.assertTrue(len(building_dict.get('fuxin')) != 0)

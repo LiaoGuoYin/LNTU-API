@@ -133,7 +133,7 @@ class AiPaoOrder(Base):
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
 
-class ClassRoom(Base):
+class Classroom(Base):
     __tablename__ = "public_classroom"
 
     buildingName = Column(String(64))

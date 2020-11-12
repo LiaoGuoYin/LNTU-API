@@ -28,18 +28,18 @@ class Notice(NoticeDetail):
     url: str
 
 
-# ClassRoom
-class ClassRoom(BaseModel):
+# Classroom
+class Classroom(BaseModel):
     room: str = ''
     type: str = ''
     capacity: str = ''
     scheduleList: List[str] = []  # 周一到周天的每天五大节课的列表: '00100' 0 -> 没课，1 -> 有课
 
 
-class ClassRoomResponse(BaseModel):
+class ClassroomResponse(BaseModel):
     week: str
     buildingName: str
-    classRoomList: List[ClassRoom] = []
+    classroomList: List[Classroom] = []
 
 
 # User

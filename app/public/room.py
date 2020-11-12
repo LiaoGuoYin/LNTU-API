@@ -57,14 +57,14 @@ def get_class_room_html(week: int, building_id: int, is_save=False) -> str:
         return response.text
 
 
-def parse_class_room_html(html_text: str) -> [schemas.ClassRoom]:
+def parse_class_room_html(html_text: str) -> [schemas.Classroom]:
     html_doc = etree.HTML(html_text)
     class_room_row = html_doc.xpath('/html/body/table[2]/tr')
-    room_list: [schemas.ClassRoom] = []
+    room_list: [schemas.Classroom] = []
     for data in class_room_row[1:]:
         if int(data[1].text) <= 0:
             continue
-        room = schemas.ClassRoom(
+        room = schemas.Classroom(
             room=data[0].text,
             capacity=data[1].text,
             type=data[2].text
@@ -86,7 +86,7 @@ def parse_class_room_html(html_text: str) -> [schemas.ClassRoom]:
     return room_list
 
 
-def run(week, building_id) -> [schemas.ClassRoom]:
+def run(week, building_id) -> [schemas.Classroom]:
     html_text = get_class_room_html(week=week, building_id=building_id)
     return parse_class_room_html(html_text)
 

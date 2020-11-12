@@ -40,8 +40,8 @@ async def refresh_classroom(week, name):
         building_id = const.building_dict.get(name)
         if not building_id:
             raise exceptions.FormException("参数错误：请输入正确的教学楼")
-        classroom_data = schemas.ClassRoomResponse(week=week, buildingName=name,
-                                                   classRoomList=room.run(week=week, building_id=building_id))
+        classroom_data = schemas.ClassroomResponse(week=week, buildingName=name,
+                                                   classroomList=room.run(week=week, building_id=building_id))
         crud.update_classroom(classroom_data, db.session)
         response.data = classroom_data
     except exceptions.NetworkException:

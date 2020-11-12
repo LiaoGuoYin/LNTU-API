@@ -64,9 +64,9 @@ def update_aipao_order(student: schemas.AiPaoUser, session: Session) -> models.A
     return new_user
 
 
-def update_classroom(classroom_data: schemas.ClassRoomResponse, session: Session):
-    for room in classroom_data.classRoomList:
-        new_room = models.ClassRoom(**room.dict())
+def update_classroom(classroom_data: schemas.ClassroomResponse, session: Session):
+    for room in classroom_data.classroomList:
+        new_room = models.Classroom(**room.dict())
         new_room.week = classroom_data.week
         new_room.buildingName = classroom_data.buildingName
         session.merge(new_room)
@@ -91,8 +91,8 @@ def server_user_valid_required(function_to_wrap):
     return wrap
 
 
-def retrieve_classroom(week: str, building_name: str, session: Session) -> ([schemas.ClassRoomResponse], str):
-    classroom_list = session.query(models.ClassRoom).filter_by(week=week, buildingName=building_name).all()
+def retrieve_classroom(week: str, building_name: str, session: Session) -> ([schemas.ClassroomResponse], str):
+    classroom_list = session.query(models.Classroom).filter_by(week=week, buildingName=building_name).all()
     serializer = Serializer(classroom_list, exclude=['lastUpdatedAt'], many=True)
     last_updated_at = '' if len(classroom_list) == 0 else classroom_list[0].lastUpdatedAt
     return serializer.data, last_updated_at

@@ -43,8 +43,8 @@ An elegant backend API of [LNTU Course Management Information System](http://202
   
 ## Requirements
   
-1. MySQL or Mariadb(10.3+)
-2. Python(3.7.2+)
+1. MySQL(5.7+) or Mariadb(10.3+)
+2. Python(3.7+)
 
 
 ## License

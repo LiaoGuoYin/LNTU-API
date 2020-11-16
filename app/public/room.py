@@ -3,7 +3,7 @@ from lxml import etree
 
 from app import schemas, exceptions
 from app.education.utils import save_html_to_file
-from app import const
+from app.constants import constantsShared
 
 
 def initialize_to_get_building_id_html(is_save=False) -> str:
@@ -43,7 +43,7 @@ def process_building_html(html_text) -> dict:
 
 def get_class_room_html(week: int, building_id: int, is_save=False) -> str:
     request_room_params = {
-        'semesterId': 627,  # TODO
+        'semesterId': constantsShared.current_semester_id,
         'iWeek': week,
         'room.building.id': building_id,
     }
@@ -92,7 +92,7 @@ def run(week, building_id) -> [schemas.Classroom]:
 
 
 if __name__ == '__main__':
-    building_id = const.building_dict.get('eyl')
+    building_id = constantsShared.building.get('eyl')
     if not building_id:
         raise exceptions.FormException("参数错误：请输入正确的教学楼")
     result = run(week=11, building_id=building_id)

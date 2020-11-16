@@ -2,9 +2,9 @@ from fastapi import APIRouter
 from fastapi_sqlalchemy import db
 from starlette import status
 
-from app import const
+from app.constants import constantsShared
 from app import schemas, exceptions
-from app.education import core
+from app.education import core, utils
 from app.public import notice, room, helper
 from app.schemas import ResponseT
 from appDB import crud
@@ -37,7 +37,7 @@ async def refresh_classroom(week, name):
     """
     response = ResponseT()
     try:
-        building_id = const.building_dict.get(name)
+        building_id = constantsShared.building.get(name)
         if not building_id:
             raise exceptions.FormException("参数错误：请输入正确的教学楼")
         classroom_data = schemas.ClassroomResponse(week=week, buildingName=name,
@@ -71,7 +71,7 @@ async def refresh_education_info(user: schemas.User):
 
 
 @router.post("/course-table", response_model=ResponseT, summary='获取指定学期课表')
-async def refresh_education_course_table(user: schemas.User, semester: str = '2020-秋'):
+async def refresh_education_course_table(user: schemas.User, semester: str = constantsShared.current_semester):
     """
         获取指定学期课表
     - **username**: 用户名
@@ -80,8 +80,7 @@ async def refresh_education_course_table(user: schemas.User, semester: str = '20
     """
     response = ResponseT()
     try:
-        semester_id = const.choose_semester_id(semester)
-        data = core.get_course_table(**user.dict(), semester_id=semester_id)
+        data = core.get_course_table(**user.dict(), semester_id=utils.choose_semester_id(semester))
         crud.update_user(user, db.session)
         crud.update_course_table(user, semester, data, db.session)
         response.data = data
@@ -118,7 +117,7 @@ async def refresh_education_grade(user: schemas.User):
 
 
 @router.post("/exam", response_model=ResponseT, summary='获取考试安排')
-async def refresh_education_exam(user: schemas.User, semester: str = '2020-秋'):
+async def refresh_education_exam(user: schemas.User, semester: str = constantsShared.current_semester):
     """
         考试安排查询
     - **username**: 用户名
@@ -128,8 +127,7 @@ async def refresh_education_exam(user: schemas.User, semester: str = '2020-秋')
     response = ResponseT()
     user = schemas.User(**user.dict())
     try:
-        semester_id = const.choose_semester_id(semester)
-        exam_list = core.get_exam(**user.dict(), semester_id=semester_id)
+        exam_list = core.get_exam(**user.dict(), semester_id=utils.choose_semester_id(semester))
         response.data = exam_list
         crud.update_user(user, db.session)
         crud.update_exam_list(user, exam_list, semester, db.session)
@@ -189,17 +187,17 @@ async def refresh_education_data(user: schemas.User):
         }
         crud.update_user(user, db.session)
         crud.update_info(data['info'], db.session)
-        crud.update_exam_list(user, data['exam'], '2020-秋', db.session)  # TODO global semester
+        crud.update_exam_list(user, data['exam'], constantsShared.current_semester, db.session)
         crud.update_grade_list(user, data['grade'], db.session)
         crud.update_gpa(user, data['gpa'], db.session)
-        crud.update_course_table(user, '2020-秋', course_table_data, db.session)
+        crud.update_course_table(user, constantsShared.current_semester, course_table_data, db.session)
         response.data = data
     except exceptions.NetworkException:
         response.code = status.HTTP_200_OK
         user_info, last_updated_at = crud.retrieve_user_info(user, db.session)
         response.data = {
             'info': user_info,
-            'courseTable': crud.retrieve_user_course_table(user, '2020-秋', db.session),
+            'courseTable': crud.retrieve_user_course_table(user, constantsShared.current_semester, db.session),
             'exam': crud.retrieve_user_exam(user, db.session)[0],
             'grade': crud.retrieve_user_grade(user, db.session)[0],
             'gpa': crud.retrieve_user_gpa(user, db.session)[0],

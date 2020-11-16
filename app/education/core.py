@@ -12,6 +12,7 @@ from app import schemas, exceptions
 from app.education import parser
 from app.education.urls import URLEnum
 from app.education.utils import save_html_to_file
+from app.constants import constantsShared
 
 
 def is_education_online() -> bool:
@@ -81,7 +82,7 @@ def get_plan(username: str, password: str, session: Session = None, is_save: boo
         raise exceptions.SpiderParserException("[个人培养方案完成情况页]获取失败")
 
 
-def get_course_table(username: str, password: str, semester_id: int = 627, session: Session = None,
+def get_course_table(username: str, password: str, semester_id: int = constantsShared.current_semester_id, session: Session = None,
                      is_save: bool = False) -> [schemas.CourseTable]:
     def get_std_ids(tmp_session):
         # 课表查询之前，一定要访问，因此使用 session 模式
@@ -140,7 +141,7 @@ def get_grade_table(username: str, password: str, session: Session = None, is_sa
         raise exceptions.SpiderParserException("[总成绩查询页]获取失败")
 
 
-def get_exam(username: str, password: str, semester_id: int = 627, session: Session = None, is_save: bool = False) -> [schemas.Exam]:
+def get_exam(username: str, password: str, semester_id: int = constantsShared.current_semester_id, session: Session = None, is_save: bool = False) -> [schemas.Exam]:
     def get_exam_id(tmp_session, inner_semester_id, inner_is_save):
         # 课表查询之前，一定要访问，因此使用 session 模式
         response_inner = tmp_session.get(URLEnum.EXAM_OF_BATCH_ID.value, params={'semester.id': inner_semester_id})

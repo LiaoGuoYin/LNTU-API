@@ -63,15 +63,6 @@ app.include_router(
 )
 
 
-def filter_sentry_alert(event, hint):
-    if 'exc_info' in hint:
-        exc_type, exc_value, tb = hint['exc_info']
-        if isinstance(exc_value, FormException):
-            # 来源于用户的表单错误，不应被埋点记录
-            return None
-    return event
-
-
 # Sentry monitor
 def get_sentry():
     import yaml
@@ -98,13 +89,21 @@ else:
     print("初始化 Sentry 失败")
 
 
-# Global Exception Handlers
-@app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+def filter_sentry_alert(event, hint):
+    if 'exc_info' in hint:
+        exc_type, exc_value, tb = hint['exc_info']
+        if isinstance(exc_value, FormException):
+            # 来源于用户的表单错误，不应被埋点记录
+            return None
+    return event
+
+
+@app.exception_handler(exceptions.CommonException)
+async def common_exception_handler(request: Request, exc: exceptions.CommonException):
     capture_exception(exc)
     response = schemas.ResponseT(
-        code=exc.status_code,
-        message=exc.detail
+        code=exc.code,
+        message=exc.message
     )
     return JSONResponse(
         status_code=response.code,
@@ -125,12 +124,11 @@ async def request_validation_exception_handler(request: Request, exc: RequestVal
     )
 
 
-@app.exception_handler(exceptions.CommonException)
-async def common_exception_handler(request: Request, exc: exceptions.CommonException):
-    capture_exception(exc)
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     response = schemas.ResponseT(
-        code=exc.code,
-        message=exc.message
+        code=exc.status_code,
+        message=exc.detail
     )
     return JSONResponse(
         status_code=response.code,

@@ -1,4 +1,7 @@
-import datetime
+import os
+
+from app import exceptions
+from app.constants import constantsShared
 
 
 class GetWeek:
@@ -97,31 +100,14 @@ class GetWeek:
         return self.result
 
 
-class Logger:
-    @staticmethod
-    def i(tag, content):
-        date_string = str(datetime.datetime.today())[:16]
-        print("{date}: INFO [{tag}] {content}".format(date=date_string, tag=tag, content=content))
-
-    @staticmethod
-    def e(tag, content):
-        date_string = str(datetime.datetime.today())[:16]
-        print("{date}: ERROR [{tag}] {content}".format(date=date_string, tag=tag, content=content))
-
-
 def save_html_to_file(html_text, module_name):
-    # 找到 app 组件根目录
-    import os
-    APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-    with open(F"{APP_ABSOLUTE_PATH}/tests/static/{module_name}.html", "w+") as fp:
+    with open(os.path.join(constantsShared.app_path, 'app/tests/static/', f'{module_name}.html'), 'w+') as fp:
         fp.write(html_text)
-    print(F"{module_name}.html: output to tests/static successfully!")
+    print(f"{module_name}.html: output to tests/static successfully!")
 
 
-def calculate_week(semester_start_date) -> str:
-    from datetime import datetime
-    start = datetime.strptime(semester_start_date, '%Y-%m-%d')
-    now = datetime.today()
-    delta = now - start
-    return str((delta.days // 7) + 1)
+def choose_semester_id(semester_str: str) -> int:
+    if constantsShared.semester.get(semester_str, None):
+        return constantsShared.semester[semester_str]
+    else:
+        raise exceptions.FormException('请检查学期参数是否正确')

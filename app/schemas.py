@@ -5,6 +5,23 @@ from pydantic import BaseModel
 from starlette import status
 
 
+class YamlConfig(BaseModel):
+    message: str
+    sentryURL: str
+    semesterStartDate: str
+
+    host: str
+    port: str
+    user: str
+    password: str
+    database: str
+    testDatabase: str
+
+    username: str
+    educationPassword: str
+    qualityPassword: str
+
+
 # Generic Response
 class ResponseT(BaseModel):
     code: int = status.HTTP_200_OK

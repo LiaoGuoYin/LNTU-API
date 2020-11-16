@@ -1,21 +1,13 @@
-import os
 import unittest
 
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.constants import constantsShared
 
-APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-def get_test_users():
-    import yaml
-    with open(f'{APP_ABSOLUTE_PATH}/../config.yaml') as f:
-        config = yaml.load(f, Loader=yaml.BaseLoader)
-    return config['education-account'], config['quality-account']
-
-
-user_dict, quality_user_dict = get_test_users()
+education_user_dict = constantsShared.get_education_user_dict()
+quality_user_dict = constantsShared.get_quality_user_dict()
+current_year = constantsShared.current_semester[:4]
 
 
 class TestMainAPI(unittest.TestCase):
@@ -24,13 +16,13 @@ class TestMainAPI(unittest.TestCase):
         self.client = TestClient(app)
 
     def test_education_info(self):
-        response = self.client.post('/education/info', json=user_dict)
+        response = self.client.post('/education/info', json=education_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
     def test_education_course_table(self):
         payload = {'semester': '2020-秋'}
-        response = self.client.post('/education/course-table', params=payload, json=user_dict)
+        response = self.client.post('/education/course-table', params=payload, json=education_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
@@ -38,23 +30,23 @@ class TestMainAPI(unittest.TestCase):
         payload = {
             'isIncludingOptionalCourse': 1,
         }
-        response = self.client.post('/education/grade', json=user_dict)
+        response = self.client.post('/education/grade', json=education_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
     def test_education_exam(self):
-        payload = {'semester': '2020-秋'}
-        response = self.client.post('/education/exam', params=payload, json=user_dict)
+        payload = {'semester': constantsShared.current_semester}
+        response = self.client.post('/education/exam', params=payload, json=education_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
     def test_education_data(self):
-        response = self.client.post('/education/data', json=user_dict)
+        response = self.client.post('/education/data', json=education_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
     def test_education_notice(self):
-        response = self.client.get('/education/notice', params=user_dict)
+        response = self.client.get('/education/notice', params=education_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
@@ -63,13 +55,13 @@ class TestMainAPI(unittest.TestCase):
             'week': 10,
             'name': 'eyl'
         }
-        response = self.client.get('/education/classroom', params=payload, json=user_dict)
+        response = self.client.get('/education/classroom', params=payload, json=education_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
     def test_quality_data(self):
         payload = {
-            'year': '2020'
+            'year': current_year,
         }
         response = self.client.post('quality/data', params=payload, json=quality_user_dict)
         print(response.text)

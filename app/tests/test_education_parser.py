@@ -1,27 +1,21 @@
-import os
 import unittest
 
 from lxml import etree
 
 from app import schemas
 from app.education import parser
+from app.constants import constantsShared
 
-APP_ABSOLUTE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-local_file_dict = {
-    'config': f'{APP_ABSOLUTE_PATH}/../config.yaml',
-    'info': f'{APP_ABSOLUTE_PATH}/tests/static/info.html',
-    'course-table': f'{APP_ABSOLUTE_PATH}/tests/static/course-table.html',
-    'grade': f'{APP_ABSOLUTE_PATH}/tests/static/grade.html',
-    'grade-table': f'{APP_ABSOLUTE_PATH}/tests/static/grade-table.html',
-    'exam': f'{APP_ABSOLUTE_PATH}/tests/static/exam.html',
-    'other-exam': f'{APP_ABSOLUTE_PATH}/tests/static/other-exam.html',
-    'plan': f'{APP_ABSOLUTE_PATH}/tests/static/plan.html',
-}
+app_path = constantsShared.app_path
+local_html_file_dict = constantsShared.get_local_html_file_dict()
+
+user_dict = constantsShared.get_education_user_dict()
+semester_id = constantsShared.current_semester_id
 
 
 class TestEducationParser(unittest.TestCase):
     def test_education_parse_info(self):
-        with open(local_file_dict['info']) as f:
+        with open(local_html_file_dict['info']) as f:
             html_text = f.read()
         self.assertIn('学籍信息', html_text)
 
@@ -30,7 +24,7 @@ class TestEducationParser(unittest.TestCase):
         print(data_dict)
 
     def test_education_parse_course_table(self):
-        with open(local_file_dict['course-table']) as f:
+        with open(local_html_file_dict['course-table']) as f:
             html_text = f.read()
         self.assertIn('课表格式说明', html_text)
 
@@ -42,7 +36,7 @@ class TestEducationParser(unittest.TestCase):
         [print(each) for each in part_course_dict_list]
 
     def test_education_parse_grade(self):
-        with open(local_file_dict['grade']) as f:
+        with open(local_html_file_dict['grade']) as f:
             html_text = f.read()
         self.assertTrue('学年学期' or '所有成绩尚未发布' in html_text)
 
@@ -51,7 +45,7 @@ class TestEducationParser(unittest.TestCase):
         [print(each) for each in grade_list]
 
     def test_education_parse_grade_table(self):
-        with open(local_file_dict['grade-table']) as f:
+        with open(local_html_file_dict['grade-table']) as f:
             html_text = f.read()
         self.assertIn('个人成绩总表打印', html_text)
 
@@ -61,7 +55,7 @@ class TestEducationParser(unittest.TestCase):
         [print(each) for each in grade_table_list]
 
     def test_education_core_exam(self):
-        with open(local_file_dict['exam']) as f:
+        with open(local_html_file_dict['exam']) as f:
             html_text = f.read()
 
         exam_list = parser.parse_exam(html_doc=etree.HTML(html_text))
@@ -69,7 +63,7 @@ class TestEducationParser(unittest.TestCase):
         print(exam_list)
 
     def test_education_core_other_exam(self):
-        with open(local_file_dict['other-exam']) as f:
+        with open(local_html_file_dict['other-exam']) as f:
             html_text = f.read()
 
         other_exam_list = parser.parse_other_exam(html_doc=etree.HTML(html_text))
@@ -77,7 +71,7 @@ class TestEducationParser(unittest.TestCase):
         print(other_exam_list)
 
     def test_education_parse_plan(self):
-        with open(local_file_dict['plan']) as f:
+        with open(local_html_file_dict['plan']) as f:
             html_text = f.read()
 
         plan_result = parser.parse_plan(html_doc=etree.HTML(html_text))

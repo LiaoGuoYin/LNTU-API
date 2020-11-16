@@ -1,16 +1,6 @@
 from sqlalchemy import inspect
 from sqlalchemy.orm.base import ONETOMANY, MANYTOMANY
 
-from app.constants import constantsShared
-
-
-def get_db_url_dict() -> dict:
-    db = constantsShared.config
-    return {
-        'production': f"mysql+pymysql://{db.user}:{db.password}@{db.host}:{db.port}/{db.database}?charset=utf8",
-        'test': f"mysql+pymysql://{db.user}:{db.password}@{db.host}:{db.port}/{db.testDatabase}?charset=utf8"
-    }
-
 
 class Serializer(object):
     def __init__(self, instance, many=False, include=[], exclude=[], depth=2):

@@ -25,27 +25,32 @@ class Constants:
     def _load_config_yaml(self) -> schemas.YamlConfig:
         with open(os.path.join(self.app_path, 'config.yaml')) as fp:
             yaml_config = yaml.load(fp, Loader=yaml.BaseLoader)
-        return schemas.YamlConfig(
-            message=yaml_config['message'],
-            sentryURL=yaml_config['sentryUrl'],
-            semesterStartDate=yaml_config['semesterStartDate'],
-            host=yaml_config['mysql']['host'],
-            port=yaml_config['mysql']['port'],
-            user=yaml_config['mysql']['user'],
-            password=yaml_config['mysql']['password'],
-            database=yaml_config['mysql']['database'],
-            testDatabase=yaml_config['mysql']['testDatabase'],
-            username=yaml_config['account']['username'],
-            educationPassword=yaml_config['account']['educationPassword'],
-            qualityPassword=yaml_config['account']['qualityPassword'],
-        )
+        try:
+            config = schemas.YamlConfig(
+                message=yaml_config['message'],
+                sentryURL=yaml_config['sentryUrl'],
+                semesterStartDate=yaml_config['semesterStartDate'],
+                host=yaml_config['mysql']['host'],
+                port=yaml_config['mysql']['port'],
+                user=yaml_config['mysql']['user'],
+                password=yaml_config['mysql']['password'],
+                database=yaml_config['mysql']['database'],
+                testDatabase=yaml_config['mysql']['testDatabase'],
+                username=yaml_config['account']['username'],
+                educationPassword=yaml_config['account']['educationPassword'],
+                qualityPassword=yaml_config['account']['qualityPassword'],
+            )
+            return config
+        except KeyError as e:
+            print('config.yaml 配置文件有误', e)
+            exit(0)
 
     app_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     building = {'eyl': 20, 'jyl': 11, 'hldwlsys': 16, 'hldjf': 21, 'yhl': 14, 'bwl': 7, 'byl': 13, 'xhl': 19,
                 'zhl': 17, 'zyl': 18, 'zxl': 8, 'wlsys': 15, 'zljf': 9}
-
     # building_str = {'fuxin': {'博文楼': 7, '博雅楼': 13, '新华楼': 19, '中和楼': 17, '致远楼': 18, '知行楼': 8, '物理实验室': 15, '主楼机房': 9},
     #                  'huludao': {'尔雅楼': 20, '静远楼': 11, '葫芦岛物理实验室': 16, '葫芦岛机房': 21, '耘慧楼': 14}}
+
     semester = {'2008-秋': 636, '2009-春': 637,
                 '2009-秋': 643, '2010-春': 635,
                 '2010-秋': 639, '2011-春': 632,
@@ -100,6 +105,11 @@ class Constants:
             'password': self.config.qualityPassword,
         }
 
+    def get_db_url_dict(self):
+        return {
+            'production': f'mysql+pymysql://{self.config.user}:{self.config.password}@{self.config.host}:{self.config.port}/{self.config.database}?charset=utf8',
+            'test': f'mysql+pymysql://{self.config.user}:{self.config.password}@{self.config.host}:{self.config.port}/{self.config.testDatabase}?charset=utf8',
+        }
+
 
 constantsShared = Constants()
-print(constantsShared.__dict__)

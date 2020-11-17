@@ -15,26 +15,27 @@ async def get_record_list(id: int, page: int = 1, offsets: int = 10, valid: bool
 
 
 @router.get('/check')
-async def check_code(code: str) -> schemas.ResponseT:
+async def check_code(code: str, imei: str = 'API') -> schemas.ResponseT:
     response = schemas.ResponseT()
     user = core.check_imei_code(code)
     if not user.isCodeValid:
         raise exceptions.FormException("IMEICode 无效")
     response.data = user.dict(exclude={'token'})
-    crud.update_aipao_order(user, session=db.session)
+    crud.update_aipao_order(user, imei, session=db.session)
     return response
 
 
 @router.get('/run')
-async def sunny_run(code: str) -> schemas.ResponseT:
+async def sunny_run(code: str, imei: str = 'API') -> schemas.ResponseT:
     response = schemas.ResponseT()
     user = core.check_imei_code(code)
     if not user.isCodeValid:
         raise exceptions.FormException("IMEICode 无效")
     elif user.isDoneToday:
+        crud.update_aipao_order(user, imei, session=db.session)
         raise exceptions.FormException("今天已有有效跑步记录")
     else:
         response.data = core.run_sunny(code)
         user = core.check_imei_code(code)
-    crud.update_aipao_order(user, session=db.session)
+        crud.update_aipao_order(user, imei, session=db.session)
     return response

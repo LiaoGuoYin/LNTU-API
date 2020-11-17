@@ -130,6 +130,8 @@ class AiPaoOrder(Base):
     isCodeValid = Column(Boolean)
     isDoneToday = Column(Boolean)
 
+    IMEI = Column(String(64))
+
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
 

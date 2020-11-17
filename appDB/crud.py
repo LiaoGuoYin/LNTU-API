@@ -57,8 +57,8 @@ def update_gpa(user: schemas.User, grade_gpa: schemas.GPA, session: Session) -> 
     return new_gpa
 
 
-def update_aipao_order(student: schemas.AiPaoUser, session: Session) -> models.AiPaoOrder:
-    new_user = models.AiPaoOrder(**student.dict(exclude={'token'}))
+def update_aipao_order(student: schemas.AiPaoUser, imei: str, session: Session) -> models.AiPaoOrder:
+    new_user = models.AiPaoOrder(IMEI=imei, **student.dict(exclude={'token'}))
     session.merge(new_user)
     session.commit()
     return new_user

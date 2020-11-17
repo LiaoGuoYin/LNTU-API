@@ -4,7 +4,7 @@ from enum import Enum
 class AIPAOURLEnum(Enum):
     ROOT_URL = 'http://client3.aipao.me'
 
-    CHECK_IMEI_CODE_URL = ROOT_URL + '/api/%7Btoken%7D/QM_Users/Login_AndroidSchool'
+    CHECK_IMEI_CODE_URL = ROOT_URL + '/api/token/QM_Users/LoginSchool'
 
     VALID_URL = ROOT_URL + '/api/%7Btoken%7D/QM_Runs/getResultsofValidByUser'
     INVALID_URL = ROOT_URL + '/api/%7Btoken%7D/QM_Runs/getResultsofInValidByUser'

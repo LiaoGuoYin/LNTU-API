@@ -86,7 +86,7 @@ async def refresh_education_course_table(user: schemas.User, semester: str = con
         response.data = data
     except exceptions.NetworkException:
         response.code = status.HTTP_200_OK
-        response.data, last_updated_at = crud.retrieve_user_course_table(user, semester, db.session)
+        response.data, last_updated_at = crud.retrieve_user_course_table(user, db.session, semester)
         response.message = f"离线模式: {response.message}, 最后更新于: {last_updated_at}"
     return response
 
@@ -197,7 +197,7 @@ async def refresh_education_data(user: schemas.User):
         user_info, last_updated_at = crud.retrieve_user_info(user, db.session)
         response.data = {
             'info': user_info,
-            'courseTable': crud.retrieve_user_course_table(user, constantsShared.current_semester, db.session),
+            'courseTable': crud.retrieve_user_course_table(user, db.session, constantsShared.current_semester),
             'exam': crud.retrieve_user_exam(user, db.session)[0],
             'grade': crud.retrieve_user_grade(user, db.session)[0],
             'gpa': crud.retrieve_user_gpa(user, db.session)[0],

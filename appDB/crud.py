@@ -134,7 +134,7 @@ def retrieve_user_exam(request_user: schemas.User, session: Session) -> (list, s
 
 
 @server_user_valid_required
-def retrieve_user_course_table(request_user: schemas.User, semester: str, session: Session) -> (
+def retrieve_user_course_table(request_user: schemas.User, session: Session, semester: str) -> (
         [schemas.CourseTable], str):
     course_table_list = session.query(models.CourseTable).filter_by(username=request_user.username,
                                                                     semester=semester).all()

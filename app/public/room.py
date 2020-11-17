@@ -47,14 +47,14 @@ def get_class_room_html(week: int, building_id: int, is_save=False) -> str:
         'iWeek': week,
         'room.building.id': building_id,
     }
-    response = requests.get('http://202.199.224.119:8080/eams/classroom/occupy/class-details!unitDetail.action',
-                            params=request_room_params)
-    if response.status_code != 200:
-        raise exceptions.SpiderParserException('获取教学楼教室失败')
-    else:
+    try:
+        response = requests.get('http://202.199.224.119:8080/eams/classroom/occupy/class-details!unitDetail.action',
+                                params=request_room_params)
         if is_save:
             save_html_to_file(response.text, 'class-room')
-        return response.text
+    except requests.ConnectionError:
+        raise exceptions.NetworkException('教务无响应，爆炸爆炸')
+    return response.text
 
 
 def parse_class_room_html(html_text: str) -> [schemas.Classroom]:

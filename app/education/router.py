@@ -28,7 +28,7 @@ async def refresh_notice():  # TODO, limit offsets
 
 
 @router.get("/classroom", response_model=ResponseT, summary='获取空教室')
-async def refresh_classroom(week, name):
+async def refresh_classroom(week: int, name: str):
     """
         查询空教室
     - **week**: 教学周(1-26)

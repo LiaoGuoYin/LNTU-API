@@ -91,7 +91,7 @@ def server_user_valid_required(function_to_wrap):
     return wrap
 
 
-def retrieve_classroom(week: str, building_name: str, session: Session) -> ([schemas.ClassroomResponse], str):
+def retrieve_classroom(week: int, building_name: str, session: Session) -> ([schemas.ClassroomResponse], str):
     classroom_list = session.query(models.Classroom).filter_by(week=week, buildingName=building_name).all()
     serializer = Serializer(classroom_list, exclude=['lastUpdatedAt'], many=True)
     last_updated_at = '' if len(classroom_list) == 0 else classroom_list[0].lastUpdatedAt

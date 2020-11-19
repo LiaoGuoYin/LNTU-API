@@ -1,4 +1,7 @@
-# LNTUME
+# LNTUME(Departed)
+
+**教务在线已经完全改版, 本项目转为存档, 仅供参考**
+
     A Python Spider for Crawling LiaoNing Technology University Teaching Management Online.
 
 ## Scheduling

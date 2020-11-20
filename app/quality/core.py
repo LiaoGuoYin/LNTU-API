@@ -52,7 +52,7 @@ def get_report(cookie: str, is_save=False) -> [schemas.QualityActivity]:
         return parse_report(html_doc)
 
 
-def get_scholarship(cookie: str, year) -> [schemas.QualityScholarship]:
+def get_scholarship(cookie: str, year: int) -> [schemas.QualityScholarship]:
     url = QualityExpansionURLEnum.SCHOLARSHIP.value
 
     # 构造参数

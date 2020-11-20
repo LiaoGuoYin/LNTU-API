@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.post('/data', summary='获取素拓网活动记录，及指定学年奖学金加分表')
-async def quality_report(user: schemas.User, year: str = '2020'):
+async def quality_report(user: schemas.User, year: int = 2020):
     response = ResponseT()
     cookie = core.get_cookie(**user.dict())
     data_dict = {

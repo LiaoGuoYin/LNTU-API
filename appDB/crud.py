@@ -91,11 +91,14 @@ def server_user_valid_required(function_to_wrap):
     return wrap
 
 
-def retrieve_classroom(week: int, building_name: str, session: Session) -> ([schemas.ClassroomResponse], str):
-    classroom_list = session.query(models.Classroom).filter_by(week=week, buildingName=building_name).all()
-    serializer = Serializer(classroom_list, exclude=['lastUpdatedAt'], many=True)
+def retrieve_classroom(week: int, building_name: str, session: Session) -> (schemas.ClassroomResponse, str):
+    classroom_response = schemas.ClassroomResponse(week=week, buildingName=building_name)
+    classroom_list = session.query(models.Classroom).filter_by(week=classroom_response.week,
+                                                               buildingName=classroom_response.buildingName).all()
+    serializer = Serializer(classroom_list, exclude=['buildingName', 'week', 'lastUpdatedAt'], many=True)
+    classroom_response.classroomList = serializer.data
     last_updated_at = '' if len(classroom_list) == 0 else classroom_list[0].lastUpdatedAt
-    return serializer.data, last_updated_at
+    return classroom_response, last_updated_at
 
 
 @server_user_valid_required

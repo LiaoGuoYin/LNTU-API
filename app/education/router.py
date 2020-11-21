@@ -28,7 +28,7 @@ async def refresh_notice():  # TODO, limit offsets
 
 
 @router.get("/classroom", response_model=ResponseT, summary='获取空教室')
-async def refresh_classroom(week: int, name: str):
+async def refresh_classroom(week: int, name: str, offline: bool = False):
     """
         查询空教室
     - **week**: 教学周(1-26)
@@ -37,6 +37,8 @@ async def refresh_classroom(week: int, name: str):
     """
     response = ResponseT()
     try:
+        if offline:
+            raise exceptions.NetworkException("用户离线模式")
         building_id = constantsShared.building.get(name)
         if not building_id:
             raise exceptions.FormException("参数错误：请输入正确的教学楼")
@@ -52,7 +54,7 @@ async def refresh_classroom(week: int, name: str):
 
 
 @router.post("/info", response_model=ResponseT, summary='获取个人基本信息')
-async def refresh_education_info(user: schemas.User):
+async def refresh_education_info(user: schemas.User, offline: bool = False):
     """
         相当于登录
     - **username**: 用户名
@@ -60,6 +62,8 @@ async def refresh_education_info(user: schemas.User):
     """
     response = ResponseT()
     try:
+        if offline:
+            raise exceptions.NetworkException("用户离线模式")
         response.data = core.get_stu_info(**user.dict())
         crud.update_user(user, db.session)
         crud.update_info(response.data, db.session)
@@ -71,7 +75,8 @@ async def refresh_education_info(user: schemas.User):
 
 
 @router.post("/course-table", response_model=ResponseT, summary='获取指定学期课表')
-async def refresh_education_course_table(user: schemas.User, semester: str = constantsShared.current_semester):
+async def refresh_education_course_table(user: schemas.User, semester: str = constantsShared.current_semester,
+                                         offline: bool = False):
     """
         获取指定学期课表
     - **username**: 用户名
@@ -80,6 +85,8 @@ async def refresh_education_course_table(user: schemas.User, semester: str = con
     """
     response = ResponseT()
     try:
+        if offline:
+            raise exceptions.NetworkException("用户离线模式")
         data = core.get_course_table(**user.dict(), semester_id=utils.choose_semester_id(semester))
         crud.update_user(user, db.session)
         crud.update_course_table(user, semester, data, db.session)
@@ -92,7 +99,7 @@ async def refresh_education_course_table(user: schemas.User, semester: str = con
 
 
 @router.post("/grade", response_model=ResponseT, summary='获取成绩')
-async def refresh_education_grade(user: schemas.User):
+async def refresh_education_grade(user: schemas.User, offline: bool = False):
     """
         计算学期成绩及 GPA
     - **username**: 用户名
@@ -101,6 +108,8 @@ async def refresh_education_grade(user: schemas.User):
     response = ResponseT()
     user = schemas.User(**user.dict())
     try:
+        if offline:
+            raise exceptions.NetworkException("用户离线模式")
         grade_list = core.get_grade(**user.dict())
         response.data = {
             'grade': grade_list,
@@ -117,7 +126,8 @@ async def refresh_education_grade(user: schemas.User):
 
 
 @router.post("/exam", response_model=ResponseT, summary='获取考试安排')
-async def refresh_education_exam(user: schemas.User, semester: str = constantsShared.current_semester):
+async def refresh_education_exam(user: schemas.User, semester: str = constantsShared.current_semester,
+                                 offline: bool = False):
     """
         考试安排查询
     - **username**: 用户名
@@ -127,6 +137,8 @@ async def refresh_education_exam(user: schemas.User, semester: str = constantsSh
     response = ResponseT()
     user = schemas.User(**user.dict())
     try:
+        if offline:
+            raise exceptions.NetworkException("用户离线模式")
         exam_list = core.get_exam(**user.dict(), semester_id=utils.choose_semester_id(semester))
         response.data = exam_list
         crud.update_user(user, db.session)
@@ -167,7 +179,7 @@ async def refresh_education_plan(user: schemas.User):
 
 
 @router.post("/data", response_model=ResponseT, summary='获取数据集合：基本信息、本学期课表、考试安排、所有成绩、GPA')
-async def refresh_education_data(user: schemas.User):
+async def refresh_education_data(user: schemas.User, offline: bool = False):
     """
         登录: 获取基本信息、本学期课表、考试安排、所有成绩、GPA
     - **username**: 用户名
@@ -175,6 +187,8 @@ async def refresh_education_data(user: schemas.User):
     """
     response = ResponseT()
     try:
+        if offline:
+            raise exceptions.NetworkException("用户离线模式")
         session = core.login(**user.dict())
         grade_list = core.get_grade(**user.dict(), session=session)
         course_table_data = core.get_course_table(**user.dict(), session=session)

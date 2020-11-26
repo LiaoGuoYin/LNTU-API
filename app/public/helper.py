@@ -7,8 +7,8 @@ from app.constants import constantsShared
 def refresh_helper_message() -> schemas.HelperMessage:
     helper_message = schemas.HelperMessage(
         notice=constantsShared.config.message,
-        semester=constantsShared.current_semester,
-        week=constantsShared.current_week,
+        semester=constantsShared.get_current_semester(),
+        week=constantsShared.get_current_week(),
     )
     helper_message.educationServerStatus = '正常' if core.is_education_online() else '离线'
     helper_message.qualityServerStatus = '正常' if quality_core.is_quality_online() else '离线'

@@ -111,5 +111,15 @@ class Constants:
             'test': f'mysql+pymysql://{self.config.user}:{self.config.password}@{self.config.host}:{self.config.port}/{self.config.testDatabase}?charset=utf8',
         }
 
+    def get_current_week(self):
+        self.current_semester, self.current_week = self.calculate_semester_and_week(self.config.semesterStartDate)
+        self.current_semester_id = self.semester.get(self.current_semester, '2020-秋')
+        return self.current_week
+
+    def get_current_semester(self):
+        self.current_semester, self.current_week = self.calculate_semester_and_week(self.config.semesterStartDate)
+        self.current_semester_id = self.semester.get(self.current_semester, '2020-秋')
+        return self.current_semester
+
 
 constantsShared = Constants()

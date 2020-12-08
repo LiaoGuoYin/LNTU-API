@@ -142,6 +142,6 @@ def retrieve_user_course_table(request_user: schemas.User, session: Session, sem
         [schemas.CourseTable], str):
     course_table_list = session.query(models.CourseTable).filter_by(username=request_user.username,
                                                                     semester=semester).all()
-    serializer = Serializer(course_table_list, exclude=['lastUpdatedAt'], many=True)
+    serializer = Serializer(course_table_list, exclude=['username', 'semester', 'lastUpdatedAt'], many=True)
     last_updated_at = '' if len(course_table_list) == 0 else course_table_list[0].lastUpdatedAt
     return serializer.data, last_updated_at

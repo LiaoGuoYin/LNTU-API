@@ -217,7 +217,7 @@ async def refresh_education_data(user: schemas.User, offline: bool = False):
         user_info, last_updated_at = crud.retrieve_user_info(user, db.session)
         response.data = {
             'info': user_info,
-            'courseTable': crud.retrieve_user_course_table(user, db.session, constantsShared.current_semester),
+            'courseTable': crud.retrieve_user_course_table(user, db.session, constantsShared.current_semester)[0],
             'exam': crud.retrieve_user_exam(user, db.session)[0],
             'grade': crud.retrieve_user_grade(user, db.session)[0],
         }

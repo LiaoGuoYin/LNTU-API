@@ -57,22 +57,6 @@ class TestEducationCore(unittest.TestCase):
         self.assertIn('个人成绩总表打印', html_text)
         self.assertTrue(len(grade_table_list) > 0)
 
-    def test_gpa_grade(self):
-        with open(local_html_file_dict['grade']) as f:
-            html_text = f.read()
-        grade_list = parser.parse_grade(html_doc=etree.HTML(html_text))
-        gpa_result = core.calculate_gpa(grade_list, is_including_optional_course='1')
-        self.assertIsInstance(gpa_result.courseCount, int)
-        print(gpa_result)
-
-    def test_gpa_grade_table(self):
-        with open(local_html_file_dict['grade-table']) as f:
-            html_text = f.read()
-        grade_list = parser.parse_grade_table(html_doc=etree.HTML(html_text))
-        gpa_result = core.calculate_gpa(grade_list, is_including_optional_course='1')
-        self.assertIsInstance(gpa_result.courseCount, int)
-        print(gpa_result)
-
     def test_education_core_exam(self):
         exam_list = core.get_exam(**user_dict, semester_id=semester_id, is_save=True)
         with open(local_html_file_dict['exam']) as f:

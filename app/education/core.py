@@ -1,7 +1,6 @@
 import hashlib
 import re
 import time
-from copy import deepcopy
 
 import parse
 import requests
@@ -41,7 +40,7 @@ def login(username: str, password: str) -> Session:
     if token is None:
         raise exceptions.SpiderParserException("页面上没找到 SHA1token")
     key = hashlib.sha1((token + password).encode('utf-8')).hexdigest()
-    time.sleep(0.5)  # 延迟 0.5 秒防止被 ban
+    time.sleep(0.48)  # 延迟 0.48 秒防止被 ban
     response = session.post(URLEnum.LOGIN.value, data={'username': username, 'password': key})
     if '密码错误' in response.text:
         raise exceptions.FormException(F"{username} 用户名或密码错误")
@@ -82,7 +81,8 @@ def get_plan(username: str, password: str, session: Session = None, is_save: boo
         raise exceptions.SpiderParserException("[个人培养方案完成情况页]获取失败")
 
 
-def get_course_table(username: str, password: str, semester_id: int = constantsShared.current_semester_id, session: Session = None,
+def get_course_table(username: str, password: str, semester_id: int = constantsShared.current_semester_id,
+                     session: Session = None,
                      is_save: bool = False) -> [schemas.CourseTable]:
     def get_std_ids(tmp_session):
         # 课表查询之前，一定要访问，因此使用 session 模式
@@ -128,7 +128,8 @@ def get_grade(username: str, password: str, session: Session = None, is_save: bo
         raise exceptions.SpiderParserException("[成绩查询页]请求失败")
 
 
-def get_grade_table(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.GradeTable]:
+def get_grade_table(username: str, password: str, session: Session = None, is_save: bool = False) -> [
+    schemas.GradeTable]:
     # 备用：获取成绩表格
     if not session:
         session = login(username, password)
@@ -141,7 +142,8 @@ def get_grade_table(username: str, password: str, session: Session = None, is_sa
         raise exceptions.SpiderParserException("[总成绩查询页]获取失败")
 
 
-def get_exam(username: str, password: str, semester_id: int = constantsShared.current_semester_id, session: Session = None, is_save: bool = False) -> [schemas.Exam]:
+def get_exam(username: str, password: str, semester_id: int = constantsShared.current_semester_id,
+             session: Session = None, is_save: bool = False) -> [schemas.Exam]:
     def get_exam_id(tmp_session, inner_semester_id, inner_is_save):
         # 课表查询之前，一定要访问，因此使用 session 模式
         response_inner = tmp_session.get(URLEnum.EXAM_OF_BATCH_ID.value, params={'semester.id': inner_semester_id})
@@ -175,77 +177,3 @@ def get_other_exam(username: str, password: str, session: Session = None, is_sav
         return parser.parse_other_exam(html_doc=etree.HTML(response.text))
     else:
         raise exceptions.SpiderParserException("[资格考试页]获取失败")
-
-
-def calculate_gpa(course_list: [schemas.Grade], is_including_optional_course: str = '1') -> schemas.GPA:
-    """GPA计算规则:
-        "二级制: 合格(85),不合格(0)"
-        "五级制: 优秀(95),良(85),中(75),及格(65),不及格(0)"
-    补考和重修：同一门课程多次考核时，其绩点按平均值算。当至少一次绩点大于 1.0，且平均绩点低于 1.0 时，平均绩点按 1.0 计算。
-    """
-    course_list = deepcopy(course_list)
-    gpa_result = schemas.GPA()
-    rule_dict = {"合格": 85, "不合格": 0,
-                 "优秀": 95, "良": 85, "中": 75, "及格": 65, "不及格": 0}
-    for course in course_list:
-        if not isinstance(course, schemas.Grade):
-            continue
-
-        # 排除选修课
-        if (is_including_optional_course == '0') and ('校级公选课' in course.courseType):
-            # TODO is_including_optional_course
-            continue
-
-        # 分数等级置换
-        course.result = rule_dict.get(course.result, course.result)
-        if not course.result:
-            continue
-
-        # 计算GPA
-        try:
-            point = float(course.result)
-            course.credit = float(course.credit)
-        except ValueError:
-            # 分数转换错误 TODO
-            continue
-        gpa_result.courseCount += 1
-        gpa_result.creditTotal += course.credit
-        gpa_result.scoreTotal += point * course.credit
-
-        # 计算成绩绩点 GradePoint
-        if 95 <= point <= 100:
-            course_point = 4.5
-        elif 90 <= point < 95:
-            course_point = 4.0
-        elif 85 <= point < 90:
-            course_point = 3.5
-        elif 80 <= point < 85:
-            course_point = 3.0
-        elif 75 <= point < 80:
-            course_point = 2.5
-        elif 70 <= point < 75:
-            course_point = 2.0
-        elif 65 <= point < 70:
-            course_point = 1.5
-        elif 60 <= point < 65:
-            course_point = 1.0
-        else:
-            course_point = 0
-
-        if course.status == schemas.GradeTable.CourseStatusEnum.makeUp:
-            course_point /= 2
-        elif course.status == schemas.GradeTable.CourseStatusEnum.reStudy:
-            course_point /= 3
-        else:
-            pass
-        final_course_point = 1 if (course_point <= 1) else course_point  # 重修多次导致单科成绩绩点 GradePoint <= 1.0
-        # print(f'{course.name} \t {course.result}  \t {final_course_point}  \r {course.point}')
-        gpa_result.gradePointTotal += final_course_point * course.credit
-
-    if gpa_result.courseCount == 0:
-        return gpa_result
-    else:
-        # 计算平均学分绩 GPA
-        gpa_result.gradePointAverage = round(gpa_result.gradePointTotal / gpa_result.creditTotal, 4)  # 平均绩点
-        gpa_result.weightedAverage = round(gpa_result.scoreTotal / gpa_result.creditTotal, 4)  # 加权平均分
-        return gpa_result

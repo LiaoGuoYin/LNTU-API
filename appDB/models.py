@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, Float, JSON, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, JSON, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -97,21 +97,6 @@ class Grade(Base):
     result = Column(String(64))
     point = Column(String(64))
     status = Column(String(64))
-
-    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
-
-
-class GPA(Base):
-    __tablename__ = "gpa"
-
-    username = Column(String(64), primary_key=True, index=True)
-    semester = Column(String(64), primary_key=True, index=True)
-    gradePointAverage = Column(Float(precision=8, decimal_return_scale=2))
-    weightedAverage = Column(Float(precision=8, decimal_return_scale=2))
-    gradePointTotal = Column(Float)
-    scoreTotal = Column(Float)
-    creditTotal = Column(Float)
-    courseCount = Column(Integer)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 

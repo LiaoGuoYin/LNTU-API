@@ -42,8 +42,8 @@ async def refresh_classroom(week: int, name: str, offline: bool = False):
         building_id = constantsShared.building.get(name)
         if not building_id:
             raise exceptions.FormException("参数错误：请输入正确的教学楼")
-        classroom_data = schemas.ClassroomResponse(week=week, buildingName=name,
-                                                   classroomList=room.run(week=week, building_id=building_id))
+        classroom_data = schemas.ClassroomResponseData(week=week, buildingName=name,
+                                                       classroomList=room.run(week=week, building_id=building_id))
         crud.update_classroom(classroom_data, db.session)
         response.data = classroom_data
     except exceptions.NetworkException:
@@ -101,7 +101,7 @@ async def refresh_education_course_table(user: schemas.User, semester: str = con
 @router.post("/grade", response_model=ResponseT, summary='获取成绩')
 async def refresh_education_grade(user: schemas.User, offline: bool = False):
     """
-        计算学期成绩及 GPA
+        计算所有学期成绩
     - **username**: 用户名
     - **password**: 密码
     """
@@ -110,14 +110,9 @@ async def refresh_education_grade(user: schemas.User, offline: bool = False):
     try:
         if offline:
             raise exceptions.NetworkException("用户离线模式")
-        grade_list = core.get_grade(**user.dict())
-        response.data = {
-            'grade': grade_list,
-            'gpa': core.calculate_gpa(grade_list)
-        }
+        response.data = core.get_grade(**user.dict())
         crud.update_user(user, db.session)
-        crud.update_grade_list(user, response.data['grade'], db.session)
-        crud.update_gpa(user, response.data['gpa'], db.session)
+        crud.update_grade_list(user, response.data, db.session)
     except exceptions.NetworkException:
         response.code = status.HTTP_200_OK
         response.data, last_updated_at = crud.retrieve_user_grade(user, db.session)
@@ -150,7 +145,7 @@ async def refresh_education_exam(user: schemas.User, semester: str = constantsSh
     return response
 
 
-@router.post("/other-exam", response_model=ResponseT, summary='获取校外考试')
+@router.post("/external-exam", response_model=ResponseT, summary='获取校外考试情况')
 async def refresh_education_other_exam(user: schemas.User):
     """
         获取外校考试(无离线模式)
@@ -178,10 +173,10 @@ async def refresh_education_plan(user: schemas.User):
     return response
 
 
-@router.post("/data", response_model=ResponseT, summary='获取数据集合：基本信息、本学期课表、考试安排、所有成绩、GPA')
+@router.post("/data", response_model=ResponseT, summary='获取数据集合：基本信息、本学期课表、考试安排、所有成绩')
 async def refresh_education_data(user: schemas.User, offline: bool = False):
     """
-        登录: 获取基本信息、本学期课表、考试安排、所有成绩、GPA
+        登录: 获取基本信息、本学期课表、考试安排、所有成绩
     - **username**: 用户名
     - **password**: 密码
     """
@@ -197,13 +192,11 @@ async def refresh_education_data(user: schemas.User, offline: bool = False):
             'courseTable': course_table_data,
             'exam': core.get_exam(**user.dict(), session=session),
             'grade': [] if isinstance(grade_list, str) else grade_list,
-            'gpa': core.calculate_gpa(grade_list),
         }
         crud.update_user(user, db.session)
         crud.update_info(data['info'], db.session)
         crud.update_exam_list(user, data['exam'], constantsShared.current_semester, db.session)
         crud.update_grade_list(user, data['grade'], db.session)
-        crud.update_gpa(user, data['gpa'], db.session)
         crud.update_course_table(user, constantsShared.current_semester, course_table_data, db.session)
         response.data = data
     except exceptions.NetworkException:
@@ -214,7 +207,6 @@ async def refresh_education_data(user: schemas.User, offline: bool = False):
             'courseTable': crud.retrieve_user_course_table(user, db.session, constantsShared.current_semester),
             'exam': crud.retrieve_user_exam(user, db.session)[0],
             'grade': crud.retrieve_user_grade(user, db.session)[0],
-            'gpa': crud.retrieve_user_gpa(user, db.session)[0],
         }
         response.message = f"离线模式: {response.message}, 最后更新于: {last_updated_at}"
     return response

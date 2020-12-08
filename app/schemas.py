@@ -53,7 +53,7 @@ class Classroom(BaseModel):
     scheduleList: List[str] = []  # 周一到周天的每天五大节课的列表: '00100' 0 -> 没课，1 -> 有课
 
 
-class ClassroomResponse(BaseModel):
+class ClassroomResponseData(BaseModel):
     week: str
     buildingName: str
     classroomList: List[Classroom] = []
@@ -121,7 +121,7 @@ class GradeTable(BaseModel):
     name: str
     credit: str = None
     semester: str = None
-    status: CourseStatusEnum = CourseStatusEnum.normal.value
+    status: CourseStatusEnum = CourseStatusEnum.normal
     result: str = None
 
 
@@ -136,17 +136,6 @@ class Grade(GradeTable):
     makeUpScoreResult: str = None
     totalScore: str = None
     point: str = None
-
-
-# GPA
-class GPA(BaseModel):
-    semester: str = "all"
-    gradePointAverage: float = 0.0
-    weightedAverage: float = 0.0
-    gradePointTotal: float = 0.0
-    scoreTotal: float = 0.0
-    creditTotal: float = 0.0
-    courseCount: int = 0
 
 
 class AiPaoUser(BaseModel):

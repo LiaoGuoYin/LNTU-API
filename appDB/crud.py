@@ -50,13 +50,6 @@ def update_grade_list(user: schemas.User, grade_list: [schemas.Grade], session: 
     session.commit()
 
 
-def update_gpa(user: schemas.User, grade_gpa: schemas.GPA, session: Session) -> models.GPA:
-    new_gpa = models.GPA(username=user.username, **grade_gpa.dict())
-    session.merge(new_gpa)
-    session.commit()
-    return new_gpa
-
-
 def update_aipao_order(student: schemas.AiPaoUser, imei: str, session: Session) -> models.AiPaoOrder:
     new_user = models.AiPaoOrder(IMEI=imei, **student.dict(exclude={'token'}))
     session.merge(new_user)
@@ -64,7 +57,7 @@ def update_aipao_order(student: schemas.AiPaoUser, imei: str, session: Session) 
     return new_user
 
 
-def update_classroom(classroom_data: schemas.ClassroomResponse, session: Session):
+def update_classroom(classroom_data: schemas.ClassroomResponseData, session: Session):
     for room in classroom_data.classroomList:
         new_room = models.Classroom(**room.dict())
         new_room.week = classroom_data.week
@@ -91,8 +84,8 @@ def server_user_valid_required(function_to_wrap):
     return wrap
 
 
-def retrieve_classroom(week: int, building_name: str, session: Session) -> (schemas.ClassroomResponse, str):
-    classroom_response = schemas.ClassroomResponse(week=week, buildingName=building_name)
+def retrieve_classroom(week: int, building_name: str, session: Session) -> (schemas.ClassroomResponseData, str):
+    classroom_response = schemas.ClassroomResponseData(week=week, buildingName=building_name)
     classroom_list = session.query(models.Classroom).filter_by(week=classroom_response.week,
                                                                buildingName=classroom_response.buildingName).all()
     serializer = Serializer(classroom_list, exclude=['buildingName', 'week', 'lastUpdatedAt'], many=True)
@@ -118,14 +111,6 @@ def retrieve_user_grade(request_user: schemas.User, session: Session) -> (list, 
     last_updated_at = '' if len(grade_list) == 0 else grade_list[0].lastUpdatedAt
     serializer = Serializer(grade_list, exclude=['username', 'lastUpdatedAt'], many=True)
     return serializer.data, last_updated_at
-
-
-@server_user_valid_required
-def retrieve_user_gpa(request_user: schemas.User, session: Session) -> (dict, str):
-    user_gpa_result = session.query(models.GPA).filter_by(username=request_user.username).all()
-    serializer = Serializer(user_gpa_result, exclude=['username', 'lastUpdatedAt'], many=True)
-    last_updated_at = '' if len(user_gpa_result) == 0 else user_gpa_result[0].lastUpdatedAt
-    return ({}, '') if len(serializer.data) == 0 else (serializer.data[0], last_updated_at)
 
 
 @server_user_valid_required

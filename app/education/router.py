@@ -22,8 +22,21 @@ async def refresh_education_refresh_helper_message():
 
 
 @router.get("/notice", response_model=ResponseT, summary='获取教务通知')
-async def refresh_notice():  # TODO, limit offsets
-    response = ResponseT(data=notice.run())
+async def refresh_notice(offset: int = 0, limit: int = 20, init: bool = False):
+    """
+        获取教务通知
+    - **offset: int**: 偏移起始位
+    - **limit: int**: 偏移量
+    """
+    page_list = ['https://jwzx.lntu.edu.cn/index/jwgg.htm']
+    if init:
+        page_list.extend(['http://jwzx.lntu.edu.cn/index/jwgg/{page}.htm'.format(page=i)
+                          for i in range(1, 25)])
+    for page in page_list:
+        notice_list = notice.get_notice_url_list_from(page)
+        crud.update_public_notice(notice_list, db.session)
+    response = ResponseT()
+    response.data, last_updated_at = crud.retrieve_public_notice(offset, limit, db.session)
     return response
 
 

@@ -131,20 +131,13 @@ class Classroom(Base):
     scheduleList = Column(JSON)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
-#
-#
-# class Notice(Base):
-#     __tablename__ = "public_notice"
-#
-#     id = Column(Integer, primary_key=True, index=True)
-#     code = Column(String(64))
-#     name = Column(String(64))
-#     gender = Column(String(64))
-#     schoolName = Column(String(64))
-#     successCount = Column(Integer)
-#     failureCount = Column(Integer)
-#
-#     isCodeValid = Column(Boolean)
-#     isDoneToday = Column(Boolean)
-#
-#     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+
+
+class Notice(Base):
+    __tablename__ = "public_notice"
+
+    title = Column(String(64), primary_key=True)
+    url = Column(String(64), primary_key=True)
+    date = Column(String(64), index=True)
+
+    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

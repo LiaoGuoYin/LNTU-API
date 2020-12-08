@@ -7,6 +7,7 @@ from appDB import models
 from appDB.models import Base
 from app import schemas
 from app.constants import constantsShared
+from app.public.notice import get_notice_url_list_from
 
 
 class TestAppDB(unittest.TestCase):
@@ -62,6 +63,20 @@ class TestAppDB(unittest.TestCase):
         with db():
             db.session.merge(models.Grade(username='1000', **grade.dict()))
             db.session.commit()
+
+    def test_public_room(self):
+        # notice_list = [schemas.Notice(url='https://jwzx.lntu.edu.cn/info/1100/1618.htm',
+        #                               title='关于落实2021年春季学期教学任务的通知',
+        #                               date='2020-12-08')]
+        page_list = ['https://jwzx.lntu.edu.cn/index/jwgg.htm']
+        page_list.extend(['http://jwzx.lntu.edu.cn/index/jwgg/{page}.htm'.format(page=i)
+                          for i in range(1, 25)])
+        for page in page_list:
+            notice_list = get_notice_url_list_from(page)
+            for notice in notice_list:
+                with db():
+                    db.session.merge(models.Notice(**notice.dict()))
+                    db.session.commit()
 
 
 if __name__ == '__main__':

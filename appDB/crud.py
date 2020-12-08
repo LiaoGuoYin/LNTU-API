@@ -66,6 +66,22 @@ def update_classroom(classroom_data: schemas.ClassroomResponseData, session: Ses
     session.commit()
 
 
+def update_public_notice(notice_list: [schemas.Notice], session: Session):
+    for notice in notice_list:
+        if not isinstance(notice, schemas.Notice):
+            continue
+        new_notice = models.Notice(**notice.dict())
+        session.merge(new_notice)
+    session.commit()
+
+
+def retrieve_public_notice(offset: int, limit: int, session: Session) -> (schemas.Notice, str):
+    notice_list = session.query(models.Notice).order_by(models.Notice.date.desc()).offset(offset).limit(limit).all()
+    serializer = Serializer(notice_list, exclude=['lastUpdatedAt'], many=True)
+    last_updated_at = '' if len(notice_list) == 0 else notice_list[0].lastUpdatedAt
+    return serializer.data, last_updated_at
+
+
 # Login Decorator Function
 def server_user_valid_required(function_to_wrap):
     @wraps(function_to_wrap)

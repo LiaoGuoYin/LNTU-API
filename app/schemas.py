@@ -30,19 +30,6 @@ class ResponseT(BaseModel):
 
 
 # Notice
-class NoticeDetail(BaseModel):
-    class NoticeDetailAppendix(BaseModel):
-        url: str
-        name: str
-
-    title: str = None
-    date: str = None
-    content: str = None
-    appendix: List[NoticeDetailAppendix] = []
-
-
-class Notice(NoticeDetail):
-    url: str
 
 
 # Classroom
@@ -212,6 +199,7 @@ class OtherExam(BaseModel):
     semester: str = ''
 
 
+# Public
 class HelperMessage(BaseModel):
     notice: str = ''
     educationServerStatus: str = '未知'
@@ -219,3 +207,9 @@ class HelperMessage(BaseModel):
     qualityServerStatus: str = '未知'
     week: str = ''
     semester: str = ''
+
+
+class Notice(BaseModel):
+    url: str
+    title: str
+    date: str

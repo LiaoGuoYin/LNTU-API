@@ -29,9 +29,6 @@ class ResponseT(BaseModel):
     data: Union[list, dict] = None
 
 
-# Notice
-
-
 # Classroom
 class Classroom(BaseModel):
     room: str = ''
@@ -47,6 +44,7 @@ class ClassroomResponseData(BaseModel):
 
 
 # User
+# For Education and Quality commonly using
 class User(BaseModel):
     username: str
     password: str

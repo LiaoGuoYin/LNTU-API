@@ -82,6 +82,23 @@ def retrieve_public_notice(offset: int, limit: int, session: Session) -> (schema
     return serializer.data, last_updated_at
 
 
+def update_quality_user(user: schemas.User, session: Session) -> models.User:
+    new_user = models.User(username=user.username, qualityPassword=user.password)
+    new_user.lastUpdatedAt = datetime.datetime.now()
+    session.merge(new_user)
+    session.commit()
+    return new_user
+
+
+def update_quality_activity(user: schemas.User, quality_activity_list: [schemas.QualityActivity], session: Session):
+    for activity in quality_activity_list:
+        if not isinstance(activity, schemas.QualityActivity):
+            continue
+        new_activity = models.QualityActivity(username=user.username, **activity.dict())
+        session.merge(new_activity)
+    session.commit()
+
+
 # Login Decorator Function
 def server_user_valid_required(function_to_wrap):
     @wraps(function_to_wrap)
@@ -89,10 +106,28 @@ def server_user_valid_required(function_to_wrap):
         server_user = session.query(models.User).filter_by(username=request_user.username).first()
         if not server_user:
             # Check user server account validation
-            raise exceptions.FormException(F"离线模式: {request_user.username} 用户无效，请稍后再试，可能是未曾登录过 LNTUHelper")
+            raise exceptions.FormException(F"离线模式: {request_user.username} 用户无效，请稍后再试，可能是还未曾登录过 LNTUHelper")
         else:
             if request_user.password != server_user.password:
-                raise exceptions.FormException(F"离线模式: {request_user.username} 用户名或密码错误")
+                raise exceptions.FormException(F"离线模式: {request_user.username} 教务在线用户名或密码错误")
+            else:
+                # Authenticated successfully
+                return function_to_wrap(request_user, session, *args, **kwargs)
+
+    return wrap
+
+
+# Login Decorator Function for Quality TODO
+def server_user_valid_required_for_quality(function_to_wrap):
+    @wraps(function_to_wrap)
+    def wrap(request_user: schemas.User, session: Session, *args, **kwargs):
+        server_user = session.query(models.User).filter_by(username=request_user.username).first()
+        if not server_user:
+            # Check user server account validation
+            raise exceptions.FormException(F"离线模式: {request_user.username} 用户无效，请稍后再试，可能是还未曾登录过 LNTUHelper")
+        else:
+            if request_user.password != server_user.qualityPassword:
+                raise exceptions.FormException(F"离线模式: {request_user.username} 素拓网用户名或密码错误")
             else:
                 # Authenticated successfully
                 return function_to_wrap(request_user, session, *args, **kwargs)
@@ -144,4 +179,12 @@ def retrieve_user_course_table(request_user: schemas.User, session: Session, sem
                                                                     semester=semester).all()
     serializer = Serializer(course_table_list, exclude=['username', 'semester', 'lastUpdatedAt'], many=True)
     last_updated_at = '' if len(course_table_list) == 0 else course_table_list[0].lastUpdatedAt
+    return serializer.data, last_updated_at
+
+
+@server_user_valid_required_for_quality
+def retrieve_quality_activity(request_user: schemas.User, session: Session) -> ([schemas.QualityActivity], str):
+    quality_activity_list = session.query(models.QualityActivity).filter_by(username=request_user.username).all()
+    serializer = Serializer(quality_activity_list, exclude=['username', 'lastUpdatedAt'], many=True)
+    last_updated_at = '' if len(quality_activity_list) == 0 else quality_activity_list[0].lastUpdatedAt
     return serializer.data, last_updated_at

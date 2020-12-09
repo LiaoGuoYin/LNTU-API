@@ -24,15 +24,18 @@ def get_cookie(username: str, password: str) -> str:
     url = QualityExpansionURLEnum.LOGIN.value
     response = requests.get(url)
     html_doc = etree.HTML(response.text)
-    body_data = {
-        'Tuserid': username,
-        'Tpassword': password,
-        'dllx': 'RadioButton2',
-        '__EVENTVALIDATION': html_doc.xpath("//*[@id='__EVENTVALIDATION']/@value")[0],
-        '__VIEWSTATE': html_doc.xpath("//*[@id='__VIEWSTATE']/@value")[0],
-        'Button1': '',
-    }
-    response = requests.post(url, data=body_data)
+    try:
+        body_data = {
+            'Tuserid': username,
+            'Tpassword': password,
+            'dllx': 'RadioButton2',
+            '__EVENTVALIDATION': html_doc.xpath("//*[@id='__EVENTVALIDATION']/@value")[0],
+            '__VIEWSTATE': html_doc.xpath("//*[@id='__VIEWSTATE']/@value")[0],
+            'Button1': '',
+        }
+        response = requests.post(url, data=body_data)
+    except IndexError:
+        raise exceptions.SpiderParserException('爬虫解析错误')
     if response.status_code == 500:
         raise exceptions.FormException(f'{username} 用户名或密码错误')
     else:

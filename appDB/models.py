@@ -10,7 +10,8 @@ class User(Base):
     __tablename__ = "user"
 
     username = Column(String(64), primary_key=True, index=True)
-    password = Column(String(64))
+    password = Column(String(128))
+    qualityPassword = Column(String(128))
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -139,5 +140,23 @@ class Notice(Base):
     title = Column(String(64), primary_key=True)
     url = Column(String(64), primary_key=True)
     date = Column(String(64), index=True)
+
+    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+
+
+class QualityActivity(Base):
+    __tablename__ = "quality_activity"
+
+    username = Column(String(64), primary_key=True, index=True)
+    type = Column(String(64), primary_key=True)
+    id = Column(String(64), primary_key=True)
+    name = Column(String(255), primary_key=True)
+    semester = Column(String(255))
+    activityDate = Column(String(255))
+    location = Column(String(255))
+    responsibility = Column(String(255))
+    loggingDateTime = Column(String(255))
+    status = Column(String(255))
+    comment = Column(String(255))
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

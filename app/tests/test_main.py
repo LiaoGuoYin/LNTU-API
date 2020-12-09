@@ -60,15 +60,17 @@ class TestMainAPI(unittest.TestCase):
         self.assertTrue(response.status_code == 200)
 
     def test_quality_data(self):
-        payload = {
-            'year': current_year,
-        }
-        response = self.client.post('quality/data', params=payload, json=quality_user_dict)
+        response = self.client.post('quality/data', json=quality_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
     def test_quality_report(self):
         response = self.client.post('/quality/report', json=quality_user_dict)
+        print(response.text)
+        self.assertTrue(response.status_code == 200)
+
+    def test_quality_scholarship(self):
+        response = self.client.post('quality/data', params={'year': 2020}, json=quality_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 

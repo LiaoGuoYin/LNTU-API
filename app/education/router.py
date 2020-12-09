@@ -51,7 +51,7 @@ async def refresh_classroom(week: int, name: str, offline: bool = False):
     response = ResponseT()
     try:
         if offline:
-            raise exceptions.NetworkException("用户离线模式")
+            raise exceptions.NetworkException("用户手动懒加载模式")
         building_id = constantsShared.building.get(name)
         if not building_id:
             raise exceptions.FormException("参数错误：请输入正确的教学楼")
@@ -76,7 +76,7 @@ async def refresh_education_info(user: schemas.User, offline: bool = False):
     response = ResponseT()
     try:
         if offline:
-            raise exceptions.NetworkException("用户离线模式")
+            raise exceptions.NetworkException("用户手动懒加载模式")
         response.data = core.get_stu_info(**user.dict())
         crud.update_user(user, db.session)
         crud.update_info(response.data, db.session)
@@ -99,7 +99,7 @@ async def refresh_education_course_table(user: schemas.User, semester: str = con
     response = ResponseT()
     try:
         if offline:
-            raise exceptions.NetworkException("用户离线模式")
+            raise exceptions.NetworkException("用户手动懒加载模式")
         data = core.get_course_table(**user.dict(), semester_id=utils.choose_semester_id(semester))
         crud.update_user(user, db.session)
         crud.update_course_table(user, semester, data, db.session)
@@ -119,10 +119,9 @@ async def refresh_education_grade(user: schemas.User, offline: bool = False):
     - **password**: 密码
     """
     response = ResponseT()
-    user = schemas.User(**user.dict())
     try:
         if offline:
-            raise exceptions.NetworkException("用户离线模式")
+            raise exceptions.NetworkException("用户手动懒加载模式")
         response.data = core.get_grade(**user.dict())
         crud.update_user(user, db.session)
         crud.update_grade_list(user, response.data, db.session)
@@ -143,10 +142,9 @@ async def refresh_education_exam(user: schemas.User, semester: str = constantsSh
     - **semester**: 学期; 例: 2020-秋
     """
     response = ResponseT()
-    user = schemas.User(**user.dict())
     try:
         if offline:
-            raise exceptions.NetworkException("用户离线模式")
+            raise exceptions.NetworkException("用户手动懒加载模式")
         exam_list = core.get_exam(**user.dict(), semester_id=utils.choose_semester_id(semester))
         response.data = exam_list
         crud.update_user(user, db.session)
@@ -166,7 +164,6 @@ async def refresh_education_other_exam(user: schemas.User):
     - **password**: 密码
     """
     response = ResponseT()
-    user = schemas.User(**user.dict())
     response.data = core.get_other_exam(**user.dict())
     crud.update_user(user, db.session)
     return response
@@ -180,7 +177,6 @@ async def refresh_education_plan(user: schemas.User):
     - **password**: 密码
     """
     response = ResponseT()
-    user = schemas.User(**user.dict())
     response.data = core.get_plan(**user.dict())
     crud.update_user(user, db.session)
     return response
@@ -196,7 +192,7 @@ async def refresh_education_data(user: schemas.User, offline: bool = False):
     response = ResponseT()
     try:
         if offline:
-            raise exceptions.NetworkException("用户离线模式")
+            raise exceptions.NetworkException("用户手动懒加载模式")
         session = core.login(**user.dict())
         grade_list = core.get_grade(**user.dict(), session=session)
         course_table_data = core.get_course_table(**user.dict(), session=session)

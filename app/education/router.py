@@ -28,14 +28,18 @@ async def refresh_notice(offset: int = 0, limit: int = 20, init: bool = False):
     - **offset: int**: 偏移起始位
     - **limit: int**: 偏移量
     """
+    response = ResponseT()
     page_list = ['https://jwzx.lntu.edu.cn/index/jwgg.htm']
     if init:
         page_list.extend(['http://jwzx.lntu.edu.cn/index/jwgg/{page}.htm'.format(page=i)
                           for i in range(1, 25)])
-    for page in page_list:
-        notice_list = notice.get_notice_url_list_from(page)
-        crud.update_public_notice(notice_list, db.session)
-    response = ResponseT()
+    try:
+        for page in page_list:
+            notice_list = notice.get_notice_url_list_from(page)
+            crud.update_public_notice(notice_list, db.session)
+    except exceptions.NetworkException:
+        response.code = status.HTTP_200_OK
+        response.message = "教务官网在线宕机，离线模式"
     response.data, last_updated_at = crud.retrieve_public_notice(offset, limit, db.session)
     return response
 

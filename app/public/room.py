@@ -14,7 +14,7 @@ def initialize_to_get_building_id_html(is_save=False) -> str:
     response = requests.get(url)
     response.encoding = 'utf-8'
     if response.status_code != 200:
-        raise exceptions.SpiderParserException('获取教学楼列表失败')
+        raise exceptions.NetworkException('教务在线爆炸，获取教学楼列表失败')
     else:
         if is_save:
             save_html_to_file(response.text, 'class-room-building')

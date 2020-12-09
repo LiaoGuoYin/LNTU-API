@@ -59,8 +59,8 @@ class TestMainAPI(unittest.TestCase):
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
-    def test_quality_data(self):
-        response = self.client.post('quality/data', json=quality_user_dict)
+    def test_quality_activity(self):
+        response = self.client.post('quality/activity', json=quality_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 

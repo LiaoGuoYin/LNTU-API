@@ -11,8 +11,8 @@ from app.schemas import ResponseT
 router = APIRouter()
 
 
-@router.post('/data', summary='获取素拓网活动记录')
-async def quality_data(user: schemas.User, offline: bool = False):
+@router.post('/activity', summary='获取素拓网活动记录')
+async def quality_activity(user: schemas.User, offline: bool = False):
     """
         获取素拓网活动记录
     - **username**: 用户名

@@ -138,29 +138,6 @@ class AiPaoUser(BaseModel):
     isDoneToday: bool = False
 
 
-class QualityActivity(BaseModel):
-    type: str
-    id: str
-    name: str = ''
-    semester: str = ''
-    activityDate: str = ''
-    location: str = ''
-    responsibility: str = ''
-    loggingDateTime: str = ''
-    status: str = ''
-    comment: Union[str, None] = None
-
-
-class QualityScholarship(BaseModel):
-    id: str
-    semester: str = ''
-    activityType: str = ''
-    activityContent: str = ''
-    activityLevel: str = ''
-    creditType: str = ''
-    credit: str = ''
-
-
 class Exam(BaseModel):
     code: str
     name: str = ''
@@ -213,3 +190,27 @@ class Notice(BaseModel):
     url: str
     title: str
     date: str
+
+
+# Quality
+class QualityActivity(BaseModel):
+    type: str
+    id: str
+    name: str = ''
+    semester: str = ''
+    activityDate: str = ''
+    location: str = ''
+    responsibility: str = ''
+    loggingDateTime: str = ''
+    status: str = ''
+    comment: Union[str, None] = None
+
+
+class QualityScholarship(BaseModel):
+    id: str
+    semester: str = ''
+    activityType: str = ''
+    activityContent: str = ''
+    activityLevel: str = ''
+    creditType: str = ''
+    credit: str = ''

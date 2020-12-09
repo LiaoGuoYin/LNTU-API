@@ -90,18 +90,18 @@ def get_single_activity(url, activity_type: str, cookie: str, is_save=False) -> 
         return parse_activity(html_doc=html_doc, activity_type=activity_type)
 
 
-def get_all_activity(cookie: str) -> dict:
+def get_all_activity(cookie: str) -> [schemas.QualityActivity]:
+    result_data_list = []
     activity_dict = QualityExpansionURLEnum.get_activity()
     for item, url in activity_dict.items():
-        # 把字典值中的 URL 换成爬虫结果
-        activity_dict[item] = get_single_activity(url.value, cookie=cookie, activity_type=item)
-    return activity_dict
+        result_data_list.extend(get_single_activity(url.value, cookie=cookie, activity_type=item))
+    return result_data_list
 
 
 if __name__ == '__main__':
-    # user_cookie = get_cookie(1710030215, "****")
-    user_cookie = 'ASP.NET_SessionId=qjbzzfzyb4v1jnhckoia3'
-    print(get_report(user_cookie))
+    # user_cookie = get_cookie('1710030215', '')
+    user_cookie = 'ASP.NET_SessionId=fda33li1cnf5ahe4il0xkt02'
+    print(get_all_activity(user_cookie))
     # get_scholarship(user_cookie, year=2019)
     # get_scholarship(user_cookie, year=2018)
     # get_scholarship(user_cookie, year=2017)

@@ -16,7 +16,6 @@ class TestQuality(unittest.TestCase):
 
     def setUp(self) -> None:
         self.cookie = core.get_cookie(**quality_user_dict)
-        # Download some html files to local
         core.get_report(self.cookie, is_save=True)
         core.get_single_activity(QualityExpansionURLEnum.MIND.value, 'mind', self.cookie, is_save=True)
 

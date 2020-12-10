@@ -21,9 +21,9 @@ class QualityExpansionURLEnum(Enum):
     def get_activity(cls):
         return {
             'mind': cls.MIND,
+            'competition': cls.COMPETITION,
             'social': cls.SOCIAL,
             'reading': cls.READING,
             'employment': cls.EMPLOYMENT,
             'skill': cls.SKILL,
-            'competition': cls.COMPETITION,
         }

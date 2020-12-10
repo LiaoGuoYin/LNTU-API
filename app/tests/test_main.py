@@ -70,7 +70,7 @@ class TestMainAPI(unittest.TestCase):
         self.assertTrue(response.status_code == 200)
 
     def test_quality_scholarship(self):
-        response = self.client.post('quality/data', params={'year': 2020}, json=quality_user_dict)
+        response = self.client.post('quality/scholarship', params={'year': 2020}, json=quality_user_dict)
         print(response.text)
         self.assertTrue(response.status_code == 200)
 

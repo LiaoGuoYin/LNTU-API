@@ -32,7 +32,7 @@ class TestQuality(unittest.TestCase):
         with open(local_html_file_dict['quality-activity']) as fp:
             html_text = fp.read()
             html_doc = etree.HTML(html_text)
-        self.assertTrue(parse_activity(html_doc, 'mind')[0].type == 'mind')
+        self.assertTrue(parse_activity(html_doc, 'mind')[0].type == '主题思想教育活动')
 
 
 if __name__ == '__main__':

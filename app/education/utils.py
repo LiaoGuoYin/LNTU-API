@@ -111,3 +111,8 @@ def choose_semester_id(semester_str: str) -> int:
         return constantsShared.semester[semester_str]
     else:
         raise exceptions.FormException('请检查学期参数是否正确')
+
+
+if __name__ == '__main__':
+    result = GetWeek().marshal("00010101010101010100000000000000000000000000000000000", 2, 1, 25)
+    print(result)

@@ -1,5 +1,6 @@
 import parse
 
+from app import exceptions
 from app import schemas
 from app.education.utils import GetWeek
 from app.exceptions import SpiderParserException
@@ -66,7 +67,10 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
             schedule.room = tmp_room.rsplit('(', maxsplit=1)[0]
         else:
             schedule.room = tmp_room
-        tmp_weeks = GetWeek().marshal(week, 2, 1, 50)
+
+        if not week.isdigit():
+            return schedule
+        tmp_weeks = GetWeek().marshal(week, 2, 1, 25)
         schedule.weeksString = tmp_weeks
         for each in tmp_weeks.split(' '):
             if ('单' in each) or ('双' in each):  # '单1-9' or '双2-10'
@@ -75,18 +79,21 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
             elif '-' in each:  # '2-15'
                 start_week, end_week = map(int, each.split('-'))
                 schedule.weeks.extend(list(range(start_week, end_week + 1)))
-            else:  # '11'
+            elif each != '':
                 schedule.weeks.extend([int(each)])
+            else:  # ''
+                pass
         return schedule
 
     try:
         # 使最后一个课程的索引上下文符合 parse模式
         cleaned_course_content_text = html_text.replace('table0.marshalTable', 'var teachers')
-        course_pattern = """activity = new TaskActivity(actTeacherId.join(\',\'),actTeacherName.join(\',\'),"{}","{name}({code})","{room_id}","{room}","{encrypted_week}",null,null,assistantName,{course_content},"","{}");{time}var teachers"""
+        course_pattern = """activity = new TaskActivity(actTeacherId.join({}),actTeacherName.join({}),"{}","{name}({code})","{room_id}","{room}","{encrypted_week}",null,null,assistantName,{course_content},"","{}");{time}var teachers"""
         course_result_list = parse.findall(course_pattern, cleaned_course_content_text)
+
+        # TODO
         for course in course_result_list:
-            # 解析基本信息: function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,
-            # taskId,remark,assistantName,experiItemName,schGroupNo){"""
+            # 解析基本信息: function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
             info_result = course.named
 
             # 解析课程时间
@@ -95,6 +102,8 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
             schedule_all_result = parse.findall(schedule_pattern_str, original_schedule)
             schedule_day_index_tuple_list = [tuple(map(lambda x: x + 1, each)) for each in
                                              schedule_all_result]  # [(2, 3),(2, 4)] 周二第三、四小节
+
+            info_result['encrypted_week'] = str(info_result.get('encrypted_week'))
 
             schedule_list = []
             for (day, index) in schedule_day_index_tuple_list:
@@ -111,9 +120,9 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
                  info_result.get('code') == course.code]
         return course_dict_list
     except IndexError:
-        return "课表体数组越界"
+        raise exceptions.SpiderParserException("课表体数组越界")
     except AttributeError:
-        return "课表体解析错误，xpath 失败"
+        raise exceptions.SpiderParserException("课表体解析错误，xpath 失败")
 
 
 def parse_grade_table(html_doc) -> [schemas.GradeTable]:

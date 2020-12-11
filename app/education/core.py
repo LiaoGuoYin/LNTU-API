@@ -123,7 +123,7 @@ def get_grade(username: str, password: str, session: Session = None, is_save: bo
     if '学年学期' in response.text:
         return parser.parse_grade(html_doc=etree.HTML(response.text))
     elif '所有成绩尚未发布' in response.text:
-        return '用户暂无有效成绩'
+        return []
     else:
         raise exceptions.SpiderParserException("[成绩查询页]请求失败")
 

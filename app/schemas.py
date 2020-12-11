@@ -26,7 +26,7 @@ class YamlConfig(BaseModel):
 class ResponseT(BaseModel):
     code: int = status.HTTP_200_OK
     message: str = "Success"
-    data: Union[list, dict] = None
+    data: Union[list, dict] = []
 
 
 # Classroom

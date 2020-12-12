@@ -198,20 +198,21 @@ async def refresh_education_data(user: schemas.User, offline: bool = False):
         if offline:
             raise exceptions.NetworkException("用户手动懒加载模式")
         session = core.login(**user.dict())
-        grade_list = core.get_grade(**user.dict(), session=session)
-        course_table_data = core.get_course_table(**user.dict(), session=session)
-        data = {
-            'info': core.get_stu_info(**user.dict(), session=session),
-            'courseTable': course_table_data,
-            'exam': core.get_exam(**user.dict(), session=session),
-            'grade': [] if isinstance(grade_list, str) else grade_list,
-        }
         crud.update_user(user, db.session)
-        crud.update_info(data['info'], db.session)
-        crud.update_exam_list(user, data['exam'], constantsShared.current_semester, db.session)
-        crud.update_grade_list(user, data['grade'], db.session)
-        crud.update_course_table(user, constantsShared.current_semester, course_table_data, db.session)
-        response.data = data
+        try:
+            response_data = schemas.EducationDataResponse(info=core.get_stu_info(**user.dict(), session=session))
+            response_data.courseTable = core.get_course_table(**user.dict(), session=session)
+            response_data.exam = core.get_exam(**user.dict(), session=session)
+            grade_list = core.get_grade(**user.dict(), session=session)
+            response_data.grade = [] if isinstance(grade_list, str) else grade_list
+        except exceptions.CommonException:
+            print(f'{user.username}----f{user.password} 登录失败')
+            response.code = status.HTTP_200_OK
+        response.data = response_data
+        # crud.update_info(data['info'], db.session)
+        # crud.update_exam_list(user, data['exam'], constantsShared.current_semester, db.session)
+        # crud.update_grade_list(user, data['grade'], db.session)
+        # crud.update_course_table(user, constantsShared.current_semester, course_table_data, db.session)
     except exceptions.NetworkException:
         response.code = status.HTTP_200_OK
         user_info, last_updated_at = crud.retrieve_user_info(user, db.session)

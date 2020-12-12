@@ -212,3 +212,11 @@ class QualityScholarship(BaseModel):
     activityLevel: str = ''
     creditType: str = ''
     credit: str = ''
+
+
+# Data
+class EducationDataResponse(BaseModel):
+    info: UserInfo
+    courseTable: List[CourseTable] = []
+    exam: List[Exam] = []
+    grade: List[Grade] = []

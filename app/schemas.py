@@ -25,8 +25,8 @@ class YamlConfig(BaseModel):
 # Generic Response
 class ResponseT(BaseModel):
     code: int = status.HTTP_200_OK
-    message: str = "Success"
-    data: Union[list, dict] = []
+    message: str = 'Success'
+    data: Union[list, dict, None] = None
 
 
 # Classroom
@@ -54,45 +54,45 @@ class User(BaseModel):
 class UserInfo(BaseModel):
     username: str
     name: str
-    photoURL: str = None
-    nickname: str = None
-    gender: str = None
-    grade: str = None
-    educationLast: str = None
-    project: str = None
-    education: str = None
-    studentType: str = None
-    college: str = None
-    major: str = None
-    direction: str = None
-    enrollDate: str = None
-    graduateDate: str = None
-    chiefCollege: str = None
-    studyType: str = None
-    membership: str = None
-    isInSchool: str = None
-    campus: str = None
-    majorClass: str = None
-    effectAt: str = None
-    isInRecord: str = None
-    studentStatus: str = None
-    isWorking: str = None
+    photoURL: str = ''
+    nickname: str = ''
+    gender: str = ''
+    grade: str = ''
+    educationLast: str = ''
+    project: str = ''
+    education: str = ''
+    studentType: str = ''
+    college: str = ''
+    major: str = ''
+    direction: Union[str, None] = ''
+    enrollDate: str = ''
+    graduateDate: str = ''
+    chiefCollege: str = ''
+    studyType: str = ''
+    membership: str = ''
+    isInSchool: str = ''
+    campus: str = ''
+    majorClass: str = ''
+    effectAt: str = ''
+    isInRecord: str = ''
+    studentStatus: str = ''
+    isWorking: str = ''
 
 
 # CourseTable
 class CourseTableSchedule(BaseModel):
-    room: str = None
-    weekday: int = None
-    index: int = None
-    weeksString: str = None
+    room: str = ''
+    weekday: int = 1  # TODO
+    index: int = 1
+    weeksString: str = ''
     weeks: Union[list, None] = []
 
 
 class CourseTable(BaseModel):
     code: str
-    name: str = None
-    teacher: str = None
-    credit: str = None
+    name: str = ''
+    teacher: str = ''
+    credit: str = ''
     scheduleList: List[CourseTableSchedule] = []
 
 
@@ -104,23 +104,23 @@ class GradeTable(BaseModel):
         reStudy = "重修"
 
     name: str
-    credit: str = None
-    semester: str = None
+    credit: str = ''
+    semester: str = ''
     status: CourseStatusEnum = CourseStatusEnum.normal
-    result: str = None
+    result: str = ''
 
 
 # Grade
 class Grade(GradeTable):
     code: str
-    courseType: str = None
-    midTerm: str = None
-    endTerm: str = None
-    usual: str = None
-    makeUpScore: str = None
-    makeUpScoreResult: str = None
-    totalScore: str = None
-    point: str = None
+    courseType: str = ''
+    midTerm: str = ''
+    endTerm: str = ''
+    usual: str = ''
+    makeUpScore: Union[str, None] = None
+    makeUpScoreResult: Union[str, None] = None
+    totalScore: str = ''
+    point: str = ''
 
 
 class AiPaoUser(BaseModel):
@@ -186,8 +186,8 @@ class HelperMessage(BaseModel):
 
 class Notice(BaseModel):
     url: str
-    title: str
-    date: str
+    title: str = ''
+    date: str = ''
 
 
 # Quality

@@ -64,7 +64,7 @@ class UserInfo(BaseModel):
     studentType: str = ''
     college: str = ''
     major: str = ''
-    direction: Union[str, None] = ''
+    direction: str = ''
     enrollDate: str = ''
     graduateDate: str = ''
     chiefCollege: str = ''

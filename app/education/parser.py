@@ -14,7 +14,7 @@ def parse_stu_info(html_doc) -> schemas.UserInfo:
                  'chiefCollege', 'studyType', 'membership', 'isInSchool', 'campus', 'majorClass', 'effectAt',
                  'isInRecord', 'studentStatus', 'isWorking']
     try:
-        data_values = [cell.text
+        data_values = [str(cell.text)
                        for row in rows
                        for cell in row.xpath('./td[not(@class="title")]')]
         if len(data_keys) != len(data_values):

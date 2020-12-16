@@ -1,6 +1,7 @@
 import sentry_sdk
 import uvicorn
 from fastapi import FastAPI
+from pydantic import ValidationError
 from sentry_sdk import capture_exception
 from starlette import status
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -58,6 +59,19 @@ async def request_validation_exception_handler(request: Request, exc: RequestVal
     capture_exception(exc)
     response = schemas.ResponseT(
         code=status.HTTP_400_BAD_REQUEST,
+        message=str(exc.errors())
+    )
+    return JSONResponse(
+        status_code=response.code,
+        content=response.dict()
+    )
+
+
+@app.exception_handler(ValidationError)
+async def request_validation_exception_handler(request: Request, exc: ValidationError):
+    capture_exception(exc)
+    response = schemas.ResponseT(
+        code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         message=str(exc.errors())
     )
     return JSONResponse(

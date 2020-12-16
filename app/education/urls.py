@@ -17,7 +17,7 @@ class URLEnum(Enum):
     GRADE = URL_ROOT + '/teach/grade/course/person!historyCourseGrade.action'
     GRADE_TABLE = URL_ROOT + '/teach/grade/course/person!report.action'
 
-    EXAM_OF_BATCH_ID = URL_ROOT + '/stdExamTable.action'
+    EXAM_OF_BATCH_ID = URL_ROOT + '/stdExamTable!innerIndex.action'
     EXAM = URL_ROOT + '/stdExamTable!examTable.action'
     OTHER_EXAM = URL_ROOT + '/stdOtherExamSignUp.action'
     PLAN = URL_ROOT + '/myPlanCompl.action'

@@ -52,6 +52,8 @@ def login(username: str, password: str) -> Session:
         raise exceptions.FormException("超过人数上限，请稍后再试")
     elif '您当前位置' in response.text:
         return session
+    elif 'security.AccountExpired' in response.text:
+        raise exceptions.FormException("账号已到期，可能是已经毕业")
     else:
         raise exceptions.AccessException("页面未知错误")
 

@@ -14,6 +14,7 @@ mysql:
 
 # 教务、素拓有效测试账号
 account:
-  username: 1710030215
-  educationPassword: demo
-  qualityPassword: demo
+  educationUsername: 123456789
+  educationPassword: 123456789
+  qualityUsername: 123456789
+  qualityPassword: 123456789

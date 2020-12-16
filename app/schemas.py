@@ -17,8 +17,9 @@ class YamlConfig(BaseModel):
     database: str
     testDatabase: str
 
-    username: str
+    educationUsername: str
     educationPassword: str
+    qualityUsername: str
     qualityPassword: str
 
 

@@ -46,9 +46,9 @@ class TestEducationCore(unittest.TestCase):
         with open(local_html_file_dict['grade']) as f:
             html_text = f.read()
         self.assertTrue('学年学期' or '所有成绩尚未发布' in html_text)
-        self.assertTrue(len(parser.parse_grade(etree.HTML(html_text))) > 0)
+        self.assertIsInstance(parser.parse_grade(etree.HTML(html_text)), list)
         print(parser.parse_grade(etree.HTML(html_text)))
-        self.assertTrue(len(grade_list) > 0)
+        self.assertTrue(len(grade_list) >= 0)
 
     def test_education_core_grade_table(self):
         grade_table_list = core.get_grade_table(**user_dict, is_save=True)

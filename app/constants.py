@@ -36,8 +36,9 @@ class Constants:
                 password=yaml_config['mysql']['password'],
                 database=yaml_config['mysql']['database'],
                 testDatabase=yaml_config['mysql']['testDatabase'],
-                username=yaml_config['account']['username'],
+                educationUsername=yaml_config['account']['educationUsername'],
                 educationPassword=yaml_config['account']['educationPassword'],
+                qualityUsername=yaml_config['account']['qualityUsername'],
                 qualityPassword=yaml_config['account']['qualityPassword'],
             )
             return config
@@ -72,7 +73,7 @@ class Constants:
     def calculate_semester_and_week(semester_start_date) -> (str, str):
         from datetime import datetime
         start = datetime.strptime(semester_start_date, '%Y-%m-%d')
-        semester = f"{start.year}-{'秋' if start.month in [8, 9, 10, 11, 12, 1, 2] else '春'}"
+        semester = f"{start.year}-{'秋' if start.month in [7, 8, 9, 10, 11, 12] else '春'}"
         delta = datetime.today() - start
         week = str((delta.days // 7) + 1)
         return semester, week
@@ -95,13 +96,13 @@ class Constants:
 
     def get_education_user_dict(self) -> dict:
         return {
-            'username': self.config.username,
+            'username': self.config.educationUsername,
             'password': self.config.educationPassword,
         }
 
     def get_quality_user_dict(self) -> dict:
         return {
-            'username': self.config.username,
+            'username': self.config.qualityUsername,
             'password': self.config.qualityPassword,
         }
 

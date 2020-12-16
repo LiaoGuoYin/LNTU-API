@@ -32,7 +32,7 @@ class TestAppDB(unittest.TestCase):
         info = schemas.UserInfo(username=10000, name='LiaoGuoYin',
                                 photoURL='http://202.199.224.119:8080/eams/showSelfAvatar.action?user.name=xxxx',
                                 nickname='abc', gender='男', grade='2017', educationLast='4', project='主修',
-                                education='本科', studentType='本科4年', college='xxxx学院', major='xxxx', direction=None,
+                                education='本科', studentType='本科4年', college='xxxx学院', major='xxxx', direction="None",
                                 enrollDate='2022-09-01', graduateDate='2024-07-01', chiefCollege='xxxx学院',
                                 studyType='普通全日制', membership='是', isInSchool='是', campus='xxxx校区',
                                 majorClass='xx17-x', effectAt='2017-09-01', isInRecord='是', studentStatus='在校',

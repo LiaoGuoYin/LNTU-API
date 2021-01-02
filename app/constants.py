@@ -23,7 +23,7 @@ class Constants:
         self.current_semester_id = self.semester.get(self.current_semester, '2020-秋')
 
     def _load_config_yaml(self) -> schemas.YamlConfig:
-        with open(os.path.join(self.app_path, 'config.yaml')) as fp:
+        with open(os.path.join(self.app_path, 'config.yaml'), encoding='utf-8') as fp:
             yaml_config = yaml.load(fp, Loader=yaml.BaseLoader)
         try:
             config = schemas.YamlConfig(

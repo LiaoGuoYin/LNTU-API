@@ -1,4 +1,6 @@
 # LNTU-API
+![license used in this repo](https://img.shields.io/github/license/LiaoGuoYin/LNTU-API)
+
 Online Demo: [https://api.liaoguoyin.com](https://api.liaoguoyin.com)
 
 An elegant backend API of [LNTU Course Management Information System](http://202.199.224.119:8080/eams/loginExt.action) and [LNTU Students Quality Expansion Activity Management System.](http://202.199.224.19:8080/)
@@ -51,3 +53,5 @@ An elegant backend API of [LNTU Course Management Information System](http://202
 [GPL v3](LICENSE)
 
 注意：对于基于本项目 **衍生、再发行的所有项目、所有子节点项目和使用了 LNTU-API 提供的部分开源组件**  的项目，其需公开注明 LNTU-API 标识。
+
+Note: **ALL** projects (including but not limited to any derivatives and/or the subprojects of this project) which use parts or all of the open-source components from LNTU-API should bear an explicit and clear reference to LNTU-API.

@@ -63,6 +63,8 @@ async def refresh_classroom(week: int, name: str, offline: bool = False):
                                                        classroomList=room.run(week=week, building_id=building_id))
         crud.update_classroom(classroom_data, db.session)
         response.data = classroom_data
+        if len(classroom_data.classroomList) == 0:
+            raise exceptions.NetworkException("自动懒加载模式")
     except exceptions.NetworkException:
         response.code = status.HTTP_200_OK
         response.data, last_updated_at = crud.retrieve_classroom(week, name, db.session)

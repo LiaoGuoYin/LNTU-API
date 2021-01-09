@@ -2,6 +2,7 @@ import datetime
 from functools import wraps
 
 from sqlalchemy.orm import Session
+from starlette import status
 
 from app import schemas, exceptions
 from appDB import models
@@ -73,6 +74,31 @@ def update_public_notice(notice_list: [schemas.Notice], session: Session):
         new_notice = models.Notice(**notice.dict())
         session.merge(new_notice)
     session.commit()
+
+
+# Notification
+def register_notification(form: schemas.NotificationToken, session: Session) -> (int, str):
+    if bool(session.query(models.User).filter_by(username=form.username).first()):
+        # Identifying whether the user has previously logged in or not
+        is_token_exist_previous = bool(session.query(models.NotificationToken).filter_by(token=form.token).first())
+        new_token = models.NotificationToken(**form.dict())
+        session.merge(new_token)
+        session.commit()
+        if is_token_exist_previous:
+            return status.HTTP_200_OK, f'Success, 刷新绑定 {new_token.token}'
+        else:
+            return status.HTTP_200_OK, f'Success, 创建 {new_token.token}'
+    else:
+        return status.HTTP_401_UNAUTHORIZED, 'Failed, 请先通过 LNTU-API 登录'
+
+
+def remove_notification(form: schemas.NotificationToken, session: Session) -> (int, str):
+    delete_count = session.query(models.NotificationToken).filter_by(token=form.token).delete()
+    if delete_count == 0:
+        return status.HTTP_404_NOT_FOUND, 'Failed, 没有找到指定 Token'
+    else:
+        session.commit()
+        return status.HTTP_200_OK, f'Success, 成功删除 {delete_count} 条 Token'
 
 
 def retrieve_public_notice(offset: int, limit: int, session: Session) -> (schemas.Notice, str):

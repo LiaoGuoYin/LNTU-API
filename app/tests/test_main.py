@@ -2,12 +2,16 @@ import unittest
 
 from fastapi.testclient import TestClient
 
+from app import schemas
 from app.main import app
 from app.constants import constantsShared
 
 education_user_dict = constantsShared.get_education_user_dict()
 quality_user_dict = constantsShared.get_quality_user_dict()
 current_year = constantsShared.current_semester[:4]
+
+demo_notification_token = schemas.NotificationToken(token='b44dc22a-523b-11eb-ae93-0242ac130002',
+                                                    username='1710030215')
 
 
 class TestMainAPI(unittest.TestCase):
@@ -71,6 +75,17 @@ class TestMainAPI(unittest.TestCase):
 
     def test_quality_scholarship(self):
         response = self.client.post('quality/scholarship', params={'year': 2020}, json=quality_user_dict)
+        print(response.text)
+        self.assertTrue(response.status_code == 200)
+
+    def test_app_notification_register(self):
+        response = self.client.post('app/notification-register', json=demo_notification_token.dict())
+        print(demo_notification_token.json())
+        print(response.text)
+        self.assertTrue(response.status_code == 200)
+
+    def test_app_notification_remove(self):
+        response = self.client.post('app/notification-remove', json=demo_notification_token.dict())
         print(response.text)
         self.assertTrue(response.status_code == 200)
 

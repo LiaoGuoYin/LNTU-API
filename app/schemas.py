@@ -221,3 +221,9 @@ class EducationDataResponse(BaseModel):
     courseTable: List[CourseTable] = []
     exam: List[Exam] = []
     grade: List[Grade] = []
+
+
+# Apple Push Notification Token
+class NotificationToken(BaseModel):
+    token: str
+    username: str

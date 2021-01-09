@@ -160,3 +160,12 @@ class QualityActivity(Base):
     comment = Column(String(255))
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+
+
+class NotificationToken(Base):
+    __tablename__ = "notification_token"
+
+    token = Column(String(128), primary_key=True, index=True)
+    username = Column(String(64))
+
+    lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

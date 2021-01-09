@@ -85,20 +85,20 @@ def register_notification(form: schemas.NotificationToken, session: Session) -> 
         session.merge(new_token)
         session.commit()
         if is_token_exist_previous:
-            return status.HTTP_200_OK, f'Success, 刷新绑定 {new_token.token}'
+            return status.HTTP_200_OK, f'Success, {new_token.username} 刷新绑定到 Token: {new_token.token}'
         else:
-            return status.HTTP_200_OK, f'Success, 创建 {new_token.token}'
+            return status.HTTP_200_OK, f'Success, {new_token.username} 创建绑定到 Token: {new_token.username}'
     else:
-        return status.HTTP_401_UNAUTHORIZED, 'Failed, 请先通过 LNTU-API 登录'
+        return status.HTTP_401_UNAUTHORIZED, f'Failure, {form.username} 还未通过 LNTU-API 登录过!'
 
 
 def remove_notification(form: schemas.NotificationToken, session: Session) -> (int, str):
-    delete_count = session.query(models.NotificationToken).filter_by(token=form.token).delete()
+    delete_count = session.query(models.NotificationToken).filter_by(token=form.token, username=form.username).delete()
     if delete_count == 0:
-        return status.HTTP_404_NOT_FOUND, 'Failed, 没有找到指定 Token'
+        return status.HTTP_404_NOT_FOUND, f'Failure, 没有找到 Token: {form.token}'
     else:
         session.commit()
-        return status.HTTP_200_OK, f'Success, 成功删除 {delete_count} 条 Token'
+        return status.HTTP_200_OK, f'Success, 清除 Token: {form.token}, 对应用户 {form.username}, 操作 {delete_count} 条'
 
 
 def retrieve_public_notice(offset: int, limit: int, session: Session) -> (schemas.Notice, str):

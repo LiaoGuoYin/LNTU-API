@@ -11,10 +11,9 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from sqlalchemy import create_engine
 
-from app import education, quality, aipao, schemas, exceptions
-from app.exceptions import FormException
-from appDB.models import Base
+from app import education, quality, aipao, schemas, exceptions, mobile
 from app.constants import constantsShared
+from appDB.models import Base
 
 tags_metadata = [
     {
@@ -95,11 +94,17 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 def filter_sentry_alert(event, hint):
     if 'exc_info' in hint:
         exc_type, exc_value, tb = hint['exc_info']
-        if isinstance(exc_value, FormException):
+        if isinstance(exc_value, exceptions.FormException):
             # 来源于用户的表单错误，不应被埋点记录
             return None
     return event
 
+
+app.include_router(
+    mobile.router,
+    prefix="/app",
+    tags=["App"]
+)
 
 app.include_router(
     education.router,

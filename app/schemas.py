@@ -223,7 +223,26 @@ class EducationDataResponse(BaseModel):
     grade: List[Grade] = []
 
 
+class NotificationSubscriptionEnum(Enum):
+    GRADE = 'grade'
+    NOTICE = 'notice'
+
+    @classmethod
+    def values(cls):
+        return [each.value for each in cls]
+
+
 # Apple Push Notification Token
 class NotificationToken(BaseModel):
     token: str
     username: str
+    subscriptionList: List[NotificationSubscriptionEnum] = []
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "token": "test-token",
+                "username": "1710030215",
+                "subscriptionList": NotificationSubscriptionEnum.values()
+            }
+        }

@@ -81,13 +81,12 @@ def register_notification(form: schemas.NotificationToken, session: Session) -> 
     if bool(session.query(models.User).filter_by(username=form.username).first()):
         # Identifying whether the user has previously logged in or not
         is_token_exist_previous = bool(session.query(models.NotificationToken).filter_by(token=form.token).first())
-        new_token = models.NotificationToken(**form.dict())
+        new_token = models.NotificationToken(**form.dict(exclude={'subscriptionList'}))
+        new_token.isGrade = True if schemas.NotificationSubscriptionEnum.GRADE in form.subscriptionList else False
+        new_token.isNotice = True if schemas.NotificationSubscriptionEnum.NOTICE in form.subscriptionList else False
         session.merge(new_token)
         session.commit()
-        if is_token_exist_previous:
-            return status.HTTP_200_OK, f'Success, {new_token.username} 刷新绑定到 Token: {new_token.token}'
-        else:
-            return status.HTTP_200_OK, f'Success, {new_token.username} 创建绑定到 Token: {new_token.username}'
+        return status.HTTP_200_OK, f'Success, {new_token.username} {"更新" if is_token_exist_previous else "新订阅"} Token: {new_token.token}'
     else:
         return status.HTTP_401_UNAUTHORIZED, f'Failure, {form.username} 还未通过 LNTU-API 登录过!'
 
@@ -95,7 +94,7 @@ def register_notification(form: schemas.NotificationToken, session: Session) -> 
 def remove_notification(form: schemas.NotificationToken, session: Session) -> (int, str):
     delete_count = session.query(models.NotificationToken).filter_by(token=form.token, username=form.username).delete()
     if delete_count == 0:
-        return status.HTTP_404_NOT_FOUND, f'Failure, 没有找到 Token: {form.token}'
+        return status.HTTP_404_NOT_FOUND, f'Failure, 没有找到用户: {form.username}, Token: {form.token}'
     else:
         session.commit()
         return status.HTTP_200_OK, f'Success, 清除 Token: {form.token}, 对应用户 {form.username}, 操作 {delete_count} 条'

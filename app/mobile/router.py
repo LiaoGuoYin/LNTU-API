@@ -13,6 +13,7 @@ async def register_notification(form: schemas.NotificationToken):
         绑定 Notification Token
     - **token**: 来自 Apple Push Notification Service 的 deviceToken
     - **username**: 在本系统登录过的教务在线学号
+    - **subscriptionList**: 要订阅的项目，如: [grade, notice]
     """
     response = schemas.ResponseT(data=form)
     response.code, response.message = crud.register_notification(form, session=db.session)

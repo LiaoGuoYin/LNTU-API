@@ -163,9 +163,11 @@ class QualityActivity(Base):
 
 
 class NotificationToken(Base):
-    __tablename__ = "notification_token"
+    __tablename__ = "notification_subscription"
 
     token = Column(String(128), primary_key=True, index=True)
     username = Column(String(64))
+    isNotice = Column(Boolean, default=False)
+    isGrade = Column(Boolean, default=False)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

@@ -11,7 +11,8 @@ quality_user_dict = constantsShared.get_quality_user_dict()
 current_year = constantsShared.current_semester[:4]
 
 demo_notification_token = schemas.NotificationToken(token='b44dc22a-523b-11eb-ae93-0242ac130002',
-                                                    username='1710030215')
+                                                    username='1710030215',
+                                                    subscriptionList=[])
 
 
 class TestMainAPI(unittest.TestCase):

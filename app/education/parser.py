@@ -126,7 +126,7 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
     except IndexError:
         raise exceptions.SpiderParserException("课表体数组越界")
     except AttributeError:
-        raise exceptions.SpiderParserException("课表体解析错误，xpath 失败")
+        raise exceptions.SpiderParserException("课表体解析错误，XPath 失败")
 
 
 def parse_grade_table(html_doc) -> [schemas.GradeTable]:
@@ -222,20 +222,19 @@ def parse_exam(html_doc) -> [schemas.Exam]:
                 data_row.append(''.join(td.xpath('string(.)').split()))
             if len(data_row) == 0:
                 continue
-            print(data_row)
             exam = schemas.Exam(code=data_row[0])
             exam.name = data_row[1]
             exam.type = data_row[2]
             exam.date = data_row[3]
             exam.time = data_row[4]
             exam.location = data_row[5]
-            exam.seatNumber = data_row[-3] if data_row[-3].isdigit() else 'NaN'  # 期末的时候会消失
+            exam.seatNumber = data_row[-3] if data_row[-3].isdigit() else 'NaN'  # 期末教评的时候座位号会被隐藏掉
             exam.status = data_row[-2]
             exam.comment = data_row[-1]
             exam_list.append(exam)
         return exam_list
     except IndexError as e:
-        raise SpiderParserException(f"考试安排页，数组越界: {e}")
+        raise SpiderParserException(f"考试安排页，数组越界: {e}，请稍后再重试")
 
 
 def parse_plan(html_doc) -> [schemas.PlanGroup]:

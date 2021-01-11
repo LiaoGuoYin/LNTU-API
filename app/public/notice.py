@@ -23,43 +23,6 @@ def get_notice_url_list_from(page_url: str = 'https://jwzx.lntu.edu.cn/index/jwg
     return url_list
 
 
-# def get_notice_detail(notice: schemas.Notice) -> schemas.Notice:
-#     class NoticeDetail(BaseModel):
-#         class NoticeDetailAppendix(BaseModel):
-#             url: str
-#             name: str
-#
-#         title: str = None
-#         date: str = None
-#         content: str = None
-#         appendix: List[NoticeDetailAppendix] = []
-#
-#
-#     class Notice(NoticeDetail):
-#         url: str
-#
-#     def get_appendix(ori_html_doc, ori_notice: schemas.Notice):
-#         appendix_xpath = '/html/body/div[3]/form/div[1]/ul/li'
-#         appendix_elements = ori_html_doc.xpath(appendix_xpath)
-#         for row in appendix_elements:
-#             name = 'http://jwzx.lntu.edu.cn/' + row.xpath('./a/@href')[0]
-#             url = row.xpath('./a/text()')[0]
-#             appendix = schemas.NoticeDetail.NoticeDetailAppendix(url=url, name=name)
-#             ori_notice.appendix.append(appendix)
-#
-#     xpath_str = '/html/body/div/form/div[1]'
-#     response = requests.get(notice.url)
-#     response.encoding = 'utf-8'
-#     html_doc = etree.HTML(response.text)
-#     notice_elements = html_doc.xpath(xpath_str)[0]
-#     notice.title = notice_elements.xpath('./div/h1/text()')[0]
-#     notice.date = notice_elements.xpath('./div/h3/text()')[1][3:]
-#     notice.content = notice_elements.xpath('string(./div[@id="vsb_content"]/div)')
-#     if '附件' in notice.content:
-#         get_appendix(html_doc, notice)
-#     return notice
-
-
 if __name__ == '__main__':
     page_list = ['https://jwzx.lntu.edu.cn/index/jwgg.htm']
     # page_list.extend(['http://jwzx.lntu.edu.cn/index/jwgg/{page}.htm'.format(page=i)

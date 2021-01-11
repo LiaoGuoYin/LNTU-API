@@ -222,15 +222,16 @@ def parse_exam(html_doc) -> [schemas.Exam]:
                 data_row.append(''.join(td.xpath('string(.)').split()))
             if len(data_row) == 0:
                 continue
+            print(data_row)
             exam = schemas.Exam(code=data_row[0])
             exam.name = data_row[1]
             exam.type = data_row[2]
             exam.date = data_row[3]
             exam.time = data_row[4]
             exam.location = data_row[5]
-            exam.seatNumber = data_row[6]
-            exam.status = data_row[7]
-            exam.comment = data_row[8]
+            exam.seatNumber = data_row[-3] if data_row[-3].isdigit() else 'NaN'  # 期末的时候会消失
+            exam.status = data_row[-2]
+            exam.comment = data_row[-1]
             exam_list.append(exam)
         return exam_list
     except IndexError as e:

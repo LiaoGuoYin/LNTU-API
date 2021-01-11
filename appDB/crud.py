@@ -46,8 +46,14 @@ def update_grade_list(user: schemas.User, grade_list: [schemas.Grade], session: 
     for grade in grade_list:
         if not isinstance(grade, schemas.Grade):
             continue
-        new_grade = models.Grade(username=user.username, **grade.dict())
-        session.merge(new_grade)
+        old_grade = session.query(models.Grade).filter(models.Grade.username == user.username,
+                                                       models.Grade.code == grade.code).first()
+        if old_grade:
+            session.add(old_grade)
+        else:  # New Notice
+            new_grade = models.Grade(username=user.username, **grade.dict())
+            new_grade.isPushed = False
+            session.add(new_grade)
     session.commit()
 
 
@@ -71,8 +77,14 @@ def update_public_notice(notice_list: [schemas.Notice], session: Session):
     for notice in notice_list:
         if not isinstance(notice, schemas.Notice):
             continue
-        new_notice = models.Notice(**notice.dict())
-        session.merge(new_notice)
+        old_notice = session.query(models.Notice).filter(models.Notice.title == notice.title,
+                                                         models.Notice.url == notice.url).first()
+        if old_notice:
+            session.add(old_notice)
+        else:  # New Notice
+            new_notice = models.Notice(**notice.dict())
+            new_notice.isPushed = False
+            session.add(new_notice)
     session.commit()
 
 
@@ -82,8 +94,8 @@ def register_notification(form: schemas.NotificationToken, session: Session) -> 
         # Identifying whether the user has previously logged in or not
         is_token_exist_previous = bool(session.query(models.NotificationToken).filter_by(token=form.token).first())
         new_token = models.NotificationToken(**form.dict(exclude={'subscriptionList'}))
-        new_token.isGrade = True if schemas.NotificationSubscriptionEnum.GRADE in form.subscriptionList else False
-        new_token.isNotice = True if schemas.NotificationSubscriptionEnum.NOTICE in form.subscriptionList else False
+        new_token.isSubscribeGrade = True if schemas.NotificationSubscriptionEnum.GRADE in form.subscriptionList else False
+        new_token.isSubscribeNotice = True if schemas.NotificationSubscriptionEnum.NOTICE in form.subscriptionList else False
         session.merge(new_token)
         session.commit()
         return status.HTTP_200_OK, f'Success, {new_token.username} {"更新" if is_token_exist_previous else "新订阅"} Token: {new_token.token}'
@@ -102,7 +114,7 @@ def remove_notification(form: schemas.NotificationToken, session: Session) -> (i
 
 def retrieve_public_notice(offset: int, limit: int, session: Session) -> (schemas.Notice, str):
     notice_list = session.query(models.Notice).order_by(models.Notice.date.desc()).offset(offset).limit(limit).all()
-    serializer = Serializer(notice_list, exclude=['lastUpdatedAt'], many=True)
+    serializer = Serializer(notice_list, exclude=['lastUpdatedAt', 'isPushed'], many=True)
     last_updated_at = '' if len(notice_list) == 0 else notice_list[0].lastUpdatedAt
     return serializer.data, last_updated_at
 

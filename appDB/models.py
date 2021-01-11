@@ -98,6 +98,7 @@ class Grade(Base):
     result = Column(String(64))
     point = Column(String(64))
     status = Column(String(64))
+    isPushed = Column(Boolean, default=True)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -140,6 +141,7 @@ class Notice(Base):
     title = Column(String(64), primary_key=True)
     url = Column(String(64), primary_key=True)
     date = Column(String(64), index=True)
+    isPushed = Column(Boolean, default=True)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -167,7 +169,7 @@ class NotificationToken(Base):
 
     token = Column(String(128), primary_key=True, index=True)
     username = Column(String(64))
-    isNotice = Column(Boolean, default=False)
-    isGrade = Column(Boolean, default=False)
+    isSubscribeNotice = Column(Boolean, default=True)
+    isSubscribeGrade = Column(Boolean, default=True)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

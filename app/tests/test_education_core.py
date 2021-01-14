@@ -2,8 +2,8 @@ import unittest
 from lxml import etree
 from requests import Session
 
+from app import exceptions
 from app.education import parser, core
-from app.exceptions import FormException
 from app.constants import constantsShared
 
 local_html_file_dict = constantsShared.get_local_html_file_dict()
@@ -23,9 +23,9 @@ class TestEducationCore(unittest.TestCase):
     def test_education_core_login_invalid_user(self):
         invalid_user = user_dict.copy()
         invalid_user['password'] += '000'
-        self.assertRaises(FormException, core.login, **invalid_user)
+        self.assertRaises(exceptions.FormException, core.login, **invalid_user)
         username = 10000000
-        self.assertRaises(FormException, core.login, username, 'test')
+        self.assertRaises(exceptions.FormException, core.login, username, 'test')
 
     def test_education_core_get_info(self):
         core.get_stu_info(**user_dict, is_save=True)
@@ -77,3 +77,12 @@ class TestEducationCore(unittest.TestCase):
             html_text = f.read()
         self.assertIsInstance(exam_list, list)
         self.assertIn('计划完成情况', html_text)
+
+    def test_education_core_evaluate(self):
+        try:
+            core.evaluate_teacher(**user_dict, is_save=True)
+        except exceptions.FormException:
+            pass
+        with open(local_html_file_dict['evaluate']) as f:
+            html_text = f.read()
+        self.assertIn('评教', html_text)

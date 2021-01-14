@@ -228,7 +228,7 @@ def parse_exam(html_doc) -> [schemas.Exam]:
             exam.date = data_row[3]
             exam.time = data_row[4]
             exam.location = data_row[5]
-            exam.seatNumber = data_row[-3] if data_row[-3].isdigit() else 'NaN'  # 期末教评的时候座位号会被隐藏掉
+            exam.seatNumber = data_row[-3] if data_row[-3].isdigit() else 'NaN'  # 期末评教阶段，座位号会被隐藏
             exam.status = data_row[-2]
             exam.comment = data_row[-1]
             exam_list.append(exam)

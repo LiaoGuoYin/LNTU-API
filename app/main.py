@@ -11,7 +11,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from sqlalchemy import create_engine
 
-from app import education, quality, aipao, schemas, exceptions, mobile
+from app import education, quality, schemas, exceptions, mobile
 from app.constants import constantsShared
 from appDB.models import Base
 
@@ -25,8 +25,8 @@ tags_metadata = [
         "description": "API for [LNTU Students Quality Expansion Activity Management System.](http://202.199.224.19:8080/)",
     },
     {
-        "name": "AiPao",
-        "description": "API for [AiPao](http://client3.aipao.me/)",
+        "name": "App",
+        "description": "API For App(LNTUHelper)",
     },
 ]
 
@@ -101,12 +101,6 @@ def filter_sentry_alert(event, hint):
 
 
 app.include_router(
-    mobile.router,
-    prefix="/app",
-    tags=["App"]
-)
-
-app.include_router(
     education.router,
     prefix="/education",
     tags=["Education"]
@@ -119,9 +113,9 @@ app.include_router(
 )
 
 app.include_router(
-    aipao.router,
-    prefix="/aipao",
-    tags=["AiPao"]
+    mobile.router,
+    prefix="/app",
+    tags=["App"]
 )
 
 db_url_dict = constantsShared.get_db_url_dict()

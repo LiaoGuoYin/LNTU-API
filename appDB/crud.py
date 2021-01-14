@@ -57,13 +57,6 @@ def update_grade_list(user: schemas.User, grade_list: [schemas.Grade], session: 
     session.commit()
 
 
-def update_aipao_order(student: schemas.AiPaoUser, imei: str, session: Session) -> models.AiPaoOrder:
-    new_user = models.AiPaoOrder(IMEI=imei, **student.dict(exclude={'token'}))
-    session.merge(new_user)
-    session.commit()
-    return new_user
-
-
 def update_classroom(classroom_data: schemas.ClassroomResponseData, session: Session):
     for room in classroom_data.classroomList:
         new_room = models.Classroom(**room.dict())

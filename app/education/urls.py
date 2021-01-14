@@ -22,6 +22,9 @@ class URLEnum(Enum):
     OTHER_EXAM = URL_ROOT + '/stdOtherExamSignUp.action'
     PLAN = URL_ROOT + '/myPlanCompl.action'
 
+    EVALUATE = URL_ROOT + '/quality/stdEvaluate!innerIndex.action'
+    EVALUATE_SUBMIT = URL_ROOT + '/quality/stdEvaluate!finishAnswer.action'
+
     # CLASSROOMS = URL_ROOT + '/classroom/apply/free!search.action'
     # 公开课:http://202.199.224.119:8080/eams/stdSyllabus!search.action?lesson.project.id=1&lesson.semester.id=620
     # 校历:http://202.199.224.119:8080/eams/schoolCalendar!search.action?semester.id=620

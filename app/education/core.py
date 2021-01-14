@@ -80,7 +80,7 @@ def get_plan(username: str, password: str, session: Session = None, is_save: boo
     if '计划完成情况' in response.text:
         return parser.parse_plan(html_doc=etree.HTML(response.text))
     elif '请先完成评教' in response.text:
-        raise exceptions.SpiderParserException("请去教务在线，完成评教后重试")
+        raise exceptions.FormException("请完成评教后重试")
     else:
         raise exceptions.SpiderParserException("[个人培养方案完成情况页]获取失败，请稍后重试")
 
@@ -181,3 +181,70 @@ def get_other_exam(username: str, password: str, session: Session = None, is_sav
         return parser.parse_other_exam(html_doc=etree.HTML(response.text))
     else:
         raise exceptions.SpiderParserException("[资格考试页]获取失败，请稍后重试")
+
+
+def evaluate_teacher(username: str, password: str, session: Session = None, is_save: bool = False) -> (int, str):
+    def get_evaluate_id(html_text):
+        id_pattern = "evaluationLesson.id={id:d}"
+        result_id_list = parse.findall(id_pattern, html_text)
+        return [course.named.get('id') for course in result_id_list]
+
+    def submit_evaluate(semester_id: int, course_id: int, session: Session = None) -> bool:
+        response = session.post(URLEnum.EVALUATE_SUBMIT.value, data={
+            "teacher.id": "",
+            "semester.id": semester_id,
+            "evaluationLesson.id": course_id,
+            "result1_0.questionName": "1.该课程每节课的学习目标清晰。",
+            "result1_0.content": "赞成",
+            "result1_0.score": "0.5",
+            "result1_1.questionName": "2.该课程学习资源满足我的学习需要。",
+            "result1_1.content": "赞成",
+            "result1_1.score": "0.5",
+            "result1_2.questionName": "3.教师与我们沟通交流及时、顺畅。",
+            "result1_2.content": "赞成",
+            "result1_2.score": "0.5",
+            "result1_3.questionName": "4.我的学习表现得到教师及时反馈。",
+            "result1_3.content": "赞成",
+            "result1_3.score": "0.5",
+            "result1_4.questionName": "5.教师讲授能够激发我的学习兴趣、调动我的学习积极性。",
+            "result1_4.content": "赞成",
+            "result1_4.score": "0.5",
+            "result1_5.questionName": "6.教师能够帮助我改进学习方法。",
+            "result1_5.content": "赞成",
+            "result1_5.score": "0.5",
+            "result1_6.questionName": "7.教师能够关注我的学习效果。",
+            "result1_6.content": "赞成",
+            "result1_6.score": "0.5",
+            "result1_7.questionName": "8.教师能够客观公正地评价我的学习水平。",
+            "result1_7.content": "赞成",
+            "result1_7.score": "0.5",
+            "result1_8.questionName": "9.我的学习成果达到课程要求。",
+            "result1_8.content": "赞成",
+            "result1_8.score": "0.5",
+            "result1_9.questionName": "10.该课程使我的表达、沟通能力得到提高。",
+            "result1_9.content": "赞成",
+            "result1_9.score": "0.5",
+            "result1Num": "10",
+            "result2Num": "0",
+        }, headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        return True if response.status_code == 200 else False
+
+    if not session:
+        session = login(username, password)
+    response = session.get(URLEnum.EVALUATE.value)
+    if is_save:
+        save_html_to_file(response.text, 'evaluate')
+    if '进行评教' in response.text:
+        evaluate_id_list = get_evaluate_id(html_text=response.text)
+        evaluate_result_list = []
+        for evaluate_id in evaluate_id_list:
+            if submit_evaluate(constantsShared.current_semester_id, evaluate_id, session=session):
+                evaluate_result_list.append(True)
+        if len(evaluate_result_list) == len(evaluate_id_list):
+            return 200, f"操作 {len(evaluate_result_list)} 条教师评价（好评），已完成!"
+        else:
+            exceptions.SpiderParserException(f"操作 {len(evaluate_result_list)} 条教师评价（好评），但是不完整!")
+    elif '评教完成' in response.text:
+        raise exceptions.FormException("已完成本学期教师评价!")
+    else:
+        raise exceptions.SpiderParserException("[教室评价页]获取失败，请稍后重试")

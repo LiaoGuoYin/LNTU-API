@@ -294,3 +294,26 @@ def parse_other_exam(html_doc) -> [schemas.OtherExam]:
         return other_exam_list
     except IndexError as e:
         raise SpiderParserException(f"考试安排页，数组越界: {e}")
+
+
+def parse_teacher_evaluation(html_doc) -> [schemas.TeacherEvaluationResponse]:
+    evaluation_list: [schemas.TeacherEvaluationResponse] = []
+    rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
+    for row in rows:  # 处理每一行
+        data_row = []
+        for td in row:
+            data_row.append(''.join(td.xpath('string(.)').split()))
+        if len(data_row) == 0:
+            continue
+        try:
+            evaluation = schemas.TeacherEvaluationResponse(code=data_row[0])
+            evaluation.name = data_row[1]
+            evaluation.teacher = data_row[3]
+            evaluation.status = '未完成评教' if ('进行评教' in data_row[-1]) else data_row[-1]
+            tmp_id_info = row.xpath('./td/a/@href')
+            for each in tmp_id_info:
+                evaluation.id = each.split('=')[1]
+            evaluation_list.append(evaluation)
+        except IndexError as e:
+            print(f"[评教页]数组越界: {e}")
+    return evaluation_list

@@ -92,7 +92,7 @@ class Constants:
             'class-room': os.path.join(self.app_path, 'app/tests/static/', 'class-room.html'),
             'quality-report': os.path.join(self.app_path, 'app/tests/static/', 'quality-report.html'),
             'quality-activity': os.path.join(self.app_path, 'app/tests/static/', 'quality-activity.html'),
-            'evaluate': os.path.join(self.app_path, 'app/tests/static/', 'evaluate.html'),
+            'evaluation': os.path.join(self.app_path, 'app/tests/static/', 'evaluation.html'),
         }
 
     def get_education_user_dict(self) -> dict:

@@ -78,11 +78,11 @@ class TestEducationCore(unittest.TestCase):
         self.assertIsInstance(exam_list, list)
         self.assertIn('计划完成情况', html_text)
 
-    def test_education_core_evaluate(self):
-        try:
-            core.evaluate_teacher(**user_dict, is_save=True)
-        except exceptions.FormException:
-            pass
-        with open(local_html_file_dict['evaluate']) as f:
+    def test_education_core_evaluate_teacher(self):
+        status_code, response_message, evaluation_list = core.evaluate_teacher(submit=False, is_save=True, **user_dict)
+        with open(local_html_file_dict['evaluation']) as f:
             html_text = f.read()
+
+        print(status_code, response_message, evaluation_list)
+        self.assertIsInstance(evaluation_list, list)
         self.assertIn('评教', html_text)

@@ -77,3 +77,11 @@ class TestEducationParser(unittest.TestCase):
         plan_result = parser.parse_plan(html_doc=etree.HTML(html_text))
         self.assertIsInstance(plan_result, list)
         print(plan_result)
+
+    def test_education_parse_teacher_evaluation(self):
+        with open(local_html_file_dict['evaluation']) as f:
+            html_text = f.read()
+
+        plan_result = parser.parse_teacher_evaluation(html_doc=etree.HTML(html_text))
+        print(plan_result)
+        self.assertIsInstance(plan_result, list)

@@ -45,6 +45,12 @@ class TestMainAPI(unittest.TestCase):
         print(response.text)
         self.assertTrue(response.status_code == 200)
 
+    def test_core_evaluate_teacher(self):
+        response = self.client.post('education/evaluation',
+                                    json=schemas.TeacherEvaluationRequest(submit=False, **education_user_dict).dict())
+        print(response.text)
+        self.assertTrue(response.json()['code'] == 404)  # 本学期无需评教
+
     def test_education_data(self):
         response = self.client.post('/education/data', json=education_user_dict)
         print(response.text)

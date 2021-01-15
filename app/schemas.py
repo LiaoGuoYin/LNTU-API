@@ -124,19 +124,6 @@ class Grade(GradeTable):
     point: str = ''
 
 
-class AiPaoUser(BaseModel):
-    id: int
-    code: str
-    token: str = ''
-    name: str = ''
-    gender: str = ''
-    schoolName: str = ''
-    successCount: int = -1
-    failureCount: int = -1
-    isCodeValid: bool = False
-    isDoneToday: bool = False
-
-
 class Exam(BaseModel):
     code: str
     name: str = ''
@@ -173,6 +160,18 @@ class OtherExam(BaseModel):
     result: str = ''
     status: str = ''
     semester: str = ''
+
+
+class TeacherEvaluationRequest(User):
+    submit: bool = False
+
+
+class TeacherEvaluationResponse(BaseModel):
+    code: str
+    name: str = ''
+    teacher: str = ''
+    status: str = ''
+    id: str = ''
 
 
 # Public

@@ -6,6 +6,7 @@ import parse
 import requests
 from lxml import etree
 from requests import Session
+from starlette import status
 
 from app import schemas, exceptions
 from app.education import parser
@@ -183,13 +184,9 @@ def get_other_exam(username: str, password: str, session: Session = None, is_sav
         raise exceptions.SpiderParserException("[资格考试页]获取失败，请稍后重试")
 
 
-def evaluate_teacher(username: str, password: str, session: Session = None, is_save: bool = False) -> (int, str):
-    def get_evaluate_id(html_text):
-        id_pattern = "evaluationLesson.id={id:d}"
-        result_id_list = parse.findall(id_pattern, html_text)
-        return [course.named.get('id') for course in result_id_list]
-
-    def submit_evaluate(semester_id: int, course_id: int, session: Session = None) -> bool:
+def evaluate_teacher(username: str, password: str, submit: bool, session: Session = None,
+                     is_save: bool = False) -> (int, str, [schemas.TeacherEvaluationResponse]):
+    def submit_evaluation(semester_id: int, course_id: int, session: Session = None) -> bool:
         response = session.post(URLEnum.EVALUATE_SUBMIT.value, data={
             "teacher.id": "",
             "semester.id": semester_id,
@@ -233,18 +230,27 @@ def evaluate_teacher(username: str, password: str, session: Session = None, is_s
         session = login(username, password)
     response = session.get(URLEnum.EVALUATE.value)
     if is_save:
-        save_html_to_file(response.text, 'evaluate')
-    if '进行评教' in response.text:
-        evaluate_id_list = get_evaluate_id(html_text=response.text)
-        evaluate_result_list = []
-        for evaluate_id in evaluate_id_list:
-            if submit_evaluate(constantsShared.current_semester_id, evaluate_id, session=session):
-                evaluate_result_list.append(True)
-        if len(evaluate_result_list) == len(evaluate_id_list):
-            return 200, f"操作 {len(evaluate_result_list)} 条教师评价（好评），已完成!"
-        else:
-            exceptions.SpiderParserException(f"操作 {len(evaluate_result_list)} 条教师评价（好评），但是不完整!")
-    elif '评教完成' in response.text:
-        raise exceptions.FormException("已完成本学期教师评价!")
+        save_html_to_file(response.text, 'evaluation')
+    if '评教' in response.text:
+        evaluation_list = parser.parse_teacher_evaluation(html_doc=etree.HTML(response.text))
+        if submit:  # 一键评教 Mode
+            submit_evaluation_count = 0
+            for each in evaluation_list:
+                if each.status == '评教完成':
+                    continue
+                else:
+                    if submit_evaluation(constantsShared.current_semester_id, each.id, session=session):
+                        each.status = '评教完成'
+                        submit_evaluation_count += 1
+            return status.HTTP_200_OK, f'一键评教成功，共完成 {submit_evaluation_count} 条教师评价（好评）', evaluation_list
+        else:  # 查询评教状态 Mode
+            need_to_submit_evaluation_count = 0
+            for each in evaluation_list:
+                if each.status != '评教完成':
+                    need_to_submit_evaluation_count += 1
+            if need_to_submit_evaluation_count == 0:
+                return status.HTTP_404_NOT_FOUND, f'查询评教状态成功，本学期共 {len(evaluation_list)} 门课程，已经全部完成评教，无需进一步操作', evaluation_list
+            else:
+                return status.HTTP_200_OK, f'查询评教状态成功，本学期共 {len(evaluation_list)} 门课程，还有 {need_to_submit_evaluation_count} 门课程没有完成评教，可以进一步一键评教', evaluation_list
     else:
         raise exceptions.SpiderParserException("[教室评价页]获取失败，请稍后重试")

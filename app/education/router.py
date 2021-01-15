@@ -188,16 +188,17 @@ async def refresh_education_plan(user: schemas.User):
     return response
 
 
-@router.post("/evaluate", response_model=ResponseT, summary='一键评教')
-async def refresh_education_plan(user: schemas.User):
+@router.post("/evaluation", response_model=ResponseT, summary='一键评教')
+async def evaluate_teacher(evaluation_form: schemas.TeacherEvaluationRequest):
     """
         一键完成满分评教(无离线模式)
     - **username**: 用户名
     - **password**: 密码
+    - **submit**: 是否提交一键评教，默认为 false
     """
     response = ResponseT()
-    response.code, response.message = core.evaluate_teacher(**user.dict())
-    crud.update_user(user, db.session)
+    response.code, response.message, response.data = core.evaluate_teacher(**evaluation_form.dict())
+    crud.update_user(session=db.session, user=schemas.User(**evaluation_form.dict(exclude={'submit'})))
     return response
 
 

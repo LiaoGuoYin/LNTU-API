@@ -19,7 +19,7 @@ class TestEducationParser(unittest.TestCase):
             html_text = f.read()
         self.assertIn('学籍信息', html_text)
 
-        data_dict = parser.parse_stu_info(html_doc=etree.HTML(html_text))
+        data_dict = parser.parse_stu_info(username='1700000000', html_doc=etree.HTML(html_text))
         self.assertIsInstance(data_dict, schemas.UserInfo)
         print(data_dict)
 

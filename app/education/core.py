@@ -67,7 +67,7 @@ def get_stu_info(username: str, password: str, session=None, is_save: bool = Fal
         if is_save:
             save_html_to_file(response.text, 'info')
         html_doc = etree.HTML(response.text)
-        return parser.parse_stu_info(html_doc)
+        return parser.parse_stu_info(username=username, html_doc=html_doc)
     else:
         raise exceptions.SpiderParserException("[个人信息页]获取失败，请稍后重试")
 

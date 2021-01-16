@@ -1,29 +1,39 @@
 import parse
 from sentry_sdk import capture_exception
 
-from app import schemas, exceptions
+from app import schemas
 from app.education.utils import GetWeek
 
 
-def parse_stu_info(html_doc) -> schemas.UserInfo:
-    rows = html_doc.xpath('/html/body/div/div[2]/div[1]/table/tr')[1:-1]
-    data_keys = ['username', 'name', 'photoURL', 'nickname', 'gender', 'grade', 'educationLast', 'project',
-                 'education', 'studentType', 'college', 'major', 'direction', 'enrollDate', 'graduateDate',
-                 'chiefCollege', 'studyType', 'membership', 'isInSchool', 'campus', 'majorClass', 'effectAt',
-                 'isInRecord', 'studentStatus', 'isWorking']
-    data_values = []
-    data = []
+def parse_stu_info(username, html_doc) -> schemas.UserInfo:
+    info = schemas.UserInfo(username=username)
+
+    # 个人基本信息
+    basic_info_keys = ['username', 'name', 'photoURL', 'nickname', 'gender', 'grade', 'educationLast', 'project',
+                       'education', 'studentType', 'college', 'major', 'direction', 'enrollDate', 'graduateDate',
+                       'chiefCollege', 'studyType', 'membership', 'isInSchool', 'campus', 'majorClass', 'effectAt',
+                       'isInRecord', 'studentStatus', 'isWorking']
+    basic_info_values = []
     try:
-        for row in rows:
-            for cell in row.xpath('./td[not(@class="title")]'):
-                data_values.append(str(cell.text))
-        if len(data_keys) != len(data_values):
-            raise exceptions.SpiderParserException("[个人信息页]数据解析缺失")
-        data = dict(zip(data_keys, data_values))
-        data['photoURL'] = f"/eams/showSelfAvatar.action?user.name={data.get('username', 'None')}"
+        rows = html_doc.xpath('/html/body/div[1]/div[2]/div[@id="tabPage1"]/table/tr')
+        for row in rows[1:-1]:
+            for td in row.xpath('./td[not(@class="title")]'):
+                basic_info_values.append(str(td.text))
+        else:
+            data = dict(zip(basic_info_keys, basic_info_values))
+            info = schemas.UserInfo(**data)
+            info.photoURL = f"/eams/showSelfAvatar.action?user.name={data.get('username', 'None')}"
     except Exception as e:
         capture_exception(e)
-    return schemas.UserInfo(**data)
+
+    # 联系信息、火车站
+    try:
+        home_data = html_doc.xpath('/html/body/div[1]/div[2]/div[@id="tabPage3"]/table[1]')[0]
+        info.address = home_data.xpath('./tr[2]/td[4]/text()')[0]
+        info.train = home_data.xpath('./tr[3]/td[4]/text()')[0]
+    except Exception as e:
+        capture_exception(e)
+    return info
 
 
 def parse_course_table_bottom(html_doc) -> [schemas.CourseTable]:

@@ -10,8 +10,8 @@ education_user_dict = constantsShared.get_education_user_dict()
 quality_user_dict = constantsShared.get_quality_user_dict()
 current_year = constantsShared.current_semester[:4]
 
-demo_notification_token = schemas.NotificationToken(token='b44dc22a-523b-11eb-ae93-0242ac130002',
-                                                    username='1710030215',
+demo_notification_token = schemas.NotificationToken(token='2l1sROBU/RugsdQitG7IKLXDmdsYF5EpABa4M+/Co0A=',
+                                                    username='1700000000',
                                                     subscriptionList=[])
 
 

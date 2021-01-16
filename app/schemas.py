@@ -54,7 +54,7 @@ class User(BaseModel):
 # UserInfo
 class UserInfo(BaseModel):
     username: str
-    name: str
+    name: str = ''
     photoURL: str = ''
     nickname: str = ''
     gender: str = ''
@@ -78,6 +78,8 @@ class UserInfo(BaseModel):
     isInRecord: str = ''
     studentStatus: str = ''
     isWorking: str = ''
+    address: str = ''
+    train: str = ''
 
 
 # CourseTable
@@ -241,7 +243,7 @@ class NotificationToken(BaseModel):
         schema_extra = {
             "example": {
                 "token": "test-token",
-                "username": "1710030215",
+                "username": "1700000000",
                 "subscriptionList": NotificationSubscriptionEnum.values()
             }
         }

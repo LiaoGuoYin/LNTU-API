@@ -1,10 +1,8 @@
 import parse
+from sentry_sdk import capture_exception
 
-from app import exceptions
-from app import schemas
+from app import schemas, exceptions
 from app.education.utils import GetWeek
-from app.exceptions import SpiderParserException
-from app.schemas import CourseTableSchedule, CourseTable
 
 
 def parse_stu_info(html_doc) -> schemas.UserInfo:
@@ -13,26 +11,26 @@ def parse_stu_info(html_doc) -> schemas.UserInfo:
                  'education', 'studentType', 'college', 'major', 'direction', 'enrollDate', 'graduateDate',
                  'chiefCollege', 'studyType', 'membership', 'isInSchool', 'campus', 'majorClass', 'effectAt',
                  'isInRecord', 'studentStatus', 'isWorking']
+    data_values = []
+    data = []
     try:
-        data_values = [str(cell.text)
-                       for row in rows
-                       for cell in row.xpath('./td[not(@class="title")]')]
+        for row in rows:
+            for cell in row.xpath('./td[not(@class="title")]'):
+                data_values.append(str(cell.text))
         if len(data_keys) != len(data_values):
-            raise SpiderParserException("个人信息页，数据解析缺失")
+            raise exceptions.SpiderParserException("[个人信息页]数据解析缺失")
         data = dict(zip(data_keys, data_values))
         data['photoURL'] = f"/eams/showSelfAvatar.action?user.name={data.get('username', 'None')}"
-        return schemas.UserInfo(**data)
-    except IndexError:
-        raise SpiderParserException("个人信息页，数组越界")
-    except AttributeError:
-        raise SpiderParserException("个人信息页，结构不正常解析失败")
+    except Exception as e:
+        capture_exception(e)
+    return schemas.UserInfo(**data)
 
 
 def parse_course_table_bottom(html_doc) -> [schemas.CourseTable]:
-    course_list = []
+    course_list: [schemas.CourseTable] = []
     rows = html_doc.xpath('//*[@id="tasklesson"]/div/table/tbody/tr')
-    try:
-        for row in rows:
+    for row in rows:
+        try:
             cells = row.xpath('./td')
             if not len(cells):  # 处理课表为空的情况（可能是学期字段错误）
                 continue
@@ -44,12 +42,10 @@ def parse_course_table_bottom(html_doc) -> [schemas.CourseTable]:
                 'credit': data_row[1],
                 'teacher': data_row[3],
             }
-            course_list.append(CourseTable(**single_course_dict))
-        return course_list
-    except IndexError:
-        raise SpiderParserException("课表页，底部数组越界")
-    except AttributeError:
-        raise SpiderParserException("课表页，底部解析失败")
+            course_list.append(schemas.CourseTable(**single_course_dict))
+        except Exception as e:
+            capture_exception(e)
+    return course_list
 
 
 def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) -> [schemas.CourseTable]:
@@ -61,7 +57,7 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
             2-15 -> [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
         week: 00001111111100000000000000000000000000000000000000000
         """
-        schedule = CourseTableSchedule()
+        schedule = schemas.CourseTableSchedule()
         tmp_room = info_result.get('room')
         if '（' in tmp_room:
             schedule.room = tmp_room.rsplit('（', maxsplit=1)[1].replace('）', '')
@@ -90,10 +86,9 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
         cleaned_course_content_text = html_text.replace('table0.marshalTable',
                                                         'var teachers; activity = new TaskActivity')
         tmp_course_list = cleaned_course_content_text.split('activity = new TaskActivity')
-        for each in tmp_course_list[1:-1]:  # 去除垃圾数据(非 activity = new TaskActivity 部分)
+        for tmp_course in tmp_course_list[1:-1]:  # 去除垃圾数据(非 activity = new TaskActivity 部分)
             course_pattern = """(actTeacherId.join({}),actTeacherName.join({}),{},"{name}({code})","{room_id}","{room}","{encrypted_week}",null,null,assistantName,{course_content},{},{});{time}var teachers"""
-            course_result_list = parse.findall(course_pattern, each)
-            # [print(i) for i in course_result_list]
+            course_result_list = parse.findall(course_pattern, tmp_course)
 
             for course in course_result_list:
                 # 解析基本信息: function TaskActivity(teacherId,teacherName,courseId,courseName,roomId,roomName,vaildWeeks,taskId,remark,assistantName,experiItemName,schGroupNo){"""
@@ -122,19 +117,17 @@ def parse_course_table_body(html_text, course_dict_list: [schemas.CourseTable]) 
                 for i in schedule_list:
                     [course.scheduleList.append(i) for course in course_dict_list if
                      info_result.get('code') == course.code]
-        return course_dict_list
-    except IndexError:
-        raise exceptions.SpiderParserException("课表体数组越界")
-    except AttributeError:
-        raise exceptions.SpiderParserException("课表体解析错误，XPath 失败")
+    except Exception as e:
+        capture_exception(e)
+    return course_dict_list
 
 
 def parse_grade_table(html_doc) -> [schemas.GradeTable]:
     course_grade_list: [schemas.GradeTable] = []
     rows = html_doc.xpath('/html/body/table[2]/tr')
+    cells_element = []
+    cells = []
     try:
-        cells_element = []
-        cells = []
         for row in rows[1:]:
             cells_element.append(row[:4])
             if row[-1].text != '\xa0':
@@ -164,21 +157,21 @@ def parse_grade_table(html_doc) -> [schemas.GradeTable]:
             course_grade_table.semester = each[3]
             course_grade_table.status = each[4]
             course_grade_list.append(course_grade_table)
-        return course_grade_list
     except Exception as e:
-        return e
+        capture_exception(e)
+    return course_grade_list
 
 
 def parse_grade(html_doc) -> [schemas.CourseTable]:
     course_list: [schemas.CourseTable] = []
     score_table_rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
-    try:
-        for row in score_table_rows:
-            cells = []
-            for td in row:
-                cells.append(''.join(td.xpath('string(.)').split()))
-            if len(cells) == 0:
-                continue
+    for row in score_table_rows:
+        cells = []
+        for td in row:
+            cells.append(''.join(td.xpath('string(.)').split()))
+        if len(cells) == 0:
+            continue
+        try:
             # cells: ['2019-20202', 'H101730023056', 'H101730023056.01', '信息系统分析与设计', '专业必修', '3.5', '95', '94', '89', '93.3', '93.3', '4', '查卷申请']
             course = schemas.Grade(name=cells[3], code=cells[2])
             # 转换学期：2019-20202 -> 2020-春
@@ -205,23 +198,21 @@ def parse_grade(html_doc) -> [schemas.CourseTable]:
             else:
                 course.status = schemas.GradeTable.CourseStatusEnum.normal
             course_list.append(course)
-        return course_list
-    except IndexError as e:
-        raise SpiderParserException(f"成绩详情页，数组越界: {e}")
-    except AttributeError as e:
-        raise SpiderParserException(f"成绩详情页，结构解析失败: {e}")
+        except Exception as e:
+            capture_exception(e)
+    return course_list
 
 
 def parse_exam(html_doc) -> [schemas.Exam]:
     exam_list: [schemas.Exam] = []
     rows = html_doc.xpath('/html/body/div[@class="grid"]/table/tbody/tr')
-    try:
-        for row in rows:  # 处理每一行
-            data_row = []
-            for td in row:
-                data_row.append(''.join(td.xpath('string(.)').split()))
-            if len(data_row) == 0:
-                continue
+    for row in rows:  # 处理每一行
+        data_row = []
+        for td in row:
+            data_row.append(''.join(td.xpath('string(.)').split()))
+        if len(data_row) == 0:
+            continue
+        try:
             exam = schemas.Exam(code=data_row[0])
             exam.name = data_row[1]
             exam.type = data_row[2]
@@ -232,20 +223,20 @@ def parse_exam(html_doc) -> [schemas.Exam]:
             exam.status = data_row[-2]
             exam.comment = data_row[-1]
             exam_list.append(exam)
-        return exam_list
-    except IndexError as e:
-        raise SpiderParserException(f"考试安排页，数组越界: {e}，请稍后再重试")
+        except Exception as e:
+            capture_exception(e)
+    return exam_list
 
 
 def parse_plan(html_doc) -> [schemas.PlanGroup]:
     plan_group_list: [schemas.PlanGroup] = []
     rows = html_doc.xpath('/html/body/div/table/tr')
-    try:
-        plan_group = schemas.PlanGroup()
-        for row in rows[1:]:  # 跳过表头，处理每一行
-            data_row = []
-            for td in row:
-                data_row.append(''.join(td.xpath('string(.)').split()))
+    plan_group = schemas.PlanGroup()
+    for row in rows[1:]:  # 跳过表头，处理每一行
+        data_row = []
+        for td in row:
+            data_row.append(''.join(td.xpath('string(.)').split()))
+        try:
             if len(data_row) == 0:  # 当前行数据为空
                 continue
             elif len(data_row) == 6:  # 当前行数据是培养方案组
@@ -270,30 +261,29 @@ def parse_plan(html_doc) -> [schemas.PlanGroup]:
                 plan.comment = data_row[-1]
                 plan.type = plan_group.type
                 plan_group.courseList.append(plan)
-        return plan_group_list
-    except IndexError as e:
-        raise SpiderParserException(f"培养计划完成页，数组越界: {e}")
+        except Exception as e:
+            capture_exception(e)
+    return plan_group_list
 
 
 def parse_other_exam(html_doc) -> [schemas.OtherExam]:
-    # TODO 资格考试报名记录
     other_exam_list: [schemas.OtherExam] = []
     rows = html_doc.xpath('/html/body/form/div[@class="grid"]/table/tbody/tr')
-    try:
-        for row in rows:  # 处理每一行
-            data_row = []
-            for td in row:
-                data_row.append(''.join(td.xpath('string(.)').split()))
-            if len(data_row) == 0:
-                continue
+    for row in rows:  # 处理每一行
+        data_row = []
+        for td in row:
+            data_row.append(''.join(td.xpath('string(.)').split()))
+        if len(data_row) == 0:
+            continue
+        try:
             exam = schemas.OtherExam(name=data_row[0])
             exam.result = data_row[1]
             exam.status = data_row[2]
             exam.semester = data_row[3]
             other_exam_list.append(exam)
-        return other_exam_list
-    except IndexError as e:
-        raise SpiderParserException(f"考试安排页，数组越界: {e}")
+        except Exception as e:
+            capture_exception(e)
+    return other_exam_list
 
 
 def parse_teacher_evaluation(html_doc) -> [schemas.TeacherEvaluationResponse]:
@@ -314,6 +304,6 @@ def parse_teacher_evaluation(html_doc) -> [schemas.TeacherEvaluationResponse]:
             for each in tmp_id_info:
                 evaluation.id = each.split('=')[1]
             evaluation_list.append(evaluation)
-        except IndexError as e:
-            print(f"[评教页]数组越界: {e}")
+        except Exception as e:
+            capture_exception(e)
     return evaluation_list

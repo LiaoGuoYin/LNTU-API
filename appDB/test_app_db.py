@@ -36,7 +36,7 @@ class TestAppDB(unittest.TestCase):
                                 enrollDate='2022-09-01', graduateDate='2024-07-01', chiefCollege='xxxx学院',
                                 studyType='普通全日制', membership='是', isInSchool='是', campus='xxxx校区',
                                 majorClass='xx17-x', effectAt='2017-09-01', isInRecord='是', studentStatus='在校',
-                                isWorking='否')
+                                isWorking='否', address='', train='')
         with db():
             db.session.merge(models.UserInfo(**info.dict()))
             db.session.commit()
@@ -53,7 +53,7 @@ class TestAppDB(unittest.TestCase):
                                                                            weeks=[4, 5, 6, 7, 8, 9, 10, 11],
                                                                            weekday=2, index=2)])
         with db():
-            db.session.merge(models.CourseTable(username='1710030215', semester='2020-秋', **course_table.dict()))
+            db.session.merge(models.CourseTable(username='1700000000', semester='2020-秋', **course_table.dict()))
             db.session.commit()
 
     def test_education_grade(self):

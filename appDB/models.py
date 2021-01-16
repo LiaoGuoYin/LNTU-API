@@ -44,6 +44,8 @@ class UserInfo(Base):
     isInRecord = Column(String(128))
     studentStatus = Column(String(128))
     isWorking = Column(String(128))
+    address = Column(String(128))
+    train = Column(String(128))
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 

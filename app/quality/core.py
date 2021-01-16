@@ -102,7 +102,7 @@ def get_all_activity(cookie: str) -> [schemas.QualityActivity]:
 
 
 if __name__ == '__main__':
-    # user_cookie = get_cookie('1710030215', '')
+    # user_cookie = get_cookie('1700000000', '')
     user_cookie = 'ASP.NET_SessionId=fda33li1cnf5ahe4il0xkt02'
     print(get_all_activity(user_cookie))
     # get_scholarship(user_cookie, year=2019)

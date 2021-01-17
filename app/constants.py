@@ -40,6 +40,10 @@ class Constants:
                 educationPassword=yaml_config['account']['educationPassword'],
                 qualityUsername=yaml_config['account']['qualityUsername'],
                 qualityPassword=yaml_config['account']['qualityPassword'],
+                bundleId=yaml_config['apple']['bundleId'],
+                teamId=yaml_config['apple']['teamId'],
+                keyId=yaml_config['apple']['keyId'],
+                keyPath=yaml_config['apple']['keyPath'],
             )
             return config
         except KeyError as e:
@@ -111,6 +115,14 @@ class Constants:
         return {
             'production': f'mysql+pymysql://{self.config.user}:{self.config.password}@{self.config.host}:{self.config.port}/{self.config.database}?charset=utf8',
             'test': f'mysql+pymysql://{self.config.user}:{self.config.password}@{self.config.host}:{self.config.port}/{self.config.testDatabase}?charset=utf8',
+        }
+
+    def get_apple_push_dict(self):
+        return {
+            'bundleId': self.config.bundleId,
+            'teamId': self.config.teamId,
+            'keyId': self.config.keyId,
+            'keyPath': self.config.keyPath,
         }
 
     def get_current_week(self):

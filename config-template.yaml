@@ -18,3 +18,10 @@ account:
   educationPassword: 123456789
   qualityUsername: 123456789
   qualityPassword: 123456789
+
+# Apple Push
+apple:
+  bundleId: 'me.lntu.app'
+  teamId: ''
+  keyId: ''
+  keyPath: ''

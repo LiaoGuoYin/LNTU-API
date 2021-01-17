@@ -22,6 +22,11 @@ class YamlConfig(BaseModel):
     qualityUsername: str
     qualityPassword: str
 
+    bundleId: str = ''
+    teamId: str = ''
+    keyId: str = ''
+    keyPath: str = ''
+
 
 # Generic Response
 class ResponseT(BaseModel):

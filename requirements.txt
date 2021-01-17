@@ -14,3 +14,4 @@ parse==1.18.0
 celery==5.0.5
 redis==3.5.3
 PyJWT==1.7.1
+hyper==0.7.0

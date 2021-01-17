@@ -1,12 +1,14 @@
 import datetime
+
 from functools import wraps
 
 from sqlalchemy.orm import Session
 from starlette import status
 
 from app import schemas, exceptions
-from appDB import models
+from appDB import models, app_push_crud
 from appDB.utils import Serializer
+from appPush.tasks import push_notice
 
 
 def update_user(user: schemas.User, session: Session) -> models.User:
@@ -76,7 +78,10 @@ def update_public_notice(notice_list: [schemas.Notice], session: Session):
             session.add(old_notice)
         else:  # New Notice
             new_notice = models.Notice(**notice.dict())
-            new_notice.isPushed = False
+            session.add(new_notice)
+            token_list = app_push_crud.retrieve_need_to_push_notice_token(session)
+            push_notice.delay(content=new_notice.title, token_list=token_list)
+            # TODO status handler
             session.add(new_notice)
     session.commit()
 

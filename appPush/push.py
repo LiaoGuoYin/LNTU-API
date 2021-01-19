@@ -1,5 +1,9 @@
+import base64
+
 import json
 import time
+from binascii import Error
+
 import jwt
 from hyper import HTTPConnection
 
@@ -13,7 +17,7 @@ f = open(constantsShared.config.keyPath)
 PRIVATE_KEY = f.read()
 
 
-def apple_push(content: str, device_token_list: [str]):
+def apple_push(title, body, device_token_list: [str]):
     token = jwt.encode(
         {
             'iss': TEAM_ID,
@@ -36,7 +40,10 @@ def apple_push(content: str, device_token_list: [str]):
 
     payload_data = {
         'aps': {
-            'alert': content,
+            'alert': {
+                'title': title,
+                'body': body,
+            },
             "badge": 0,
             'sound': "default"
         }
@@ -48,12 +55,16 @@ def apple_push(content: str, device_token_list: [str]):
     conn = HTTPConnection('api.development.push.apple.com:443')
 
     for device_token in device_token_list:
+        try:
+            decrypted_device_token = base64.b64decode(device_token).hex()
+        except Error:
+            continue
         conn.request(
             'POST',
-            f'/3/device/{device_token}',
+            f'/3/device/{decrypted_device_token}',
             payload,
             headers=request_headers
         )
 
         response = conn.get_response()
-        print(response.__dict__)  # Display for celery worker
+        print(response.__dict__)  # print to log for celery-worker

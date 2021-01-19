@@ -1,5 +1,3 @@
-import base64
-
 from celery import Celery
 
 from appPush.push import apple_push
@@ -8,7 +6,6 @@ celery = Celery('appPush.tasks', broker='redis://127.0.0.1:6379', backend='redis
 
 
 @celery.task
-def push_notice(content: str, token_list: [str]):
-    print('开始推送通知任务')
-    decrypted_token_list = [base64.b64decode(each).hex() for each in token_list]  # exception handler
-    apple_push(content=content, device_token_list=decrypted_token_list)
+def push_notice(body: str, device_token_list: [str]):
+    print('教务在线发新通知啦!')
+    apple_push(title='教务在线通知', body=body, device_token_list=device_token_list)

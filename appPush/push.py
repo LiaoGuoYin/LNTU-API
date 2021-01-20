@@ -17,7 +17,7 @@ f = open(constantsShared.config.keyPath)
 PRIVATE_KEY = f.read()
 
 
-def apple_push(title, body, device_token_list: [str]):
+def apple_push(category: str, title, body, device_token_list: [str]):
     token = jwt.encode(
         {
             'iss': TEAM_ID,
@@ -45,7 +45,8 @@ def apple_push(title, body, device_token_list: [str]):
                 'body': body,
             },
             "badge": 0,
-            'sound': "default"
+            'sound': "default",
+            "category": category
         }
     }
 

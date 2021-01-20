@@ -230,8 +230,8 @@ class EducationDataResponse(BaseModel):
 
 
 class NotificationSubscriptionEnum(Enum):
-    GRADE = 'grade'
-    NOTICE = 'notice'
+    GRADE = 'GRADE'
+    NOTICE = 'NOTICE'
 
     @classmethod
     def values(cls):

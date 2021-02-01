@@ -18,9 +18,9 @@ class TestAppDB(unittest.TestCase):
     def setUp(self) -> None:
         app = FastAPI()
         db_url_dict = constantsShared.get_db_url_dict()
-        engine = create_engine(db_url_dict['test'], echo=True)
+        engine = create_engine(db_url_dict['production'], echo=True)
         Base.metadata.create_all(bind=engine)  # 创建数据库
-        app.add_middleware(DBSessionMiddleware, db_url=db_url_dict['test'])
+        app.add_middleware(DBSessionMiddleware, db_url=db_url_dict['production'])
 
     def test_education_user(self):
         user = schemas.User(username=100000, password='thisismypassword')

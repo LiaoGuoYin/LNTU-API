@@ -232,6 +232,7 @@ class EducationDataResponse(BaseModel):
 class NotificationSubscriptionEnum(Enum):
     GRADE = 'GRADE'
     NOTICE = 'NOTICE'
+    ADMIN = 'ADMIN'
 
     @classmethod
     def values(cls):
@@ -252,3 +253,33 @@ class NotificationToken(BaseModel):
                 "subscriptionList": NotificationSubscriptionEnum.values()
             }
         }
+
+
+class NotificationPushBaseModel(BaseModel):
+    token: str
+
+
+# Notice Push
+class NoticePushNotification(NotificationPushBaseModel):
+    contentBody: str = ''
+
+
+# Grade Push
+class GradePushNotification(NotificationPushBaseModel):
+    username: str
+    courseName: str
+    courseResult: str
+    isPushed: bool = False
+
+    @property
+    def contentBody(self):
+        """GPA计算规则:
+           "二级制: 合格(85),不合格(0)"
+           "五级制: 优秀(95),良(85),中(75),及格(65),不及格(0)"
+       """
+        if self.courseResult.isdigit():
+            content_body = '好像没发挥好噢，加油加油!' if float(self.courseResult) < 60.0 else '还不错噢，继续努力!'
+        else:
+            content_body = '好像没发挥好噢，加油加油!' if '不' in self.courseResult else '还不错噢，继续努力!'
+
+        return f'{self.courseName}: {self.courseResult}，{content_body}'

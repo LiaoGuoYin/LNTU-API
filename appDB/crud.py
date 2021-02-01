@@ -6,9 +6,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from app import schemas, exceptions
-from appDB import models, app_push_crud
+from appDB import models
 from appDB.utils import Serializer
-from appPush.tasks import push_notice
 
 
 def update_user(user: schemas.User, session: Session) -> models.User:
@@ -78,10 +77,6 @@ def update_public_notice(notice_list: [schemas.Notice], session: Session):
             session.add(old_notice)
         else:  # New Notice
             new_notice = models.Notice(**notice.dict())
-            session.add(new_notice)
-            device_token_list = app_push_crud.retrieve_need_to_push_notice_device_token_list(session)
-            push_notice.delay(body=new_notice.title, device_token_list=device_token_list)
-            # TODO status handler
             session.add(new_notice)
     session.commit()
 

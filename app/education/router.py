@@ -140,20 +140,19 @@ async def refresh_education_grade(user: schemas.User, offline: bool = False):
 
 @router.post("/exam", response_model=ResponseT, summary='获取考试安排')
 async def refresh_education_exam(user: schemas.User, semester: str = constantsShared.current_semester,
-                                 makeup: bool = False, offline: bool = False):
+                                 offline: bool = False):
     """
         考试安排查询
     - **username**: 用户名
     - **password**: 密码
     - **semester**: 学期; 例: 2020-秋
-    - **makeup**: 是否查询补考安排
     - **offline**: 是否离线模式
     """
     response = ResponseT()
     try:
         if offline:
             raise exceptions.NetworkException("用户手动懒加载模式")
-        exam_list = core.get_exam(**user.dict(), is_makeup=makeup, semester_id=utils.choose_semester_id(semester))
+        exam_list = core.get_exam(**user.dict(), semester_id=utils.choose_semester_id(semester))
         response.data = exam_list
         crud.update_user(user, db.session)
         crud.update_exam_list(user, exam_list, semester, db.session)

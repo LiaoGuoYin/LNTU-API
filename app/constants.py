@@ -90,6 +90,7 @@ class Constants:
             'grade': os.path.join(self.app_path, 'app/tests/static/', 'grade.html'),
             'grade-table': os.path.join(self.app_path, 'app/tests/static/', 'grade-table.html'),
             'exam': os.path.join(self.app_path, 'app/tests/static/', 'exam.html'),
+            'exam-batch-id': os.path.join(self.app_path, 'app/tests/static/', 'exam-batch-id.html'),
             'other-exam': os.path.join(self.app_path, 'app/tests/static/', 'other-exam.html'),
             'plan': os.path.join(self.app_path, 'app/tests/static/', 'plan.html'),
             'class-room-building': os.path.join(self.app_path, 'app/tests/static/', 'class-room-building.html'),

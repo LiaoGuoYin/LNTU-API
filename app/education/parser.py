@@ -238,6 +238,19 @@ def parse_exam(html_doc) -> [schemas.Exam]:
     return exam_list
 
 
+def parse_exam_id(html_doc) -> dict:
+    batch_id_dict = {}
+    batch_id_option_list = html_doc.xpath('//*[@id="examBatchId"]/option')
+    if len(batch_id_option_list) == 0:
+        return batch_id_option_list
+    else:
+        for exam in batch_id_option_list:
+            exam_type = exam.text
+            exam_id = exam.xpath('./@value')[0]
+            batch_id_dict[exam_type] = exam_id
+    return batch_id_dict
+
+
 def parse_plan(html_doc) -> [schemas.PlanGroup]:
     plan_group_list: [schemas.PlanGroup] = []
     rows = html_doc.xpath('/html/body/div/table/tr')

@@ -62,6 +62,14 @@ class TestEducationParser(unittest.TestCase):
         self.assertIsInstance(exam_list, list)
         print(exam_list)
 
+    def test_education_parse_exam_batch_id(self):
+        with open(local_html_file_dict['exam-batch-id']) as f:
+            html_text = f.read()
+
+        exam_batch_dict = parser.parse_exam_id(html_doc=etree.HTML(html_text))
+        self.assertIsInstance(exam_batch_dict, dict)
+        print(exam_batch_dict)
+
     def test_education_core_other_exam(self):
         with open(local_html_file_dict['other-exam']) as f:
             html_text = f.read()

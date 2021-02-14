@@ -2,7 +2,6 @@ import hashlib
 import re
 import time
 
-import parse
 import requests
 from lxml import etree
 from requests import Session
@@ -148,21 +147,30 @@ def get_grade_table(username: str, password: str, session: Session = None, is_sa
 
 
 def get_exam(username: str, password: str, semester_id: int = constantsShared.current_semester_id,
-             session: Session = None, is_save: bool = False) -> [schemas.Exam]:
-    def get_exam_id(tmp_session, inner_semester_id, inner_is_save):
-        # 课表查询之前，一定要访问，因此使用 session 模式
+             session: Session = None, is_makeup: bool = False, is_save: bool = False) -> [schemas.Exam]:
+    def get_exam_id(tmp_session, is_makeup, inner_semester_id, inner_is_save) -> int:
+        # 课表查询之前，一定要访问获得 batch-id，因此使用 session 模式
         response_inner = tmp_session.get(URLEnum.EXAM_OF_BATCH_ID.value, params={'semester.id': inner_semester_id})
         if inner_is_save:
             save_html_to_file(response_inner.text, 'exam-batch-id')
-        batch_id = parse.search('examBatch.id={id:d}', response_inner.text)
-        if batch_id is None:
-            raise exceptions.SpiderParserException("考试学期ID获取失败，请稍后重试")
+
+        batch_id_dict = parser.parse_exam_id(etree.HTML(response_inner.text))
+        if len(batch_id_dict) == 0:
+            return -1
         else:
-            return batch_id.named['id']
+            for key, value in batch_id_dict.items():
+                if is_makeup:
+                    if '补考' in key:
+                        return value
+                else:
+                    if '补考' not in key:
+                        return value
 
     if not session:
         session = login(username, password)
-    exam_batch_id = get_exam_id(session, semester_id, is_save)
+    exam_batch_id = get_exam_id(session, is_makeup, semester_id, is_save)
+    if (exam_batch_id is None) or (exam_batch_id == -1):
+        raise exceptions.SpiderParserException("考试学期ID获取失败，请稍后重试")
     response = session.get(URLEnum.EXAM.value, params={'examBatch.id': exam_batch_id})
     if is_save:
         save_html_to_file(response.text, 'exam')

@@ -1,12 +1,12 @@
 # LNTU-API
-![license used in this repo](https://img.shields.io/github/license/LiaoGuoYin/LNTU-API)
+[<img src=https://img.shields.io/github/license/LiaoGuoYin/LNTU-API alt="License for this repo">](LICENSE)
 
 Online Demo: [https://api.liaoguoyin.com](https://api.liaoguoyin.com)
 
-An elegant backend API of [LNTU Course Management Information System](http://202.199.224.119:8080/eams/loginExt.action) and [LNTU Students Quality Expansion Activity Management System.](http://202.199.224.19:8080/)
+An elegant backend API of [LNTU Course Management Information System](http://202.199.224.119:8080/eams/loginExt.action) and [LNTU Students Quality Expansion Activity Management System](http://202.199.224.19:8080/).
 
 
-## How to deploy it
+## How to deploy
 
 1. Clone this repo to the local workspace: `git clone https://github.com/LiaoGuoYin/LNTUME`
 
@@ -14,7 +14,7 @@ An elegant backend API of [LNTU Course Management Information System](http://202
 
 3. Copy `config-template.yaml` to `config.yaml`, then filling your own db and account config in.
 
-4. (Optional) Run pytest: `python3 -m pytest`
+4. (Optional) Run tests with pytest: `python3 -m pytest`
 
 5. Run Server: `python3 -m uvicorn app.main:app --reload`
 

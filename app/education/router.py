@@ -5,6 +5,7 @@ from starlette import status
 from app.constants import constantsShared
 from app import schemas, exceptions
 from app.education import core, utils
+from app.education.urls import ClassTableTypeEnum
 from app.public import notice, room, helper
 from app.schemas import ResponseT
 from appDB import crud
@@ -95,18 +96,20 @@ async def refresh_education_info(user: schemas.User, offline: bool = False):
 
 @router.post("/course-table", response_model=ResponseT, summary='获取指定学期课表')
 async def refresh_education_course_table(user: schemas.User, semester: str = constantsShared.current_semester,
-                                         offline: bool = False):
+                                         type: str = ClassTableTypeEnum.classes.value, offline: bool = False):
     """
         获取指定学期课表
     - **username**: 用户名
     - **password**: 密码
     - **semester**: 学期; 例: 2020-秋、2020-春
+    - **type**: 课表类型; 例：class, student
     """
     response = ResponseT()
     try:
         if offline:
             raise exceptions.NetworkException("用户手动懒加载模式")
-        data = core.get_course_table(**user.dict(), semester_id=utils.choose_semester_id(semester))
+        data = core.get_course_table(**user.dict(), semester_id=utils.choose_semester_id(semester),
+                                     table_type=type)
         crud.update_user(user, db.session)
         crud.update_course_table(user, semester, data, db.session)
         response.data = data

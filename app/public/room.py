@@ -33,8 +33,8 @@ def process_building_html(html_text) -> dict:
         return tmp_building_dict
 
     html_doc = etree.HTML(html_text)
-    fuxin_building_dict = parse_building_html(html_doc, '//*[@id="table14"]/tbody/tr')  # 阜新校区表单：//*[@id="table14"]
-    huludao_building_dict = parse_building_html(html_doc, '//*[@id="table16"]/tbody/tr')  # 葫芦岛校区表单：//*[@id="table16"]
+    fuxin_building_dict = parse_building_html(html_doc, '//table[@class="tab_style1"][1]/tbody/tr')  # 阜新校区表单：//*[@id="table14"]
+    huludao_building_dict = parse_building_html(html_doc, '//table[@class="tab_style1"][2]/tbody/tr')  # 葫芦岛校区表单：//*[@id="table16"]
     return {
         'fuxin': fuxin_building_dict,
         'huludao': huludao_building_dict

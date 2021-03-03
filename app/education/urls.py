@@ -39,6 +39,11 @@ class URLEnum(Enum):
         return self.value
 
 
+class ClassTableTypeEnum(Enum):
+    student = 'std'
+    classes = 'class'
+
+
 def get_all_urls() -> dict:
     try:
         url_dict = {}

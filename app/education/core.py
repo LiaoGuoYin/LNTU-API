@@ -5,11 +5,12 @@ import time
 import requests
 from lxml import etree
 from requests import Session
+from sentry_sdk import capture_message
 from starlette import status
 
 from app import schemas, exceptions
 from app.education import parser
-from app.education.urls import URLEnum
+from app.education.urls import URLEnum, ClassTableTypeEnum
 from app.education.utils import save_html_to_file
 from app.constants import constantsShared
 
@@ -86,25 +87,25 @@ def get_plan(username: str, password: str, session: Session = None, is_save: boo
 
 
 def get_course_table(username: str, password: str, semester_id: int = constantsShared.current_semester_id,
-                     session: Session = None,
+                     session: Session = None, table_type: str = ClassTableTypeEnum.classes.value,
                      is_save: bool = False) -> [schemas.CourseTable]:
     def get_std_ids(tmp_session):
         # 课表查询之前，一定要访问，因此使用 session 模式
         response_inner = tmp_session.get(URLEnum.COURSE_TABLE_OF_STD_IDS.value)
         if is_save:
             save_html_to_file(response_inner.text, 'get_ids')
-        stu_id = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)[0]
-        if stu_id is None:
+        stu_id_list = re.findall(r'\(form,"ids","(.*?)"\);', response_inner.text)
+        if len(stu_id_list) is None:
             raise exceptions.SpiderParserException("页面上没找到 ids，请稍后重试")
         else:
-            return stu_id
+            return stu_id_list[0] if table_type == ClassTableTypeEnum.student.value else stu_id_list[1]
 
     if not session:
         session = login(username, password)
     ids = get_std_ids(session)
     response = session.get(URLEnum.COURSE_TABLE.value, params={
         'ignoreHead': 1,
-        'setting.kind': 'std',  # std/class
+        'setting.kind': table_type,  # std/class
         'ids': ids,
         'semester.id': semester_id,
     })
@@ -115,7 +116,8 @@ def get_course_table(username: str, password: str, semester_id: int = constantsS
         part_course_list = parser.parse_course_table_bottom(html_doc=etree.HTML(html_text))
         return parser.parse_course_table_body(html_text, course_dict_list=part_course_list)
     else:
-        raise exceptions.SpiderParserException("[课表页]获取失败，请稍后重试")
+        capture_message("[课表页]获取失败，请稍后重试")
+        return []
 
 
 def get_grade(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.Grade]:
@@ -149,20 +151,17 @@ def get_grade_table(username: str, password: str, session: Session = None, is_sa
 def get_exam(username: str, password: str, semester_id: int = constantsShared.current_semester_id,
              session: Session = None, is_save: bool = False) -> [schemas.Exam]:
     def get_exam_id_list(tmp_session, inner_semester_id, inner_is_save) -> [int]:
-        # 课表查询之前，一定要访问获得 batch-id，因此使用 session 模式
         response_inner = tmp_session.get(URLEnum.EXAM_OF_BATCH_ID.value, params={'semester.id': inner_semester_id})
         if inner_is_save:
             save_html_to_file(response_inner.text, 'exam-batch-id')
 
         batch_id_dict = parser.parse_exam_id(etree.HTML(response_inner.text))
-        return batch_id_dict.values()
+        return [] if len(batch_id_dict) == 0 else batch_id_dict.values()
 
     exam_list = []
     if not session:
         session = login(username, password)
     exam_batch_id_list = get_exam_id_list(session, semester_id, is_save)
-    if len(exam_batch_id_list) == 0:
-        raise exceptions.SpiderParserException("考试学期ID获取失败，请稍后重试")
     for batch_id in exam_batch_id_list:
         response = session.get(URLEnum.EXAM.value, params={'examBatch.id': batch_id})
         if '课程序号' in response.text:

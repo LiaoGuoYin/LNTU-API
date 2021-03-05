@@ -1,6 +1,8 @@
 import yaml
 import os
 
+from datetime import datetime
+
 from app import schemas
 
 
@@ -19,8 +21,9 @@ def singleton(cls):
 class Constants:
     def __init__(self):
         self.config = self._load_config_yaml()
-        self.current_semester, self.current_week = self.calculate_semester_and_week(self.config.semesterStartDate)
-        self.current_semester_id = self.semester.get(self.current_semester, '2020-秋')
+        self.semester_start_date = datetime.strptime(self.config.semesterStartDate, "%Y-%m-%d")
+        self.current_semester, self.current_week = self.calculate_semester_and_week()
+        self.current_semester_id = self.semester.get(self.current_semester, 662)
 
     def _load_config_yaml(self) -> schemas.YamlConfig:
         with open(os.path.join(self.app_path, 'config.yaml'), encoding='utf-8') as fp:
@@ -73,15 +76,19 @@ class Constants:
                 '2022-秋': 665, '2023-春': 666,
                 '2023-秋': 667, '2024-春': 668}
 
-    @staticmethod
-    def calculate_semester_and_week(semester_start_date) -> (str, int):
-        from datetime import datetime
-        start = datetime.strptime(semester_start_date, '%Y-%m-%d')
-        semester = f"{start.year}-{'秋' if start.month in [7, 8, 9, 10, 11, 12] else '春'}"
-        delta = datetime.today() - start
-        week = str((delta.days // 7) + 1)
-        if int(week) < 0:
+    def calculate_semester_and_week(self) -> (str, int):
+        today = datetime.today()
+
+        season = '春' if today.month in [2, 3, 4, 5, 6, 7] else '秋'
+        year = today.year - 1 if today.month == 1 else today.year
+
+        semester = f'{year}-{season}'
+
+        delta = today - self.semester_start_date
+        week = delta.days // 7 + 1
+        if week <= 0:
             week = 1
+
         return semester, week
 
     def get_local_html_file_dict(self) -> dict:
@@ -129,14 +136,15 @@ class Constants:
         }
 
     def get_current_week(self):
-        self.current_semester, self.current_week = self.calculate_semester_and_week(self.config.semesterStartDate)
-        self.current_semester_id = self.semester.get(self.current_semester, '2020-秋')
         return self.current_week
 
     def get_current_semester(self):
-        self.current_semester, self.current_week = self.calculate_semester_and_week(self.config.semesterStartDate)
-        self.current_semester_id = self.semester.get(self.current_semester, '2020-秋')
         return self.current_semester
 
+    def get_semester_id(self, semester):
+        return self.semester.get(semester, self.current_semester_id)
+
+    def get_current_semester_id(self):
+        return self.current_semester_id
 
 constantsShared = Constants()

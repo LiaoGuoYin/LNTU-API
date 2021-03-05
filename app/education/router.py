@@ -94,8 +94,9 @@ async def refresh_education_info(user: schemas.User, offline: bool = False):
     return response
 
 
-@router.post("/course-table", response_model=ResponseT, summary='获取指定学期课表')
-async def refresh_education_course_table(user: schemas.User, type: str = ClassTableTypeEnum.classes.value, offline: bool = False):
+@router.post("/course-table", response_model=ResponseT, summary='获取本学期课表')
+async def refresh_education_course_table(user: schemas.User, type: str = ClassTableTypeEnum.classes.value,
+                                         offline: bool = False):
     """
         获取指定学期课表
     - **username**: 用户名
@@ -103,12 +104,13 @@ async def refresh_education_course_table(user: schemas.User, type: str = ClassTa
     - **type**: 课表类型; 例：class, student
     """
     response = ResponseT()
+    semester = constantsShared.current_semester
     try:
         if offline:
             raise exceptions.NetworkException("用户手动懒加载模式")
-        data, semester = core.get_course_table(**user.dict(), table_type=type)
+        data = core.get_course_table(**user.dict(), course_table_type=type)
         crud.update_user(user, db.session)
-        crud.update_course_table(user, (constantsShared.current_semester if semester == None else semester), data, db.session)
+        crud.update_course_table(user, semester, data, db.session)
         response.data = data
     except exceptions.NetworkException:
         response.code = status.HTTP_200_OK

@@ -80,6 +80,8 @@ class Constants:
         semester = f"{start.year}-{'秋' if start.month in [7, 8, 9, 10, 11, 12] else '春'}"
         delta = datetime.today() - start
         week = str((delta.days // 7) + 1)
+        if int(week) < 0:
+            week = 1
         return semester, week
 
     def get_local_html_file_dict(self) -> dict:

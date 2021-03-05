@@ -144,3 +144,6 @@ log
 
 # test
 mock.py
+
+# vscode configurations
+.vscode/

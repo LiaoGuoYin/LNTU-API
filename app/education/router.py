@@ -154,7 +154,7 @@ async def refresh_education_exam(user: schemas.User, semester: str = constantsSh
     try:
         if offline:
             raise exceptions.NetworkException("用户手动懒加载模式")
-        exam_list = core.get_exam(**user.dict(), semester_id=utils.choose_semester_id(semester))
+        exam_list = core.get_exam(**user.dict(), semester_id=constantsShared.get_semester_id(semester))
         response.data = exam_list
         crud.update_user(user, db.session)
         crud.update_exam_list(user, exam_list, semester, db.session)

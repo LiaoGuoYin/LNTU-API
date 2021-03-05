@@ -106,13 +106,6 @@ def save_html_to_file(html_text, module_name):
     print(f"{module_name}.html: output to tests/static successfully!")
 
 
-def choose_semester_id(semester_str: str) -> int:
-    if constantsShared.semester.get(semester_str, None):
-        return constantsShared.semester[semester_str]
-    else:
-        raise exceptions.FormException('请检查学期参数是否正确')
-
-
 if __name__ == '__main__':
     result = GetWeek().marshal("00010101010101010100000000000000000000000000000000000", 2, 1, 25)
     print(result)

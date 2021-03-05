@@ -86,7 +86,8 @@ def get_plan(username: str, password: str, session: Session = None, is_save: boo
         raise exceptions.SpiderParserException("[个人培养方案完成情况页]获取失败，请稍后重试")
 
 
-def get_course_table(username: str, password: str, session: Session = None, table_type: str = ClassTableTypeEnum.classes.value,
+def get_course_table(username: str, password: str, semester_id: int = constantsShared.current_semester_id,
+                     session: Session = None, course_table_type: str = ClassTableTypeEnum.classes.value,
                      is_save: bool = False) -> [schemas.CourseTable]:
     def get_std_ids(tmp_session):
         # 课表查询之前，一定要访问，因此使用 session 模式
@@ -97,59 +98,26 @@ def get_course_table(username: str, password: str, session: Session = None, tabl
         if len(stu_id_list) is None:
             raise exceptions.SpiderParserException("页面上没找到 ids，请稍后重试")
         else:
-            return stu_id_list[0] if table_type == ClassTableTypeEnum.student.value else stu_id_list[1]
+            return stu_id_list[0] if course_table_type == ClassTableTypeEnum.student.value else stu_id_list[1]
 
     if not session:
         session = login(username, password)
     ids = get_std_ids(session)
-    """
-        自动获取最新课表:
-        从当前年份的秋季开始获取，如果发现没有数据就尝试当前年份春季课表，如果还是没有数据就尝试前一年的秋季，以此类推，直到查到前一年春季还是查不到课表的话就说明
-        查不到数据了，返回相应的错误信息
-    """
-    from datetime import datetime
-
-    current_year = datetime.today().year
-    semester_to_try = [
-        "{year}-{season}".format(year=y, season=s)
-        for y in [current_year, current_year - 1]
-        for s in ['秋', '春']
-    ]
-
-    valid_semester = None
-    for semster in semester_to_try:
-        semester_id = constantsShared.semester.get(
-            semster, constantsShared.current_semester
-        )
-        response = session.get(
-            URLEnum.COURSE_TABLE.value,
-            params={
-                "ignoreHead": 1,
-                "setting.kind": table_type,  # std/class
-                "ids": ids,
-                "semester.id": semester_id,
-            },
-        )
-        html_text = response.text
-        course_table_body = []
-        if is_save:
-            save_html_to_file(html_text, "course-table")
-        if "课表格式说明" in html_text:
-            part_course_list = parser.parse_course_table_bottom(
-                html_doc=etree.HTML(html_text)
-            )
-            course_table_body = parser.parse_course_table_body(
-                html_text, course_dict_list=part_course_list
-            )
-            valid_semester = semster
-            break
-        else:
-            continue
-
-    if course_table_body == []:
+    response = session.get(URLEnum.COURSE_TABLE.value, params={
+        'ignoreHead': 1,
+        'setting.kind': course_table_type,  # std/class
+        'ids': ids,
+        'semester.id': semester_id,
+    })
+    html_text = response.text
+    if is_save:
+        save_html_to_file(html_text, 'course-table')
+    if "课表格式说明" in html_text:
+        part_course_list = parser.parse_course_table_bottom(html_doc=etree.HTML(html_text))
+        return parser.parse_course_table_body(html_text, course_dict_list=part_course_list)
+    else:
         capture_message("[课表页]获取失败，请稍后重试")
-
-    return (course_table_body, valid_semester)
+        return []
 
 
 def get_grade(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.Grade]:

@@ -74,7 +74,7 @@ class Constants:
                 '2023-秋': 667, '2024-春': 668}
 
     @staticmethod
-    def calculate_semester_and_week(semester_start_date) -> (str, str):
+    def calculate_semester_and_week(semester_start_date) -> (str, int):
         from datetime import datetime
         start = datetime.strptime(semester_start_date, '%Y-%m-%d')
         semester = f"{start.year}-{'秋' if start.month in [7, 8, 9, 10, 11, 12] else '春'}"

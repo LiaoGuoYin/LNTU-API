@@ -122,8 +122,8 @@ class Notice(Base):
     __tablename__ = "notice"
 
     title = Column(String(128), primary_key=True)
-    url = Column(String(128), primary_key=True)
-    date = Column(String(128), index=True)
+    url = Column(String(128))
+    date = Column(String(128), primary_key=True)
     isPushed = Column(Boolean, default=True)
 
     lastUpdatedAt = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

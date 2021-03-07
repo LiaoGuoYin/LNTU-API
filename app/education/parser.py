@@ -229,13 +229,23 @@ def parse_exam(html_doc) -> [schemas.Exam]:
             exam.date = data_row[3]
             exam.time = data_row[4]
             exam.location = data_row[5]
-            exam.seatNumber = data_row[-3] if data_row[-3].isdigit() else 'NaN'  # 期末评教阶段，座位号会被隐藏
+            exam.seatNumber = data_row[-3] if data_row[-3].isdigit() else '未知'  # 期末评教阶段，座位号会被隐藏
             exam.status = data_row[-2]
             exam.comment = data_row[-1]
             exam_list.append(exam)
         except Exception as e:
             capture_exception(e)
     return exam_list
+
+
+def parse_exam_makeup_only(html_doc) -> [schemas.Exam]:
+    all_exams = parse_exam(html_doc=html_doc)
+    result = []
+    for exam in all_exams:
+        if exam.type == "补考":
+            result.append(exam)
+
+    return result
 
 
 def parse_exam_id(html_doc) -> dict:

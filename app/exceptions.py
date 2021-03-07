@@ -53,3 +53,9 @@ class TokenException(CommonException):
     def __init__(self, message):
         self.code = status.HTTP_401_UNAUTHORIZED
         self.message = message
+
+
+class ExamException(CommonException):
+    def __init__(self, message):
+        self.code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        self.message = message

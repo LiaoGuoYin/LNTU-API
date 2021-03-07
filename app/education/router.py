@@ -162,6 +162,10 @@ async def refresh_education_exam(user: schemas.User, semester: str = constantsSh
         response.code = status.HTTP_200_OK
         response.data, last_updated_at = crud.retrieve_user_exam(user, db.session)
         response.message = f"离线模式: {response.message}, 最后更新于: {last_updated_at}"
+    except exceptions.ExamException as e:
+        response.code = e.code
+        response.message = e.message
+
     return response
 
 

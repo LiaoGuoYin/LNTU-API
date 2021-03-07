@@ -147,4 +147,23 @@ class Constants:
     def get_current_semester_id(self):
         return self.current_semester_id
 
+    def get_semester_from_semester_id(self, semester_id):
+        for k in self.semester.keys():
+            if self.semester[k] == semester_id:
+                return k
+
+        return None
+
+    def get_previous_semester(self, semester):
+        if semester[-1] == '秋':
+            semester[-1] = '春'
+            return semester
+        elif semester[-1] == '春':
+            year = int(semester[:4])
+            previous_year = year - 1
+            return f'{previous_year}-秋'
+        else:
+            return None
+
+
 constantsShared = Constants()

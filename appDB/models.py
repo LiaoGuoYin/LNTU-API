@@ -70,7 +70,7 @@ class Exam(Base):
     username = Column(String(128), primary_key=True, index=True)
     code = Column(String(128), primary_key=True, index=True)
     name = Column(String(128))
-    type = Column(String(128))
+    type = Column(String(128), primary_key=True)
     date = Column(String(128))
     time = Column(String(128))
     location = Column(String(128))

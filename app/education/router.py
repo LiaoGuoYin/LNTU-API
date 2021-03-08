@@ -4,7 +4,7 @@ from starlette import status
 
 from app.constants import constantsShared
 from app import schemas, exceptions
-from app.education import core, utils
+from app.education import core
 from app.education.urls import ClassTableTypeEnum
 from app.public import notice, room, helper
 from app.schemas import ResponseT
@@ -32,7 +32,7 @@ async def refresh_notice(offset: int = 0, limit: int = 20, init: bool = False):
     response = ResponseT()
     page_list = ['https://jwzx.lntu.edu.cn/index/jwgg.htm']
     if init:
-        page_list.extend(['http://jwzx.lntu.edu.cn/index/jwgg/{page}.htm'.format(page=i)
+        page_list.extend(['https://jwzx.lntu.edu.cn/index/jwgg/{page}.htm'.format(page=i)
                           for i in range(1, 25)])
     try:
         for page in page_list:
@@ -147,7 +147,7 @@ async def refresh_education_exam(user: schemas.User, semester: str = constantsSh
         考试安排查询
     - **username**: 用户名
     - **password**: 密码
-    - **semester**: 学期; 例: 2020-秋
+    - **semester**: 学期(optional); 例: 2020-秋
     - **offline**: 是否离线模式
     """
     response = ResponseT()
@@ -162,10 +162,6 @@ async def refresh_education_exam(user: schemas.User, semester: str = constantsSh
         response.code = status.HTTP_200_OK
         response.data, last_updated_at = crud.retrieve_user_exam(user, db.session)
         response.message = f"离线模式: {response.message}, 最后更新于: {last_updated_at}"
-    except exceptions.ExamException as e:
-        response.code = e.code
-        response.message = e.message
-
     return response
 
 

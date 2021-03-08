@@ -154,14 +154,13 @@ class Constants:
 
         return None
 
-    def get_previous_semester(self, semester):
-        if semester[-1] == '秋':
-            semester[-1] = '春'
-            return semester
-        elif semester[-1] == '春':
-            year = int(semester[:4])
-            previous_year = year - 1
-            return f'{previous_year}-秋'
+    def get_previous_semester(self, semester: str):
+        year = int(semester[:4])
+        current_season = semester[-1]
+        if current_season == "秋":
+            return f'{year}-春'
+        elif current_season == "春":
+            return f'{year - 1}-秋'
         else:
             return None
 

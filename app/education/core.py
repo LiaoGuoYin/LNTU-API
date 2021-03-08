@@ -1,6 +1,7 @@
 import hashlib
 import re
 import time
+from typing import List
 
 import requests
 from lxml import etree
@@ -158,44 +159,37 @@ def get_exam(username: str, password: str, semester_id: int = constantsShared.cu
         batch_id_dict = parser.parse_exam_id(etree.HTML(response_inner.text))
         return [] if len(batch_id_dict) == 0 else batch_id_dict.values()
 
-    exam_list = []
+    def get_exam_plan_with_exam_batch_id_list(exam_batch_id_list: [List]) -> [schemas.Exam]:
+        exam_plan_list = []
+        for exam_batch_id in exam_batch_id_list:
+            response = session.get(URLEnum.EXAM.value, params={'examBatch.id': exam_batch_id})
+            if is_save:
+                save_html_to_file(response.text, 'exam')
+            if '课程序号' in response.text:
+                html_content = etree.HTML(response.text)
+                exam_plan_list.extend(parser.parse_exam(html_doc=html_content))
+        return exam_plan_list
+
     if not session:
         session = login(username, password)
+
     current_semester_exam_batch_id_list = get_exam_id_list(session, semester_id, is_save)
-    previous_semester_exam_batch_id_list = get_exam_id_list(session,
-                                                            constantsShared.get_semester_id(
-                                                                constantsShared.get_previous_semester(
-                                                                    constantsShared.get_semester_from_semester_id(
-                                                                        semester_id
+    current_semester_parse_result = get_exam_plan_with_exam_batch_id_list(current_semester_exam_batch_id_list)
+    if len(current_semester_parse_result) != 0:
+        # 本学期有期末考试安排，则返回本学期信息（期末）
+        return current_semester_parse_result
+    else:
+        # 没有期末考试，则说明时间还早，返回上学期信息（期末+补考）
+        previous_semester_exam_batch_id_list = get_exam_id_list(session,
+                                                                constantsShared.get_semester_id(
+                                                                    constantsShared.get_previous_semester(
+                                                                        constantsShared.get_semester_from_semester_id(
+                                                                            semester_id
+                                                                        )
                                                                     )
-                                                                )
-                                                            ),
-                                                            is_save)
-    exam_batch_id_list = list(previous_semester_exam_batch_id_list) + list(current_semester_exam_batch_id_list)
-    for batch_id in exam_batch_id_list:
-        response = session.get(URLEnum.EXAM.value, params={'examBatch.id': batch_id})
-        if '课程序号' in response.text:
-            html_content = etree.HTML(response.text)
-
-            if batch_id in current_semester_exam_batch_id_list \
-                    and batch_id not in previous_semester_exam_batch_id_list:
-
-                current_parse_result = parser.parse_exam(html_doc=html_content)
-
-            elif batch_id in previous_semester_exam_batch_id_list \
-                    and batch_id not in current_semester_exam_batch_id_list:
-
-                current_parse_result = parser.parse_exam_makeup_only(html_doc=html_content)
-
-            else:
-                raise exceptions.ExamException(f"exam的batch_id意外的在当前学期和上学期都出现过，请修复。出现问题的batch_id值为 {batch_id}")
-
-            exam_list.extend(current_parse_result)
-
-        if is_save:
-            save_html_to_file(response.text, 'exam')
-
-    return exam_list
+                                                                ),
+                                                                is_save)
+        return get_exam_plan_with_exam_batch_id_list(previous_semester_exam_batch_id_list)
 
 
 def get_other_exam(username: str, password: str, session: Session = None, is_save: bool = False) -> [schemas.OtherExam]:

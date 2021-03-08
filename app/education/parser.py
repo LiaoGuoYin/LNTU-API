@@ -238,16 +238,6 @@ def parse_exam(html_doc) -> [schemas.Exam]:
     return exam_list
 
 
-def parse_exam_makeup_only(html_doc) -> [schemas.Exam]:
-    all_exams = parse_exam(html_doc=html_doc)
-    result = []
-    for exam in all_exams:
-        if exam.type == "补考":
-            result.append(exam)
-
-    return result
-
-
 def parse_exam_id(html_doc) -> dict:
     batch_id_dict = {}
     batch_id_option_list = html_doc.xpath('//*[@id="examBatchId"]/option')

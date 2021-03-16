@@ -136,15 +136,21 @@ class Constants:
         }
 
     def get_current_week(self):
+        self.__init__()
+
         return self.current_week
 
     def get_current_semester(self):
+        self.__init__()
+
         return self.current_semester
 
     def get_semester_id(self, semester):
         return self.semester.get(semester, self.current_semester_id)
 
     def get_current_semester_id(self):
+        self.__init__()
+
         return self.current_semester_id
 
     def get_semester_from_semester_id(self, semester_id):

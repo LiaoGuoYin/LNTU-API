@@ -7,6 +7,7 @@ from starlette import status
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi_sqlalchemy import DBSessionMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from sqlalchemy import create_engine
@@ -121,7 +122,12 @@ app.include_router(
 db_url_dict = constantsShared.get_db_url_dict()
 engine = create_engine(db_url_dict['production'], pool_recycle=3600)
 Base.metadata.create_all(bind=engine)  # 创建数据库
-app.add_middleware(DBSessionMiddleware, db_url=db_url_dict['production'], custom_engine=engine)
+
+app.add_middleware(DBSessionMiddleware,
+                   db_url=db_url_dict['production'],
+                   custom_engine=engine)
+app.add_middleware(CORSMiddleware,
+                   allow_origins=["*"])
 
 sentry_url = constantsShared.config.sentryURL
 sentry_sdk.init(sentry_url, before_send=filter_sentry_alert, max_breadcrumbs=50)

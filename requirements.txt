@@ -13,5 +13,5 @@ fastapi-sqlalchemy==0.2.1
 parse==1.18.0
 celery==5.0.5
 redis==3.5.3
-PyJWT==1.7.1
+PyJWT==2.4.0
 hyper==0.7.0
